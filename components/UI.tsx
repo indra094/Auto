@@ -19,7 +19,8 @@ export const Button: React.FC<{
   className?: string;
   onClick?: () => void;
   fullWidth?: boolean;
-}> = ({ children, variant = 'primary', className = "", onClick, fullWidth }) => {
+  disabled?: boolean;
+}> = ({ children, variant = 'primary', className = "", onClick, fullWidth, disabled }) => {
   const baseStyle = "px-4 py-2 rounded-md font-medium text-sm transition-colors flex items-center justify-center gap-2";
   const variants = {
     primary: "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm",
@@ -29,8 +30,14 @@ export const Button: React.FC<{
     black: "bg-slate-900 text-white hover:bg-slate-800 shadow-md",
   };
   
+  const disabledStyle = disabled ? "opacity-50 cursor-not-allowed" : "";
+  
   return (
-    <button onClick={onClick} className={`${baseStyle} ${variants[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}>
+    <button 
+      onClick={disabled ? undefined : onClick} 
+      className={`${baseStyle} ${variants[variant]} ${fullWidth ? 'w-full' : ''} ${disabledStyle} ${className}`}
+      disabled={disabled}
+    >
       {children}
     </button>
   );
@@ -83,8 +90,8 @@ export const WireframePlaceholder: React.FC<{ height?: string; label?: string }>
   </div>
 );
 
-export const ProgressBar: React.FC<{ value: number; color?: string }> = ({ value, color = "bg-indigo-600" }) => (
-  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+export const ProgressBar: React.FC<{ value: number; color?: string; className?: string; height?: string }> = ({ value, color = "bg-indigo-600", className = "", height = "h-2" }) => (
+  <div className={`w-full ${height} bg-slate-100 rounded-full overflow-hidden ${className}`}>
     <div className={`h-full ${color} transition-all duration-500`} style={{ width: `${value}%` }}></div>
   </div>
 );
