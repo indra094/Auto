@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavGroup, ScreenId } from '../types';
 import { 
   Menu, Bell, Search, Lock, AlertTriangle, CheckCircle, 
-  Circle, ChevronRight, PlayCircle
+  Circle, PlayCircle
 } from 'lucide-react';
 import { ScreenContent } from '../screens/ScreenContent';
 import { AuthService } from '../services/AuthService';
@@ -168,6 +168,10 @@ export const Layout: React.FC = () => {
 
   const companyName = workspace?.name || "New Startup";
   const stage = workspace?.stage || "Onboarding";
+  
+  // Hide top-right tools during early onboarding (Account Creation, Startup Basics) to minimize distraction
+  // We assume step 3 (Founders) is where the app "opens up"
+  const isSetupMode = (workspace?.onboardingStep || 0) < 3;
 
   return (
     <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
@@ -255,11 +259,15 @@ export const Layout: React.FC = () => {
           ))}
         </nav>
 
-        {/* User Footer */}
+        {/* User Footer - Primary place for identity */}
         <div className="p-4 border-t border-slate-700 bg-slate-900 shrink-0">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">
-                {getInitials()}
+             <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs overflow-hidden border border-slate-600">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="User" className="w-full h-full object-cover" />
+                ) : (
+                  getInitials()
+                )}
              </div>
              <div className="overflow-hidden">
                <div className="text-sm font-bold text-white truncate">{user?.fullName || "Guest"}</div>
@@ -284,14 +292,19 @@ export const Layout: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-4">
-             <div className="relative hidden md:block">
-               <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400"/>
-               <input type="text" placeholder="Search..." className="pl-9 pr-4 py-2 border border-slate-200 rounded-full text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none w-64 transition-all" />
-             </div>
-             <button className="relative p-2 text-slate-500 hover:bg-slate-50 rounded-full" onClick={() => setCurrentScreen(ScreenId.NOTIFICATIONS)}>
-               <Bell className="w-5 h-5"/>
-               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-             </button>
+             {/* Only show tools after setup is complete */}
+             {!isSetupMode && (
+               <>
+                 <div className="relative hidden md:block">
+                   <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400"/>
+                   <input type="text" placeholder="Search..." className="pl-9 pr-4 py-2 border border-slate-200 rounded-full text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none w-64 transition-all" />
+                 </div>
+                 <button className="relative p-2 text-slate-500 hover:bg-slate-50 rounded-full" onClick={() => setCurrentScreen(ScreenId.NOTIFICATIONS)}>
+                   <Bell className="w-5 h-5"/>
+                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                 </button>
+               </>
+             )}
           </div>
         </header>
 
