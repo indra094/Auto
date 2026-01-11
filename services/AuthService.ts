@@ -1,4 +1,5 @@
 import { DB } from './db';
+import { api } from './api';
 
 export interface User {
   id: string;
@@ -27,72 +28,15 @@ export const AuthService = {
   },
 
   login: async (email: string): Promise<User> => {
-    await DB.simulateDelay();
-    // Simulate fetching existing user or erroring if not found (mock logic: always succeeds for demo)
-    const user = { 
-      id: 'u_1', 
-      fullName: 'Jane Founder', 
-      email, 
-      role: 'CEO',
-      avatarUrl: undefined 
-    };
-    
-    // Simulate fetching associated workspace
-    const workspace = {
-      id: 'w_1',
-      name: 'Acme Corp',
-      industry: 'SaaS',
-      type: 'SaaS',
-      stage: 'Pre-seed',
-      onboardingStep: 6
-    };
-
-    DB.setItem('user', user);
-    DB.setItem('workspace', workspace);
-    return user;
+    return api.post('/auth/login', { email });
   },
 
   signup: async (fullName: string, email: string): Promise<User> => {
-    await DB.simulateDelay();
-    const user = { 
-      id: `u_${Date.now()}`, 
-      fullName, 
-      email, 
-      role: 'Founder' // Default role until specified
-    };
-    
-    // Initialize empty workspace for new user
-    const workspace: Workspace = {
-      id: `w_${Date.now()}`,
-      name: '',
-      onboardingStep: 1
-    };
-
-    DB.setItem('user', user);
-    DB.setItem('workspace', workspace);
-    return user;
+    return api.post('/auth/signup', { fullName, email });
   },
 
   googleSignup: async (): Promise<User> => {
-    await DB.simulateDelay();
-    const user = {
-      id: `u_g_${Date.now()}`,
-      fullName: 'Alex Google',
-      email: 'alex@gmail.com',
-      role: 'Founder',
-      // Mock avatar for demo purposes
-      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&q=80' 
-    };
-    
-    const workspace: Workspace = {
-      id: `w_${Date.now()}`,
-      name: '',
-      onboardingStep: 1
-    };
-
-    DB.setItem('user', user);
-    DB.setItem('workspace', workspace);
-    return user;
+    return api.post('/auth/google', {});
   },
 
   logout: () => {

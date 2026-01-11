@@ -1,4 +1,5 @@
 import { DB } from './db';
+import { api } from './api';
 
 export interface Founder {
   id: string;
@@ -43,34 +44,23 @@ export const FounderService = {
   },
 
   getFounders: async (): Promise<Founder[]> => {
-    await DB.simulateDelay();
-    return DB.getItem<Founder[]>('founders', DEFAULT_FOUNDERS);
+    return api.get('/founders/');
   },
 
   getFounderById: async (id: string): Promise<Founder | undefined> => {
-    await DB.simulateDelay();
-    const founders = DB.getItem<Founder[]>('founders', DEFAULT_FOUNDERS);
-    return founders.find(f => f.id === id);
+    return api.get(`/founders/${id}`);
   },
 
   addFounder: async (founder: Omit<Founder, 'id' | 'status'>) => {
-    await DB.simulateDelay();
-    const founders = DB.getItem<Founder[]>('founders', DEFAULT_FOUNDERS);
-    const newFounder = { ...founder, id: `f_${Date.now()}`, status: 'Incomplete' as const };
-    DB.setItem('founders', [...founders, newFounder]);
-    return newFounder;
+    return api.post('/founders/', founder);
   },
 
   updateFounder: async (id: string, updates: Partial<Founder>) => {
-    await DB.simulateDelay();
-    const founders = DB.getItem<Founder[]>('founders', DEFAULT_FOUNDERS);
-    const updated = founders.map(f => f.id === id ? { ...f, ...updates } : f);
-    DB.setItem('founders', updated);
-    return updated.find(f => f.id === id);
+    return api.put(`/founders/${id}`, updates);
   },
 
   getAlignmentScore: async (): Promise<number> => {
-     await DB.simulateDelay();
-     return 78; // Mock score calculation
+    await DB.simulateDelay();
+    return 78; // Mock score calculation
   }
 };
