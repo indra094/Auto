@@ -106,10 +106,10 @@ export const TeamEmployeesScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                   onClick={() => emp.type === 'AI' ? onNavigate(ScreenId.AI_EMPLOYEE_DETAIL) : null}
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white text-xl
-                        ${emp.type === 'AI' ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : 'bg-slate-500'}
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold
+                        ${emp.type === 'AI' ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : 'bg-indigo-500'}
                      `}>
-                      {emp.type === 'AI' ? '🤖' : '👤'}
+                      {emp.type === 'AI' ? '🤖' : emp.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <h4 className="font-bold text-slate-800">{emp.name} <span className="text-xs font-normal text-slate-500">({emp.role})</span></h4>

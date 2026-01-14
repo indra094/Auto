@@ -297,12 +297,8 @@ export const Layout: React.FC = () => {
               className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-full pr-3 transition-colors"
               onClick={() => setCurrentScreen(ScreenId.APP_SHELL)}
             >
-              <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs overflow-hidden border border-slate-200 shadow-sm">
-                {user?.avatarUrl ? (
-                  <img src={user.avatarUrl} alt="User" className="w-full h-full object-cover" />
-                ) : (
-                  getInitials()
-                )}
+              <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs border border-slate-200 shadow-sm">
+                {getInitials()}
               </div>
               <div className="hidden md:block text-left">
                 {user?.fullName ? (
