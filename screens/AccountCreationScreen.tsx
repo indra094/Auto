@@ -85,29 +85,30 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                   setRole(r);
                   AuthService.updateUser({ role: r });
                 }}
-                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
-                : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'
+                className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all ${role === r
+                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
+                  : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'
                   }`}
               >
-            {r}
-          </button>
+                {r}
+              </button>
             ))}
+          </div>
+        </div>
+
+        <div className="pt-4">
+          <Button
+            fullWidth
+            className="h-14 rounded-xl text-lg flex items-center justify-center gap-2"
+            onClick={handleContinue}
+            disabled={!fullName || !email || !role || isLoading}
+          >
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+              <>Continue <ArrowRight className="w-5 h-5" /></>
+            )}
+          </Button>
         </div>
       </div>
-
-      <div className="pt-4">
-        <Button
-          fullWidth
-          className="h-14 rounded-xl text-lg flex items-center justify-center gap-2"
-          onClick={handleContinue}
-          disabled={!fullName || !email || !role || isLoading}
-        >
-          {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-            <>Continue <ArrowRight className="w-5 h-5" /></>
-          )}
-        </Button>
-      </div>
-    </div>
     </div >
   );
 };
