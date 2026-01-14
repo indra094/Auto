@@ -9,8 +9,9 @@ interface ScreenProps {
 }
 
 export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-    const [name, setName] = useState('');
-    const [type, setType] = useState('');
+    const currentWorkspace = AuthService.getWorkspace();
+    const [name, setName] = useState(currentWorkspace?.name || '');
+    const [type, setType] = useState(currentWorkspace?.type || '');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleCreate = async () => {
@@ -53,8 +54,8 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                                 key={t}
                                 onClick={() => setType(t)}
                                 className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all ${type === t
-                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
-                                        : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
+                                    : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'
                                     }`}
                             >
                                 {t}
