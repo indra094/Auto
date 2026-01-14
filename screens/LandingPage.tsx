@@ -25,11 +25,14 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const openLogin = () => {
     setAuthMode('login');
     setFullName('');
     setEmail('');
     setPassword('');
+    setErrorMsg(null);
   };
 
   const openSignup = () => {
@@ -37,9 +40,13 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
     setFullName('');
     setEmail('');
     setPassword('');
+    setErrorMsg(null);
   };
 
-  const closeAuth = () => setAuthMode(null);
+  const closeAuth = () => {
+    setAuthMode(null);
+    setErrorMsg(null);
+  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -48,6 +55,7 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMsg(null);
 
     try {
       if (authMode === 'signup') {
@@ -58,8 +66,14 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
         await AuthService.login(email);
       }
       onEnterApp();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Auth failed", error);
+      setErrorMsg(error.message || "Authentication failed. Please check your credentials.");
+
+      // If 404/User not found, maybe suggest signup?
+      if (error.message && error.message.includes("404")) {
+        setErrorMsg("Account not found. Please sign up first.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +103,7 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
     <div className="min-h-screen bg-white font-sans text-slate-900">
       {/* Auth Modal Overlay */}
       {authMode && (
-        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={closeAuth}>
           <div className="min-h-full flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
               <button
@@ -137,6 +151,15 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
                   <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
                   <div className="relative flex justify-center text-xs uppercase tracking-wide font-semibold"><span className="px-3 bg-white text-slate-400">Or email</span></div>
                 </div>
+
+
+
+                {errorMsg && (
+                  <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-start gap-2">
+                    <span className="mt-0.5">⚠️</span>
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
 
                 <form onSubmit={handleAuthSubmit} className="space-y-4">
                   {isSignup && (
@@ -292,6 +315,6 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
           <p>© 2026 Auto Inc. Building the future of company building.</p>
         </div>
       </footer>
-    </div>
+    </div >
   );
 };
