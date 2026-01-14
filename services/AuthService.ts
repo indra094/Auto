@@ -40,6 +40,11 @@ export const AuthService = {
   login: async (email: string): Promise<User> => {
     // POST /auth/login
     const user = await api.post('/auth/login', { email });
+    DB.setItem('user', user);
+    // Initialize a default workspace if none exists
+    if (!DB.getItem('workspace', null)) {
+      AuthService.updateWorkspace({ name: `${user.fullName}'s Workspace`, onboardingStep: 1 });
+    }
     AuthService.refreshSession();
     return user;
   },
@@ -47,6 +52,9 @@ export const AuthService = {
   signup: async (fullName: string, email: string): Promise<User> => {
     // POST /auth/signup
     const user = await api.post('/auth/signup', { fullName, email });
+    DB.setItem('user', user);
+    // Initialize a default workspace
+    AuthService.updateWorkspace({ name: `${fullName}'s Workspace`, onboardingStep: 1 });
     AuthService.refreshSession();
     return user;
   },
@@ -54,6 +62,9 @@ export const AuthService = {
   googleSignup: async (): Promise<User> => {
     // POST /auth/google
     const user = await api.post('/auth/google', {});
+    DB.setItem('user', user);
+    // Initialize a default workspace
+    AuthService.updateWorkspace({ name: `${user.fullName}'s Workspace`, onboardingStep: 1 });
     AuthService.refreshSession();
     return user;
   },
