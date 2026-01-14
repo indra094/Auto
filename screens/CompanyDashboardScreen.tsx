@@ -3,6 +3,7 @@ import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
 import { Heart, CheckCircle, Smartphone, DollarSign, Users, Zap, Loader2, ArrowRight } from 'lucide-react';
 import { AuthService, Workspace } from '../services/AuthService';
+import { IntelligenceService } from '../services/IntelligenceService';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
@@ -10,14 +11,23 @@ interface ScreenProps {
 
 export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const user = AuthService.getUser();
+    if (!user) return;
+
     const load = async () => {
       setWorkspace(AuthService.getWorkspace());
-      // Simulate data loading
-      await new Promise(r => setTimeout(r, 500));
-      setLoading(false);
+      try {
+        const s = await IntelligenceService.getDashboardStats(user.email);
+        setStats(s);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);
@@ -28,16 +38,16 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     {
       id: ScreenId.INCORPORATION_READINESS,
       title: "Company Health",
-      status: "🟡",
-      text: "Founder alignment locked, but cap table needs work.",
+      status: stats?.risk === 'High' ? '🔴' : stats?.risk === 'Medium' ? '🟡' : '🟢',
+      text: `Risk level is ${stats?.risk || 'Low'}. Runway: ${stats?.runway || 'N/A'}.`,
       icon: <Heart className="text-pink-500" />,
       cta: "Review Health"
     },
     {
       id: ScreenId.VALIDATION_CHECKLIST,
       title: "Validation Status",
-      status: "🟢",
-      text: "Validated! 10+ customers confirmed pain and price.",
+      status: (stats?.customerCount || 0) > 0 ? "🟢" : "🟡",
+      text: `${stats?.customerCount || 0} customers confirmed pain and price via interviews.`,
       icon: <CheckCircle className="text-emerald-500" />,
       cta: "See Evidence"
     },
@@ -53,7 +63,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       id: ScreenId.FINANCIAL_DASHBOARD,
       title: "Financial Status",
       status: "🔴",
-      text: "Runway: 9 months. Burn rate stable at $15k/mo.",
+      text: `Runway: ${stats?.runway || '9 months'}. Burn: $${stats?.burnRate?.toLocaleString() || '15,000'}/mo.`,
       icon: <DollarSign className="text-amber-500" />,
       cta: "Manage Runway"
     },
@@ -61,12 +71,12 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       id: ScreenId.FOUNDERS_LIST,
       title: "People & Equity",
       status: "🟢",
-      text: "2 Founders, 100% equity allocated. No hires yet.",
+      text: stats?.teamSize || "2 Founders, 100% equity allocated.",
       icon: <Users className="text-blue-500" />,
       cta: "Manage Team"
     },
     {
-      id: ScreenId.APP_SHELL, // Using App Shell for next actions or a general screen
+      id: ScreenId.APP_SHELL,
       title: "Next Actions",
       status: "⚡",
       text: "3 urgent tasks: Fix cap table, Finish core loop, Prep Seed.",

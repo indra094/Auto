@@ -47,5 +47,23 @@ export const api = {
       console.error(err);
       throw err;
     }
+  },
+  patch: async (endpoint: string, data: any) => {
+    try {
+      console.log(`[API] PATCH ${endpoint}`, data);
+      const res = await fetch(`${API_URL}${endpoint}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        console.error(`[API] PATCH ${endpoint} failed: ${res.status} ${res.statusText}`);
+        throw new Error(`API Error: ${res.statusText}`);
+      }
+      return await res.json();
+    } catch (err) {
+      console.error(`[API] PATCH ${endpoint} Exception:`, err);
+      throw err;
+    }
   }
 };

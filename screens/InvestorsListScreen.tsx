@@ -1,18 +1,34 @@
 import React from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { Building, Plus, ArrowRight, TrendingUp } from 'lucide-react';
+import { Building, Plus, ArrowRight, TrendingUp, Loader2 } from 'lucide-react';
+import { ExternalService, Investor } from '../services/ExternalService';
+import { AuthService } from '../services/AuthService';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
 export const InvestorsListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const investors = [
-    { name: "A16Z", type: "Tier 1 VC", intro: "Warm Intro", status: "Contacted", icon: <Building className="text-indigo-600" /> },
-    { name: "Sequoia", type: "Tier 1 VC", intro: "Cold", status: "Target", icon: <Building className="text-slate-400" /> },
-    { name: "First Round", type: "Seed Fund", intro: "Warm Intro", status: "Meeting Set", icon: <Building className="text-emerald-600" /> }
-  ];
+  const [investors, setInvestors] = React.useState<Investor[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const user = AuthService.getUser();
+    if (!user) return;
+
+    const load = async () => {
+      try {
+        const data = await ExternalService.getInvestors(user.email);
+        setInvestors(data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
@@ -26,25 +42,32 @@ export const InvestorsListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         </Button>
       </header>
 
-      <div className="space-y-4">
-        {investors.map((v, i) => (
-          <Card key={i} className="p-6 flex justify-between items-center bg-white border-2 border-slate-50 hover:border-indigo-100 transition-all cursor-pointer">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center">
-                {v.icon}
+      {isLoading ? (
+        <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-indigo-600" /></div>
+      ) : (
+        <div className="space-y-4">
+          {investors.map((v, i) => (
+            <Card key={v.id || i} className="p-6 flex justify-between items-center bg-white border-2 border-slate-50 hover:border-indigo-100 transition-all cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-indigo-600">
+                  <Building className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800">{v.name}</h3>
+                  <p className="text-sm text-slate-400 font-medium">{v.type} • {v.stage}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-slate-800">{v.name}</h3>
-                <p className="text-sm text-slate-400 font-medium">{v.type} • {v.intro}</p>
+              <div className="flex items-center gap-3">
+                <Badge color={v.status === 'Meeting Set' ? 'green' : v.status === 'Contacted' ? 'indigo' : 'slate'}>{v.status}</Badge>
+                <ArrowRight className="w-4 h-4 text-slate-300" />
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge color={v.status === 'Meeting Set' ? 'green' : v.status === 'Contacted' ? 'indigo' : 'slate'}>{v.status}</Badge>
-              <ArrowRight className="w-4 h-4 text-slate-300" />
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+          {investors.length === 0 && (
+            <div className="text-center py-20 text-slate-400 font-medium">No target investors added yet.</div>
+          )}
+        </div>
+      )}
 
       <div className="mt-12 p-8 bg-slate-900 text-white rounded-3xl flex justify-between items-center shadow-xl">
         <div>

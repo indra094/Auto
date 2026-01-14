@@ -3,8 +3,8 @@ import { Button } from '../components/UI';
 import { Users, PieChart, Cpu, Rocket, ChevronRight, X, Loader2 } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 
-// Auto Logo Component for reuse
-const AutoLogo = () => (
+// Foundry Logo Component for reuse
+const FoundryLogo = () => (
   <div className="w-10 h-10 flex items-center justify-center text-indigo-600">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
       <path d="M12 2L3 22h18L12 2z" />
@@ -83,12 +83,14 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
     console.log("Google Login Clicked");
     setIsLoading(true);
     try {
-      const user = await AuthService.googleSignup();
+      // Must match seeded user email for now
+      const user = await AuthService.googleSignup("indra094@gmail.com");
       console.log("Google Signup Success:", user);
       setIsLoading(false);
       onEnterApp();
     } catch (e) {
       console.error("Google Signup Failed:", e);
+      alert("Google Login failed: Account must exist in database.");
       setIsLoading(false);
     }
   };
@@ -116,12 +118,12 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
 
               <div className="p-8 pt-10">
                 <div className="text-center mb-8">
-                  <div className="inline-flex justify-center mb-4 transform scale-125"><AutoLogo /></div>
+                  <div className="inline-flex justify-center mb-4 transform scale-125"><FoundryLogo /></div>
                   <h2 className="text-2xl font-bold text-slate-900">
                     {isSignup ? 'Create your account' : 'Welcome back'}
                   </h2>
                   <p className="text-slate-500 mt-2 text-sm">
-                    {isSignup ? 'Start building your startup operating system' : 'Log in to your Auto workspace'}
+                    {isSignup ? 'Start building your startup operating system' : 'Log in to your Foundry workspace'}
                   </p>
                 </div>
 
@@ -149,27 +151,7 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
 
                 <div className="relative mb-6">
                   <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
-                  <div className="relative flex justify-center text-xs uppercase tracking-wide font-semibold"><span className="px-3 bg-white text-slate-400">Demo Accounts</span></div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <button
-                    onClick={() => { setEmail('indra094@gmail.com'); setPassword('demo123'); }}
-                    className="p-3 border border-slate-200 rounded-xl text-xs font-bold hover:border-indigo-500 hover:bg-indigo-50 transition-all text-slate-600"
-                  >
-                    Indra Demo
-                  </button>
-                  <button
-                    onClick={() => { setEmail('inandy@umass.edu'); setPassword('demo123'); }}
-                    className="p-3 border border-slate-200 rounded-xl text-xs font-bold hover:border-indigo-500 hover:bg-indigo-50 transition-all text-slate-600"
-                  >
-                    Inandy Demo
-                  </button>
-                </div>
-
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
-                  <div className="relative flex justify-center text-xs uppercase tracking-wide font-semibold"><span className="px-3 bg-white text-slate-400">Or email</span></div>
+                  <div className="relative flex justify-center text-xs uppercase tracking-wide font-semibold"><span className="px-3 bg-white text-slate-400">Sign in with email</span></div>
                 </div>
 
 
@@ -251,8 +233,8 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
       <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={scrollToTop}>
-            <AutoLogo />
-            <span className="text-xl font-bold tracking-tight">Auto</span>
+            <FoundryLogo />
+            <span className="text-xl font-bold tracking-tight">Foundry</span>
           </div>
           <div className="flex items-center gap-4">
             <button onClick={openLogin} className="text-sm font-medium text-slate-600 hover:text-indigo-600 hidden md:block">Log in</button>
@@ -276,7 +258,7 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
           </h1>
           <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
             Make founder decisions clear before they become expensive.
-            Auto is the operating system for early-stage alignment, equity modeling, and diligence.
+            Foundry is the operating system for early-stage alignment, equity modeling, and diligence.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button onClick={openSignup} className="h-14 px-8 text-lg rounded-full w-full sm:w-auto shadow-lg shadow-indigo-200">
@@ -306,7 +288,7 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Everything you need to incorporate with confidence</h2>
-            <p className="text-lg text-slate-600">Don't let legal ambiguity kill your startup. Auto handles the hard conversations for you.</p>
+            <p className="text-lg text-slate-600">Don't let legal ambiguity kill your startup. Foundry handles the hard conversations for you.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -332,7 +314,7 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
 
       <footer className="py-12 bg-white border-t border-slate-100">
         <div className="container mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>© 2026 Auto Inc. Building the future of company building.</p>
+          <p>© 2026 Foundry Inc. Building the future of company building.</p>
         </div>
       </footer>
     </div >

@@ -10,13 +10,13 @@ export interface Employee {
 
 export const TeamService = {
   // GET /team/employees
-  getEmployees: async (): Promise<Employee[]> => {
-    return api.get('/team/employees');
+  getEmployees: async (email: string): Promise<Employee[]> => {
+    return api.get(`/team/employees?email=${email}`);
   },
 
   // POST /team/employees
-  addEmployee: async (employee: Omit<Employee, 'id'>) => {
-    return api.post('/team/employees', employee);
+  addEmployee: async (email: string, employee: Omit<Employee, 'id'>) => {
+    return api.post(`/team/employees?email=${email}`, employee);
   },
 
   // GET /team/ai-history/{ai_id}

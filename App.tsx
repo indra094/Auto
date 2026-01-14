@@ -20,6 +20,9 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!isInApp) return;
 
+    // Sync state from backend on init
+    AuthService.syncState();
+
     // Refresh session on any interaction
     window.addEventListener('mousemove', handleActivity);
     window.addEventListener('keydown', handleActivity);

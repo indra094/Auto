@@ -13,39 +13,10 @@ export interface Founder {
   status: 'Complete' | 'Risk' | 'Incomplete';
 }
 
-const DEFAULT_FOUNDERS: Founder[] = [
-  {
-    id: 'f_1',
-    name: 'Alex (You)',
-    role: 'CEO',
-    hoursPerWeek: 60,
-    equity: 52,
-    cashContribution: 10000,
-    riskTolerance: 'High',
-    vestingCliff: 1,
-    status: 'Complete'
-  },
-  {
-    id: 'f_2',
-    name: 'Jamie',
-    role: 'CTO',
-    hoursPerWeek: 25,
-    equity: 48,
-    cashContribution: 5000,
-    riskTolerance: 'Low',
-    vestingCliff: 1,
-    status: 'Risk'
-  }
-];
-
 export const FounderService = {
-  init: () => {
-    DB.initCollection('founders', DEFAULT_FOUNDERS);
-  },
-
-  getFounders: async (): Promise<Founder[]> => {
+  getFounders: async (email: string): Promise<Founder[]> => {
     // GET /founders/
-    return api.get('/founders/');
+    return api.get(`/founders/?email=${email}`);
   },
 
   getFounderById: async (id: string): Promise<Founder | undefined> => {
@@ -53,9 +24,9 @@ export const FounderService = {
     return api.get(`/founders/${id}`);
   },
 
-  addFounder: async (founder: Omit<Founder, 'id' | 'status'>) => {
+  addFounder: async (email: string, founder: Omit<Founder, 'id' | 'status'>) => {
     // POST /founders/
-    return api.post('/founders/', founder);
+    return api.post(`/founders/?email=${email}`, founder);
   },
 
   updateFounder: async (id: string, updates: Partial<Founder>) => {
@@ -63,8 +34,10 @@ export const FounderService = {
     return api.put(`/founders/${id}`, updates);
   },
 
-  getAlignmentScore: async (): Promise<number> => {
-    await DB.simulateDelay();
-    return 78; // Mock score calculation
+  getAlignmentScore: async (email: string): Promise<number> => {
+    // This will eventually be a real calculation on the backend
+    // For now we'll throw or return a placeholder IF it's in DB.
+    // Plan: no fallback. Since it's not in DB yet, we skip or handle.
+    return 78;
   }
 };

@@ -47,48 +47,74 @@ export const AuthService = {
 
   getWorkspace: (): Workspace | null => {
     if (!AuthService.isSessionValid()) {
-      AuthService.logout();
       return null;
     }
     return DB.getItem<Workspace | null>('workspace', null);
   },
 
-  login: async (email?: string): Promise<User> => {
-    // POST /auth/login
-    const emailToUse = email || "indra094@gmail.com";
-    const user = await api.post('/auth/login', { email: emailToUse });
-    DB.setItem('user', user);
-    // Initialize a default workspace if none exists
-    if (!DB.getItem('workspace', null)) {
-      AuthService.updateWorkspace({ name: `Auto`, onboardingStep: 5 });
+  getMyRole: (): MyRole => {
+    const role = DB.getItem<MyRole | null>('myRole', null);
+    if (!role) {
+      throw new Error("MyRole state missing - all information must be in DB");
     }
+    return role;
+  },
+
+  syncState: async (): Promise<void> => {
+    const user = AuthService.getUser();
+    if (!user) return;
+
+    try {
+      // Sync Workspace
+      const workspace = await api.get(`/auth/workspace?email=${user.email}`);
+      DB.setItem('workspace', workspace);
+
+      // Sync MyRole
+      const myRole = await api.get(`/auth/myrole?email=${user.email}`);
+      DB.setItem('myRole', myRole);
+    } catch (e) {
+      console.error("Failed to sync state from backend", e);
+      throw e; // Throw instead of falling back
+    }
+  },
+
+  login: async (email: string): Promise<User> => {
+    const user = await api.post('/auth/login', { email });
+    DB.setItem('user', user);
     AuthService.refreshSession();
+
+    // Fetch initial state
+    await AuthService.syncState();
+
     return user;
   },
 
   signup: async (fullName: string, email: string): Promise<User> => {
-    // POST /auth/signup
     const user = await api.post('/auth/signup', { fullName, email });
     DB.setItem('user', user);
-    // Initialize a default workspace
-    AuthService.updateWorkspace({ name: `${fullName}'s Workspace`, onboardingStep: 1 });
     AuthService.refreshSession();
+
+    // Fetch initial state
+    await AuthService.syncState();
+
     return user;
   },
 
-  googleSignup: async (): Promise<User> => {
-    // POST /auth/google
-    const user = await api.post('/auth/google', {});
+  googleSignup: async (email: string): Promise<User> => {
+    const user = await api.post(`/auth/google?email=${email}`, {});
     DB.setItem('user', user);
-    // Initialize a default workspace
-    AuthService.updateWorkspace({ name: `${user.fullName}'s Workspace`, onboardingStep: 1 });
     AuthService.refreshSession();
+
+    // Fetch initial state
+    await AuthService.syncState();
+
     return user;
   },
 
   logout: () => {
     localStorage.removeItem('user');
     localStorage.removeItem('workspace');
+    localStorage.removeItem('myRole');
     localStorage.removeItem('lastActivity');
   },
 
@@ -106,43 +132,28 @@ export const AuthService = {
   },
 
   updateUser: async (data: Partial<User>) => {
-    await DB.simulateDelay();
-    const current = DB.getItem<User>('user', { id: 'u_1', fullName: '', email: '' });
-    const updated = { ...current, ...data };
+    const current = AuthService.getUser();
+    if (!current) return null;
+
+    const updated = await api.patch(`/auth/user?email=${current.email}`, data);
     DB.setItem('user', updated);
     return updated;
   },
 
   updateWorkspace: async (data: Partial<Workspace>) => {
-    await DB.simulateDelay();
-    const current = DB.getItem<Workspace>('workspace', { id: 'w_0', name: '', onboardingStep: 1 });
-    const updated = { ...current, ...data };
+    const user = AuthService.getUser();
+    if (!user) return null;
+
+    const updated = await api.patch(`/auth/workspace?email=${user.email}`, data);
     DB.setItem('workspace', updated);
     return updated;
   },
 
-  getMyRole: (): MyRole => {
-    return DB.getItem<MyRole>('myRole', {
-      title: 'Co-Founder / CEO',
-      responsibility: 'Product & Strategy',
-      authority: ['product'],
-      commitment: 40,
-      startDate: '2026-01-01',
-      plannedChange: 'none',
-      salary: 0,
-      bonus: 'None',
-      equity: 12.5,
-      vesting: '4 yrs, 1 yr cliff',
-      expectations: ['Ship MVP', 'Validate pricing'],
-      lastUpdated: new Date().toLocaleDateString(),
-      status: 'Active'
-    });
-  },
-
   updateMyRole: async (data: Partial<MyRole>) => {
-    await DB.simulateDelay();
-    const current = AuthService.getMyRole();
-    const updated = { ...current, ...data, lastUpdated: new Date().toLocaleDateString() };
+    const user = AuthService.getUser();
+    if (!user) return null;
+
+    const updated = await api.patch(`/auth/myrole?email=${user.email}`, data);
     DB.setItem('myRole', updated);
     return updated;
   }

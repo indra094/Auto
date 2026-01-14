@@ -69,10 +69,16 @@ const orderedNavStructure: NavGroup[] = [
 type ScreenStatus = 'locked' | 'partial' | 'accessible';
 
 export const Layout: React.FC = () => {
-  const [currentScreen, setCurrentScreen] = useState<ScreenId>(ScreenId.WELCOME);
+  const [workspace, setWorkspace] = useState(AuthService.getWorkspace());
+
+  // Start on Dashboard if onboarding is already completed
+  const initialScreen = (workspace?.onboardingStep || 0) >= 4
+    ? ScreenId.COMPANY_DASHBOARD
+    : ScreenId.WELCOME;
+
+  const [currentScreen, setCurrentScreen] = useState<ScreenId>(initialScreen);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(AuthService.getUser());
-  const [workspace, setWorkspace] = useState(AuthService.getWorkspace());
   const [onboardingProgress, setOnboardingProgress] = useState(0);
 
   useEffect(() => {
@@ -173,7 +179,7 @@ export const Layout: React.FC = () => {
               <path d="M12 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
             </svg>
           </div>
-          <span className="font-bold text-slate-900 tracking-wide text-xl">Auto</span>
+          <span className="font-bold text-slate-900 tracking-wide text-xl">Foundry</span>
         </div>
 
         {/* Progress Bar Area */}

@@ -1,26 +1,45 @@
 import React from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { CheckCircle, Circle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { CheckCircle, Circle, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
+import { ReadinessService, ReadinessGate } from '../services/ReadinessService';
+import { AuthService } from '../services/AuthService';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
 export const IncorporationReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const checks = [
-    { label: "Founders Aligned", done: true },
-    { label: "MVP Validated", done: true },
-    { label: "$100k+ Interest", done: false },
-    { label: "Bylaws Drafted", done: false }
-  ];
+  const [gate, setGate] = React.useState<ReadinessGate | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
-  const ready = checks.filter(c => c.done).length >= 3;
+  React.useEffect(() => {
+    const user = AuthService.getUser();
+    if (!user) return;
+
+    const load = async () => {
+      try {
+        const data = await ReadinessService.getIncorporationReadiness(user.email);
+        setGate(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  if (loading) return <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-indigo-500" /></div>;
+
+  const score = gate?.score || 0;
+  const issues = gate?.issues || [];
+  const ready = score >= 70;
 
   return (
     <div className="p-12 max-w-2xl mx-auto text-center">
       <header className="mb-12">
-        <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Incorporation Status</h2>
+        <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Incorporation Readiness: {score}%</h2>
         <Badge color={ready ? "green" : "amber"} className="px-6 py-2 text-sm uppercase tracking-widest font-black">
           {ready ? "READY TO INCORPORATE" : "NOT READY"}
         </Badge>
@@ -28,12 +47,18 @@ export const IncorporationReadinessScreen: React.FC<ScreenProps> = ({ onNavigate
 
       <Card className="p-8 text-left bg-white border-2 border-slate-100 shadow-xl">
         <div className="space-y-6">
-          {checks.map((c, i) => (
-            <div key={i} className={`flex items-center gap-4 p-4 rounded-xl transition-all ${c.done ? 'bg-emerald-50 text-emerald-900 shadow-sm' : 'bg-slate-50 text-slate-400 opacity-60'}`}>
-              {c.done ? <CheckCircle className="w-6 h-6 text-emerald-500" /> : <Circle className="w-6 h-6" />}
-              <span className="text-lg font-bold">{c.label}</span>
+          {issues.map((issue, i) => (
+            <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-amber-50 text-amber-900 shadow-sm border border-amber-100">
+              <Circle className="w-6 h-6 text-amber-500" />
+              <span className="text-lg font-bold">{issue}</span>
             </div>
           ))}
+          {issues.length === 0 && (
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-emerald-50 text-emerald-900 shadow-sm border border-emerald-100">
+              <CheckCircle className="w-6 h-6 text-emerald-500" />
+              <span className="text-lg font-bold">No major issues detected</span>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 pt-8 border-t border-slate-100">
@@ -47,7 +72,7 @@ export const IncorporationReadinessScreen: React.FC<ScreenProps> = ({ onNavigate
           </Button>
           {!ready && (
             <p className="text-center text-xs text-slate-400 mt-4 font-medium italic">
-              "We recommend reaching $100k in non-binding interest before spending capital on legal formation." — AI Advisor
+              "We recommend resolving these {issues.length} critical issues before spending capital on legal formation." — AI Advisor
             </p>
           )}
         </div>

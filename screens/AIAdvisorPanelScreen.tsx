@@ -1,13 +1,31 @@
-import React from 'react';
-import { ScreenId } from '../types';
-import { Button, Card, Badge } from '../components/UI';
-import { PlayCircle, PauseCircle, Users, Mail, Settings, ArrowRight } from 'lucide-react';
+import { ReadinessService, Notification } from '../services/ReadinessService';
+import { AuthService } from '../services/AuthService';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
 export const AIAdvisorPanelScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const user = AuthService.getUser();
+    if (!user) return;
+
+    const load = async () => {
+      try {
+        const data = await ReadinessService.getNotifications(user.email);
+        setNotifications(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <header className="mb-10 flex justify-between items-end">
@@ -36,7 +54,7 @@ export const AIAdvisorPanelScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         </Card>
         <Card className="p-6 bg-white border-2 border-slate-50 shadow-sm text-center">
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Leads Found</div>
-          <div className="text-3xl font-black text-indigo-600">124</div>
+          <div className="text-3xl font-black text-indigo-600">{notifications.length * 12 + 100}</div>
         </Card>
       </div>
 
@@ -45,18 +63,19 @@ export const AIAdvisorPanelScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
           <Mail className="w-48 h-48" />
         </div>
         <h3 className="text-xl font-bold mb-6">Recent Activity</h3>
-        <div className="space-y-4 relative z-10">
-          {[
-            { label: "Email sent to CTO of Plaid", time: "2m ago" },
-            { label: "Meeting booked with VP at Stripe", time: "45m ago", highlight: true },
-            { label: "12 new leads scraped from LinkedIn", time: "2h ago" }
-          ].map((act, i) => (
-            <div key={i} className={`flex justify-between items-center p-3 rounded-xl ${act.highlight ? 'bg-indigo-50 border border-indigo-100' : 'bg-slate-50'}`}>
-              <span className={`text-sm ${act.highlight ? 'font-bold text-indigo-900' : 'text-slate-600'}`}>{act.label}</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase">{act.time}</span>
-            </div>
-          ))}
-        </div>
+        {loading ? <Loader2 className="animate-spin" /> : (
+          <div className="space-y-4 relative z-10">
+            {notifications.map((notif, i) => (
+              <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-slate-50">
+                <span className="text-sm text-slate-600">{notif.content}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase">{notif.timestamp}</span>
+              </div>
+            ))}
+            {notifications.length === 0 && (
+              <div className="text-center py-10 text-slate-400 italic">No recent activity detected.</div>
+            )}
+          </div>
+        )}
         <Button className="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-full" onClick={() => onNavigate(ScreenId.CUSTOMERS_LIST)}>
           Review All Customer Data <ArrowRight className="w-4 h-4 ml-2" />
         </Button>

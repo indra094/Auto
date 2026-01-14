@@ -21,8 +21,8 @@ export interface Customer {
 export const ExternalService = {
   // Investors
   // GET /investors/
-  getInvestors: async (): Promise<Investor[]> => {
-    return api.get('/investors/');
+  getInvestors: async (email: string): Promise<Investor[]> => {
+    return api.get(`/investors/?email=${email}`);
   },
 
   // GET /investors/{id}
@@ -36,14 +36,14 @@ export const ExternalService = {
   },
 
   // POST /investors/
-  addInvestor: async (investor: Omit<Investor, 'id'>) => {
-    return api.post('/investors/', investor);
+  addInvestor: async (email: string, investor: Omit<Investor, 'id'>) => {
+    return api.post(`/investors/?email=${email}`, investor);
   },
 
   // Customers
   // GET /customers/
-  getCustomers: async (): Promise<Customer[]> => {
-    return api.get('/customers/');
+  getCustomers: async (email: string): Promise<Customer[]> => {
+    return api.get(`/customers/?email=${email}`);
   },
 
   // GET /customers/{id}
@@ -57,8 +57,8 @@ export const ExternalService = {
   },
 
   // POST /customers/
-  addCustomer: async (customer: Omit<Customer, 'id'>) => {
-    return api.post('/customers/', customer);
+  addCustomer: async (email: string, customer: Omit<Customer, 'id'>) => {
+    return api.post(`/customers/?email=${email}`, customer);
   },
 
   // Session State (Mocking navigation state)

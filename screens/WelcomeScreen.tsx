@@ -18,7 +18,7 @@ export const WelcomeScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
         </svg>
       </div>
 
-      <h1 className="text-5xl font-black mb-2 tracking-tight">Welcome to Auto</h1>
+      <h1 className="text-5xl font-black mb-2 tracking-tight">Welcome to Foundry</h1>
       <p className="text-xl text-slate-500 mb-12 font-medium">Build companies the right way</p>
 
       <div className="space-y-4 w-full max-w-xs">
