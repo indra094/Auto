@@ -10,7 +10,7 @@ interface ScreenProps {
 export const LockAlignmentScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
   <div className="max-w-3xl mx-auto mt-8 pb-12 p-6">
     <div className="text-center mb-8">
-      <div className="mx-auto w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center mb-4">
+      <div className="mx-auto w-16 h-16 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-4">
         <FileCheck className="w-8 h-8" />
       </div>
       <h2 className="text-3xl font-bold text-slate-900">Lock Alignment</h2>
@@ -27,7 +27,7 @@ export const LockAlignmentScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
           <strong>1. Equity Split:</strong> The founders agree to a split of <strong>52% (Alex)</strong> and <strong>48% (Jamie)</strong>.
         </p>
         <p>
-          <strong>2. Commitment Expectations:</strong> This split is predicated on Alex contributing <strong>60 hours/week</strong> and Jamie contributing <strong>25 hours/week</strong>. 
+          <strong>2. Commitment Expectations:</strong> This split is predicated on Alex contributing <strong>60 hours/week</strong> and Jamie contributing <strong>25 hours/week</strong>.
           <span className="bg-amber-100 px-1 rounded mx-1">Note: This disparity is flagged as a high-risk factor.</span>
         </p>
         <p>
@@ -35,26 +35,26 @@ export const LockAlignmentScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
         </p>
         <div className="bg-slate-50 p-4 rounded border border-slate-200 text-sm">
           <strong>Explicit Acknowledgement:</strong>
-          <br/>
+          <br />
           "We understand that if Jamie leaves immediately after the cliff (12 months), they will retain 12% of the company. We accept this risk."
         </div>
       </div>
       <div className="bg-slate-50 p-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-         <div className="flex gap-4">
-           <div className="h-10 w-32 sm:w-40 border-b border-slate-400 relative">
-             <span className="absolute -bottom-5 left-0 text-xs text-slate-400">Signed by Alex</span>
-           </div>
-           <div className="h-10 w-32 sm:w-40 border-b border-slate-400 relative">
-              <span className="absolute -bottom-5 left-0 text-xs text-slate-400">Signed by Jamie</span>
-           </div>
-         </div>
-         <Badge color="slate">Draft v1.0</Badge>
+        <div className="flex gap-4">
+          <div className="h-10 w-32 sm:w-40 border-b border-slate-400 relative">
+            <span className="absolute -bottom-5 left-0 text-xs text-slate-400">Signed by Alex</span>
+          </div>
+          <div className="h-10 w-32 sm:w-40 border-b border-slate-400 relative">
+            <span className="absolute -bottom-5 left-0 text-xs text-slate-400">Signed by Jamie</span>
+          </div>
+        </div>
+        <Badge color="slate">Draft v1.0</Badge>
       </div>
     </Card>
 
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-       <Button variant="secondary" onClick={() => onNavigate(ScreenId.EQUITY_MODELING)}>Revise Terms</Button>
-       <Button variant="black" onClick={() => onNavigate(ScreenId.ALIGNMENT_HISTORY)}>Lock & Generate PDF</Button>
+      <Button variant="secondary" onClick={() => onNavigate(ScreenId.EQUITY_MODELING)}>Revise Terms</Button>
+      <Button variant="black" onClick={() => onNavigate(ScreenId.ALIGNMENT_HISTORY)}>Lock & Generate PDF</Button>
     </div>
   </div>
 );

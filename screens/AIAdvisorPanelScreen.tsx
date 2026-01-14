@@ -40,8 +40,8 @@ export const AIAdvisorPanelScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         </Card>
       </div>
 
-      <Card className="p-8 bg-slate-900 text-white border-none shadow-2xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 p-8 opacity-10">
+      <Card className="p-8 bg-white text-slate-900 border border-slate-200 shadow-xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 p-8 opacity-5 text-indigo-600">
           <Mail className="w-48 h-48" />
         </div>
         <h3 className="text-xl font-bold mb-6">Recent Activity</h3>
@@ -51,13 +51,13 @@ export const AIAdvisorPanelScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             { label: "Meeting booked with VP at Stripe", time: "45m ago", highlight: true },
             { label: "12 new leads scraped from LinkedIn", time: "2h ago" }
           ].map((act, i) => (
-            <div key={i} className={`flex justify-between items-center p-3 rounded-xl ${act.highlight ? 'bg-indigo-500/20 border border-indigo-500/30' : 'bg-slate-800/50'}`}>
-              <span className={`text-sm ${act.highlight ? 'font-bold text-white' : 'text-slate-300'}`}>{act.label}</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase">{act.time}</span>
+            <div key={i} className={`flex justify-between items-center p-3 rounded-xl ${act.highlight ? 'bg-indigo-50 border border-indigo-100' : 'bg-slate-50'}`}>
+              <span className={`text-sm ${act.highlight ? 'font-bold text-indigo-900' : 'text-slate-600'}`}>{act.label}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">{act.time}</span>
             </div>
           ))}
         </div>
-        <Button className="mt-8 bg-indigo-600 hover:bg-indigo-500 text-white font-bold w-full" onClick={() => onNavigate(ScreenId.CUSTOMERS_LIST)}>
+        <Button className="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-full" onClick={() => onNavigate(ScreenId.CUSTOMERS_LIST)}>
           Review All Customer Data <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </Card>

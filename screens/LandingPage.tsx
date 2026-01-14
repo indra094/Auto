@@ -103,7 +103,7 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
     <div className="min-h-screen bg-white font-sans text-slate-900">
       {/* Auth Modal Overlay */}
       {authMode && (
-        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={closeAuth}>
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-400/20 backdrop-blur-sm animate-in fade-in duration-200" onClick={closeAuth}>
           <div className="min-h-full flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
               <button

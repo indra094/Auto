@@ -151,13 +151,13 @@ export const Layout: React.FC = () => {
   const isSetupMode = (workspace?.onboardingStep || 0) < 3;
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
+    <div className="flex h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 transform transition-transform duration-300 md:relative md:translate-x-0 flex flex-col ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 text-slate-600 transform transition-transform duration-300 md:relative md:translate-x-0 flex flex-col ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
 
         {/* Brand Header */}
         <div
-          className="p-4 border-b border-slate-700 flex items-center gap-3 cursor-pointer hover:bg-slate-800 transition-colors shrink-0"
+          className="p-4 border-b border-slate-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors shrink-0"
           onClick={() => setCurrentScreen(ScreenId.WELCOME)}
         >
           <div className="w-10 h-10 flex items-center justify-center text-indigo-500">
@@ -169,49 +169,49 @@ export const Layout: React.FC = () => {
               <path d="M12 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
             </svg>
           </div>
-          <span className="font-bold text-white tracking-wide text-xl">Auto</span>
+          <span className="font-bold text-slate-900 tracking-wide text-xl">Auto</span>
         </div>
 
         {/* Progress Bar Area */}
-        <div className="p-4 border-b border-slate-800 bg-slate-800/50">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex justify-between text-xs font-bold text-slate-400 uppercase mb-2">
             <span>Setup Progress</span>
             <span>{onboardingProgress}%</span>
           </div>
-          <ProgressBar value={onboardingProgress} height="h-1.5" className="bg-slate-700" color="bg-indigo-500" />
+          <ProgressBar value={onboardingProgress} height="h-1.5" className="bg-slate-200" color="bg-indigo-500" />
         </div>
 
         {/* Navigation List */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide">
           {orderedNavStructure.map((group) => (
             <div key={group.label}>
-              <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 pl-2">{group.label}</h3>
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 pl-2">{group.label}</h3>
               <ul className="space-y-0.5">
                 {group.screens.map((screen) => {
                   const status = getScreenStatus(screen.id);
                   const isActive = currentScreen === screen.id;
 
                   let Icon = Circle;
-                  let statusColor = "text-slate-500";
-                  let containerClass = "hover:bg-slate-800 text-slate-400";
+                  let statusColor = "text-slate-400";
+                  let containerClass = "hover:bg-slate-50 text-slate-600";
 
                   if (isActive) {
                     Icon = PlayCircle;
-                    statusColor = "text-indigo-400";
-                    containerClass = "bg-indigo-600 text-white shadow-md";
+                    statusColor = "text-indigo-600";
+                    containerClass = "bg-indigo-50 text-indigo-700 shadow-sm border border-indigo-100";
                   } else if (status === 'locked') {
                     Icon = Lock;
-                    statusColor = "text-slate-600";
-                    containerClass = "text-slate-600 cursor-not-allowed opacity-60";
+                    statusColor = "text-slate-300";
+                    containerClass = "text-slate-400 cursor-not-allowed opacity-60";
                   } else if (status === 'partial') {
                     Icon = AlertTriangle;
                     statusColor = "text-amber-500";
-                    containerClass = "hover:bg-slate-800 text-slate-300";
+                    containerClass = "hover:bg-slate-50 text-slate-600";
                   } else {
                     // Accessible
                     Icon = CheckCircle;
                     statusColor = "text-emerald-500";
-                    containerClass = "hover:bg-slate-800 text-slate-300";
+                    containerClass = "hover:bg-slate-50 text-slate-600";
                   }
 
                   return (
@@ -295,8 +295,14 @@ export const Layout: React.FC = () => {
                 )}
               </div>
               <div className="hidden md:block text-left">
-                <div className="text-sm font-bold text-slate-800 leading-none">{user?.fullName || "Guest"}</div>
-                <div className="text-[10px] text-slate-500 leading-none mt-1">{user?.role || "Founder"}</div>
+                {user?.fullName ? (
+                  <>
+                    <div className="text-sm font-bold text-slate-800 leading-none">{user.fullName}</div>
+                    <div className="text-[10px] text-slate-500 leading-none mt-1">{user.email}</div>
+                  </>
+                ) : (
+                  <div className="text-sm font-bold text-slate-800 leading-none">{user?.email || "Guest"}</div>
+                )}
               </div>
               <svg className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
             </div>

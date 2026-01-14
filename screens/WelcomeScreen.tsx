@@ -7,10 +7,10 @@ interface ScreenProps {
 }
 
 export const WelcomeScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
-  <div className="h-full overflow-y-auto bg-slate-900 text-white">
+  <div className="h-full overflow-y-auto bg-white text-slate-900">
     <div className="flex flex-col items-center justify-center min-h-full p-8 text-center max-w-2xl mx-auto">
       <div className="w-20 h-20 mb-8 flex items-center justify-center">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full text-indigo-500">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full text-indigo-600">
           <path d="M12 2L3 22h18L12 2z" />
           <path d="M8 12h8" />
           <path d="M12 12v4" />
@@ -19,7 +19,7 @@ export const WelcomeScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
       </div>
 
       <h1 className="text-5xl font-black mb-2 tracking-tight">Welcome to Auto</h1>
-      <p className="text-xl text-slate-400 mb-12 font-medium">Build companies the right way</p>
+      <p className="text-xl text-slate-500 mb-12 font-medium">Build companies the right way</p>
 
       <div className="space-y-4 w-full max-w-xs">
         <Button
@@ -30,16 +30,16 @@ export const WelcomeScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
           Create Your First Company
         </Button>
 
-        <div className="py-2 flex items-center gap-4 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
-          <div className="h-px flex-1 bg-slate-800"></div>
+        <div className="py-2 flex items-center gap-4 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
+          <div className="h-px flex-1 bg-slate-100"></div>
           <span>Or</span>
-          <div className="h-px flex-1 bg-slate-800"></div>
+          <div className="h-px flex-1 bg-slate-100"></div>
         </div>
 
         <Button
           fullWidth
           variant="secondary"
-          className="h-14 text-lg bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
+          className="h-14 text-lg bg-white hover:bg-slate-50 text-slate-900 border-slate-200 shadow-sm"
           onClick={() => alert("Join flow not implemented")}
         >
           Join Existing Company
