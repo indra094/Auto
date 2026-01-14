@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ScreenId } from '../types';
-import { Button, Card } from '../components/UI';
-import { Building, User, AlertCircle, Loader2 } from 'lucide-react';
+import { Button } from '../components/UI';
+import { User, Mail, Loader2, ArrowRight } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 
 interface ScreenProps {
@@ -9,107 +9,95 @@ interface ScreenProps {
 }
 
 export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const [workspaceName, setWorkspaceName] = useState('');
-  const [userRole, setUserRole] = useState('');
-  const [errors, setErrors] = useState<{workspace?: boolean, role?: boolean}>({});
+  const [fullName, setFullName] = useState(AuthService.getUser()?.fullName || '');
+  const [email, setEmail] = useState(AuthService.getUser()?.email || '');
+  const [role, setRole] = useState(AuthService.getUser()?.role || '');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Pre-fill if data exists
-  useEffect(() => {
+  const handleContinue = async () => {
+    if (!fullName || !email || !role) return;
+    setIsLoading(true);
+    await AuthService.updateUser({ fullName, email, role });
+
+    // Set onboarding step to 2
     const ws = AuthService.getWorkspace();
-    const usr = AuthService.getUser();
-    if (ws?.name) setWorkspaceName(ws.name);
-    if (usr?.role && usr.role !== 'Founder') setUserRole(usr.role);
-  }, []);
-
-  const handleNext = async () => {
-    const newErrors: {workspace?: boolean, role?: boolean} = {};
-    if (!workspaceName.trim()) newErrors.workspace = true;
-    if (!userRole.trim()) newErrors.role = true;
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      setIsLoading(true);
-      // Save data to shared state
-      await AuthService.updateWorkspace({ name: workspaceName, onboardingStep: 2 });
-      await AuthService.updateUser({ role: userRole });
-      setIsLoading(false);
-      onNavigate(ScreenId.STARTUP_BASICS);
+    if (ws) {
+      await AuthService.updateWorkspace({ onboardingStep: 2 });
     }
+
+    setIsLoading(false);
+    onNavigate(ScreenId.COMPANY_CREATION);
   };
 
-  const isFormValid = workspaceName.trim().length > 0 && userRole.trim().length > 0;
+  const roles = ['Founder', 'Executive', 'Investor', 'Advisor'];
 
   return (
-    <div className="max-w-md mx-auto mt-12 px-4">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-slate-900">Setup Your Workspace</h2>
-        <p className="text-slate-500 mt-2">Create a home for your startup's operating system.</p>
-      </div>
+    <div className="max-w-md mx-auto py-12 px-6">
+      <header className="text-center mb-10">
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">Your Info</h1>
+        <p className="text-slate-500">Let's get to know you first.</p>
+      </header>
 
-      <Card title="Workspace Details">
-        <div className="space-y-6">
-          
-          {/* Workspace Name */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Startup / Company Name <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <div className="absolute left-3 top-3 text-slate-400">
-                <Building className="w-5 h-5" />
-              </div>
-              <input 
-                type="text" 
-                value={workspaceName}
-                onChange={(e) => {
-                  setWorkspaceName(e.target.value);
-                  if(errors.workspace) setErrors({...errors, workspace: false});
-                }}
-                disabled={isLoading}
-                className={`w-full pl-10 pr-4 py-2 border rounded-md transition-colors outline-none focus:ring-2 ${errors.workspace ? 'border-red-300 ring-2 ring-red-100 bg-red-50' : 'border-slate-300 focus:ring-indigo-100 focus:border-indigo-500'}`} 
-                placeholder="e.g. Acme Corp" 
-              />
-            </div>
-            {errors.workspace && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> Company name is required</p>}
-          </div>
-
-          {/* User Role */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Your Role <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <div className="absolute left-3 top-3 text-slate-400">
-                <User className="w-5 h-5" />
-              </div>
-              <input 
-                type="text" 
-                value={userRole}
-                onChange={(e) => {
-                  setUserRole(e.target.value);
-                  if(errors.role) setErrors({...errors, role: false});
-                }}
-                disabled={isLoading}
-                className={`w-full pl-10 pr-4 py-2 border rounded-md transition-colors outline-none focus:ring-2 ${errors.role ? 'border-red-300 ring-2 ring-red-100 bg-red-50' : 'border-slate-300 focus:ring-indigo-100 focus:border-indigo-500'}`} 
-                placeholder="e.g. CEO, CTO, Founder" 
-              />
-            </div>
-            {errors.role && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> Role is required</p>}
-          </div>
-
-          <div className="pt-2">
-            <Button fullWidth onClick={handleNext} disabled={!isFormValid || isLoading}>
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin"/> : 'Create Workspace & Continue'}
-            </Button>
+      <div className="space-y-6">
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
+          <div className="relative">
+            <User className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+            <input
+              type="text"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
+              placeholder="Full Name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
           </div>
         </div>
-      </Card>
-      
-      <p className="text-center text-xs text-slate-400 mt-6">
-        Step 2 of 6 • Information is private and encrypted.
-      </p>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+            <input
+              type="email"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
+              placeholder="email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Primary Role</label>
+          <div className="grid grid-cols-2 gap-3">
+            {roles.map(r => (
+              <button
+                key={r}
+                onClick={() => setRole(r)}
+                className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all ${role === r
+                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'
+                  }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="pt-4">
+          <Button
+            fullWidth
+            className="h-14 rounded-xl text-lg flex items-center justify-center gap-2"
+            onClick={handleContinue}
+            disabled={!fullName || !email || !role || isLoading}
+          >
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+              <>Continue <ArrowRight className="w-5 h-5" /></>
+            )}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,109 +1,69 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ScreenId } from '../types';
-import { Button, Card, Badge, AIInsightBox } from '../components/UI';
-import { ChevronRight, AlertTriangle, AlertCircle, Loader2 } from 'lucide-react';
-import { FounderService, Founder } from '../services/FounderService';
+import { Button, Card, Badge } from '../components/UI';
+import { User, Plus, ShieldAlert, ArrowRight } from 'lucide-react';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
 export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const [founders, setFounders] = useState<Founder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Initialize DB with defaults if needed, then fetch
-    FounderService.init();
-    const loadData = async () => {
-      const data = await FounderService.getFounders();
-      setFounders(data);
-      setIsLoading(false);
-    };
-    loadData();
-  }, []);
-
-  if (isLoading) {
-    return <div className="p-12 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-600"/></div>;
-  }
-
-  const hasIncomplete = founders.some(f => f.status === 'Incomplete');
+  const founders = [
+    { id: '1', name: "You", role: "Founder", equity: "100%", status: "Complete" }
+  ];
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <div className="p-8 max-w-2xl mx-auto">
+      <header className="mb-10 flex justify-between items-end">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Founders & Accountability</h2>
-          <p className="text-slate-500 text-sm">Add everyone who will hold equity in the company.</p>
+          <h2 className="text-4xl font-black text-slate-900 mb-2">Founders</h2>
+          <p className="text-slate-500 font-medium">Manage the core team and ownership.</p>
         </div>
-        <Button onClick={() => onNavigate(ScreenId.FOUNDER_PROFILE)}>+ Add Founder</Button>
-      </div>
+        <Button onClick={() => onNavigate(ScreenId.FOUNDER_PROFILE)} className="flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Add Co-founder
+        </Button>
+      </header>
 
-      {/* Incomplete Info Warning */}
-      {hasIncomplete && (
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
-           <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
-           <div>
-             <h4 className="font-bold text-amber-800 text-sm">Missing Information</h4>
-             <p className="text-sm text-amber-700">You must complete all founder profiles to generate your Equity Agreement.</p>
-           </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-4">
-        {founders.map((founder, index) => (
-          <Card 
-            key={founder.id}
-            className={`hover:border-indigo-300 transition-colors cursor-pointer ${founder.status === 'Incomplete' ? 'border-red-200 bg-red-50/10' : ''}`} 
-            onClick={() => onNavigate(ScreenId.FOUNDER_PROFILE)}
-          >
-            {founder.status === 'Incomplete' && (
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-400"></div>
-            )}
-            
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl relative 
-                  ${founder.status === 'Incomplete' ? 'bg-slate-100 text-slate-400 border-2 border-dashed border-slate-300' : 'bg-indigo-100 text-indigo-700'}`}>
-                  {founder.name.charAt(0)}
-                  {founder.status === 'Complete' && (
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold">{founder.name}</h3>
-                  <p className="text-sm text-slate-500">
-                    {founder.role || 'No Role'} • {founder.hoursPerWeek}h/week
-                  </p>
-                </div>
+      <div className="space-y-4 mb-12">
+        {founders.map((f) => (
+          <Card key={f.id} className="p-6 flex justify-between items-center bg-white border-2 border-slate-50 hover:border-indigo-100 transition-all cursor-pointer" onClick={() => onNavigate(ScreenId.FOUNDER_PROFILE)}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">
+                {f.name.charAt(0)}
               </div>
-              
-              <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                <div className="text-right">
-                   <div className="text-xs text-slate-400 uppercase font-bold">Status</div>
-                   {founder.status === 'Complete' && <Badge color="green">Complete</Badge>}
-                   {founder.status === 'Risk' && <Badge color="amber">Risk Detected</Badge>}
-                   {founder.status === 'Incomplete' && <span className="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-2 py-1 rounded">Action Required</span>}
-                </div>
-                <ChevronRight className="text-slate-300" />
+              <div>
+                <h3 className="font-bold text-slate-800">{f.name} — {f.role}</h3>
+                <p className="text-sm text-slate-400 font-medium">{f.equity} Ownership</p>
               </div>
             </div>
-
-            {founder.status === 'Risk' && (
-              <div className="mt-3 pt-3 border-t border-slate-100 flex gap-2 items-center text-sm text-slate-600">
-                 <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0"/>
-                 <span>Low time commitment vs high equity demand.</span>
-              </div>
-            )}
+            <Badge color="green">Verified</Badge>
           </Card>
         ))}
+
+        <button
+          className="w-full p-6 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 font-bold hover:border-indigo-300 hover:text-indigo-400 transition-all flex items-center justify-center gap-2"
+          onClick={() => onNavigate(ScreenId.FOUNDER_PROFILE)}
+        >
+          <Plus className="w-5 h-5" /> Add Co-founder
+        </button>
       </div>
 
-      <div className="mt-8 pt-4 border-t flex justify-end">
-        <Button onClick={() => onNavigate(ScreenId.INITIAL_READINESS)} className="w-full sm:w-auto">
-           Continue to Alignment Check
+      <Card className="p-8 bg-slate-900 text-white border-none shadow-2xl">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="w-6 h-6 text-red-500" />
+            <h3 className="text-xl font-bold">Alignment Status</h3>
+          </div>
+          <span className="text-2xl">❌</span>
+        </div>
+        <p className="text-slate-400 mb-8 leading-relaxed">
+          Your founder alignment is currently <span className="text-white font-bold text-red-400">Broken</span>.
+          Issues detected in Vision Match and Equity Agreement.
+        </p>
+        <Button fullWidth onClick={() => onNavigate(ScreenId.ALIGNMENT_OVERVIEW)} className="h-14 bg-white text-slate-900 hover:bg-slate-100 font-bold flex items-center justify-center gap-2">
+          Fix Alignment Issues <ArrowRight className="w-5 h-5" />
         </Button>
-      </div>
+      </Card>
     </div>
   );
 };

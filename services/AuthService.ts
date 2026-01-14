@@ -28,14 +28,17 @@ export const AuthService = {
   },
 
   login: async (email: string): Promise<User> => {
+    // POST /auth/login
     return api.post('/auth/login', { email });
   },
 
   signup: async (fullName: string, email: string): Promise<User> => {
+    // POST /auth/signup
     return api.post('/auth/signup', { fullName, email });
   },
 
   googleSignup: async (): Promise<User> => {
+    // POST /auth/google
     return api.post('/auth/google', {});
   },
 

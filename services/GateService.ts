@@ -1,18 +1,13 @@
-import { DB } from './db';
+import { api } from './api';
 
 export const GateService = {
+  // GET /gates/incorporation
   getIncorporationReadiness: async () => {
-    await DB.simulateDelay();
-    return {
-      score: 63,
-      issues: ['No signed agreement', 'Zero customer validation']
-    };
+    return api.get('/gates/incorporation');
   },
 
+  // GET /gates/notifications
   getNotifications: async () => {
-    await DB.simulateDelay();
-    return [
-      { id: 1, title: 'Alignment Score Dropped', type: 'Warning' }
-    ];
+    return api.get('/gates/notifications');
   }
 };

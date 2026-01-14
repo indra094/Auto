@@ -1,77 +1,67 @@
 import React from 'react';
 import { ScreenId } from '../types';
-import { Button, Card, AIInsightBox } from '../components/UI';
-import { AlertTriangle, Clock } from 'lucide-react';
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar } from 'recharts';
+import { Button, Card } from '../components/UI';
+import { ShieldCheck, AlertCircle, ArrowRight, XCircle } from 'lucide-react';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
 export const AlignmentOverviewScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const alignmentData = [
-    { name: 'Alex', equity: 52, contribution: 75 },
-    { name: 'Jamie', equity: 48, contribution: 25 },
+  const pillars = [
+    { title: "Vision Match", status: "🟡", detail: "Significant overlap, but exit strategies differ." },
+    { title: "Time Commitment", status: "🟢", detail: "Both founders committing 40+ hours/week." },
+    { title: "Equity Agreement", status: "🔴", detail: "50/50 split detected. System suggests adjustment." }
   ];
-  return (
-    <div className="p-6 max-w-6xl mx-auto">
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
-         <div>
-           <h2 className="text-3xl font-bold text-slate-900 mb-1">Alignment Overview</h2>
-           <p className="text-slate-500 text-lg">Exposing the gap between expectation and reality.</p>
-         </div>
-         <div className="text-left md:text-right">
-           <div className="text-5xl font-black text-amber-500 flex items-center gap-3 md:justify-end">
-              62<span className="text-2xl text-slate-400 font-normal">%</span>
-           </div>
-           <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Alignment Score</span>
-         </div>
-       </div>
 
-       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Chart Section */}
-          <Card className="col-span-1 lg:col-span-8" title="Equity vs. Calculated Contribution">
-            <div className="h-64 mt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={alignmentData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" domain={[0, 100]} />
-                  <YAxis dataKey="name" type="category" width={80} tick={{fontWeight: 'bold'}} />
-                  <Tooltip />
-                  <Bar dataKey="equity" fill="#4f46e5" name="Equity %" radius={[0, 4, 4, 0]} barSize={20} />
-                  <Bar dataKey="contribution" fill="#10b981" name="Contribution % (AI Model)" radius={[0, 4, 4, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-4 flex flex-wrap justify-center gap-4 md:gap-8">
-               <div className="flex items-center gap-2"><div className="w-3 h-3 bg-indigo-600 rounded"></div><span className="text-sm font-medium">Equity Owned</span></div>
-               <div className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-500 rounded"></div><span className="text-sm font-medium">Actual Contribution</span></div>
+  return (
+    <div className="p-8 max-w-2xl mx-auto">
+      <header className="mb-10 text-center">
+        <h2 className="text-4xl font-black text-slate-900 mb-2">Founder Alignment</h2>
+        <p className="text-slate-500 font-medium italic">Alignment is not an agreement; it's a shared reality.</p>
+      </header>
+
+      <div className="space-y-6 mb-12">
+        {pillars.map((p, i) => (
+          <Card key={i} className="p-8 border-2 border-slate-50 bg-white">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">{p.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">{p.detail}</p>
+              </div>
+              <span className="text-3xl">{p.status}</span>
             </div>
           </Card>
+        ))}
+      </div>
 
-          {/* AI Analysis Section */}
-          <div className="col-span-1 lg:col-span-4 space-y-4">
-             <AIInsightBox type="critical" title="Predicted Failure Mode">
-               <span className="font-bold">Resentment by Year 2.</span>
-               <p className="mt-2">Alex is contributing 75% of the value (Time + Cash + Risk) but only holding 52% of equity.</p>
-               <p className="mt-2">System predicts a <strong>High Probability</strong> of equity renegotiation or breakup before Series A fundraising.</p>
-             </AIInsightBox>
-             
-             <Card title="Key Friction Points">
-               <ul className="space-y-3">
-                 <li className="flex gap-3 text-sm text-slate-700">
-                   <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0"/>
-                   <span>Jamie's "Low Risk" tolerance contradicts startup equity norms.</span>
-                 </li>
-                 <li className="flex gap-3 text-sm text-slate-700">
-                   <Clock className="w-5 h-5 text-slate-400 shrink-0"/>
-                   <span>Time disparity (60h vs 25h) is not reflected in the 52/48 split.</span>
-                 </li>
-               </ul>
-               <Button variant="black" fullWidth className="mt-4" onClick={() => onNavigate(ScreenId.EQUITY_MODELING)}>Model Solutions</Button>
-             </Card>
-          </div>
-       </div>
+      <div className="grid grid-cols-2 gap-4">
+        <Button
+          variant="secondary"
+          fullWidth
+          className="h-16 rounded-2xl font-bold border-2 border-red-100 text-red-600 hover:bg-red-50"
+          onClick={() => alert("Fixing flow...")}
+        >
+          Fix Issues
+        </Button>
+        <Button
+          fullWidth
+          className="h-16 rounded-2xl font-black bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-200 flex items-center justify-center gap-2"
+          onClick={() => onNavigate(ScreenId.COMPANY_DASHBOARD)}
+        >
+          Lock Alignment <ShieldCheck className="w-5 h-5" />
+        </Button>
+      </div>
+
+      <div className="mt-12 p-6 bg-slate-900 text-white rounded-3xl">
+        <div className="flex items-center gap-3 mb-4">
+          <AlertCircle className="w-6 h-6 text-indigo-400" />
+          <h4 className="font-bold">Next Milestone</h4>
+        </div>
+        <p className="text-sm text-slate-400 leading-relaxed">
+          Once alignment is locked, you can move to <span className="text-white font-bold">Incorporation Readiness</span> to legally formalize these commitments.
+        </p>
+      </div>
     </div>
   );
 };

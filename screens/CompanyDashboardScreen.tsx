@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ScreenId } from '../types';
-import { Button, Card, Badge, ProgressBar } from '../components/UI';
-import { CheckCircle, AlertTriangle, Clock, Loader2 } from 'lucide-react';
+import { Button, Card, Badge } from '../components/UI';
+import { Heart, CheckCircle, Smartphone, DollarSign, Users, Zap, Loader2, ArrowRight } from 'lucide-react';
 import { AuthService, Workspace } from '../services/AuthService';
-import { IntelligenceService } from '../services/IntelligenceService';
-import { FounderService } from '../services/FounderService';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
@@ -12,80 +10,104 @@ interface ScreenProps {
 
 export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
-  const [stats, setStats] = useState<any>(null);
-  const [alignmentScore, setAlignmentScore] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       setWorkspace(AuthService.getWorkspace());
-      const dashboardStats = await IntelligenceService.getDashboardStats();
-      const score = await FounderService.getAlignmentScore();
-      setStats(dashboardStats);
-      setAlignmentScore(score);
+      // Simulate data loading
+      await new Promise(r => setTimeout(r, 500));
       setLoading(false);
     };
     load();
   }, []);
 
-  const stageLabel = workspace?.stage || "Onboarding";
-  
-  if (loading) return <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-slate-400" /></div>;
+  if (loading) return <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-indigo-500" /></div>;
+
+  const cards = [
+    {
+      id: ScreenId.INCORPORATION_READINESS,
+      title: "Company Health",
+      status: "🟡",
+      text: "Founder alignment locked, but cap table needs work.",
+      icon: <Heart className="text-pink-500" />,
+      cta: "Review Health"
+    },
+    {
+      id: ScreenId.VALIDATION_CHECKLIST,
+      title: "Validation Status",
+      status: "🟢",
+      text: "Validated! 10+ customers confirmed pain and price.",
+      icon: <CheckCircle className="text-emerald-500" />,
+      cta: "See Evidence"
+    },
+    {
+      id: ScreenId.BUILD_STATUS,
+      title: "Build Status",
+      status: "🟡",
+      text: "MVP defined. Core loop in progress (65%).",
+      icon: <Smartphone className="text-indigo-500" />,
+      cta: "Update Progress"
+    },
+    {
+      id: ScreenId.FINANCIAL_DASHBOARD,
+      title: "Financial Status",
+      status: "🔴",
+      text: "Runway: 9 months. Burn rate stable at $15k/mo.",
+      icon: <DollarSign className="text-amber-500" />,
+      cta: "Manage Runway"
+    },
+    {
+      id: ScreenId.FOUNDERS_LIST,
+      title: "People & Equity",
+      status: "🟢",
+      text: "2 Founders, 100% equity allocated. No hires yet.",
+      icon: <Users className="text-blue-500" />,
+      cta: "Manage Team"
+    },
+    {
+      id: ScreenId.APP_SHELL, // Using App Shell for next actions or a general screen
+      title: "Next Actions",
+      status: "⚡",
+      text: "3 urgent tasks: Fix cap table, Finish core loop, Prep Seed.",
+      icon: <Zap className="text-yellow-500" />,
+      cta: "View Tasks"
+    }
+  ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Dashboard</h2>
-        <Badge color="slate">{stageLabel}</Badge>
-      </div>
+    <div className="p-8 max-w-6xl mx-auto">
+      <header className="mb-10 flex justify-between items-center">
+        <div>
+          <h2 className="text-4xl font-black text-slate-900 tracking-tight">Company Dashboard</h2>
+          <p className="text-slate-500 mt-2 font-medium">Global view of your venture's operating state.</p>
+        </div>
+        <Badge color="indigo" className="px-4 py-2 text-sm font-bold">{workspace?.stage || "Pre-Seed"}</Badge>
+      </header>
 
-      <div className="grid md:grid-cols-4 gap-4 mb-8">
-        <Card className={`md:col-span-1 border-t-4 ${stats?.risk === 'High' ? 'border-t-red-500' : 'border-t-amber-500'}`}>
-          <div className="text-xs uppercase text-slate-500 font-bold mb-1">Overall Risk</div>
-          <div className={`text-2xl font-bold ${stats?.risk === 'High' ? 'text-red-600' : 'text-amber-600'}`}>
-            {stats?.risk}
-          </div>
-        </Card>
-        <Card className="md:col-span-1">
-          <div className="text-xs uppercase text-slate-500 font-bold mb-1">Burn Rate</div>
-          <div className="text-2xl font-bold text-slate-800">${stats?.burnRate?.toLocaleString()}/mo</div>
-        </Card>
-        <Card className="md:col-span-1">
-          <div className="text-xs uppercase text-slate-500 font-bold mb-1">Runway</div>
-          <div className="text-2xl font-bold text-slate-800">{stats?.runway}</div>
-        </Card>
-        <Card className="md:col-span-1">
-          <div className="text-xs uppercase text-slate-500 font-bold mb-1">Team</div>
-          <div className="text-2xl font-bold text-slate-800">{stats?.teamSize}</div>
-        </Card>
-      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {cards.map((card, i) => (
+          <Card key={i} className="p-6 hover:shadow-xl transition-all border-2 border-slate-50 hover:border-indigo-100 group">
+            <div className="flex justify-between items-start mb-6">
+              <div className="p-3 bg-slate-50 rounded-2xl group-hover:bg-indigo-50 transition-colors">
+                {React.cloneElement(card.icon as React.ReactElement, { className: "w-6 h-6" })}
+              </div>
+              <span className="text-2xl">{card.status}</span>
+            </div>
 
-      <h3 className="text-lg font-bold mb-4">This Week's Focus</h3>
-      <div className="grid md:grid-cols-3 gap-6">
-         <Card className="hover:border-indigo-300 transition-colors cursor-pointer" onClick={() => onNavigate(ScreenId.ALIGNMENT_OVERVIEW)}>
-            <div className="flex justify-between mb-2">
-              <span className="font-bold text-slate-800">Founder Alignment</span>
-              <CheckCircle className={`w-5 h-5 ${alignmentScore > 80 ? 'text-green-500' : 'text-amber-500'}`} />
-            </div>
-            <ProgressBar value={alignmentScore} color={alignmentScore > 80 ? "bg-green-500" : "bg-amber-500"} />
-            <p className="text-xs text-slate-500 mt-2">{alignmentScore}% Aligned - {alignmentScore > 80 ? 'Good' : 'Needs attention'}</p>
-         </Card>
-         <Card className="hover:border-indigo-300 transition-colors cursor-pointer" onClick={() => onNavigate(ScreenId.INCORPORATION_READINESS)}>
-            <div className="flex justify-between mb-2">
-              <span className="font-bold text-slate-800">Incorporation</span>
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-            </div>
-            <ProgressBar value={50} color="bg-indigo-500" />
-            <p className="text-xs text-slate-500 mt-2">Decision pending validation</p>
-         </Card>
-         <Card className="hover:border-indigo-300 transition-colors cursor-pointer" onClick={() => onNavigate(ScreenId.CUSTOMERS_LIST)}>
-            <div className="flex justify-between mb-2">
-              <span className="font-bold text-slate-800">Market Validation</span>
-              <Clock className="w-5 h-5 text-slate-400" />
-            </div>
-            <ProgressBar value={Math.min(100, (stats?.customerCount || 0) * 10)} color="bg-slate-300" />
-            <p className="text-xs text-slate-500 mt-2">{stats?.customerCount || 0}/10 Interviews conducted</p>
-         </Card>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">{card.title}</h3>
+            <p className="text-slate-500 text-sm leading-relaxed mb-8">{card.text}</p>
+
+            <Button
+              fullWidth
+              variant="secondary"
+              className="group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-all font-bold flex items-center justify-center gap-2"
+              onClick={() => onNavigate(card.id)}
+            >
+              {card.cta} <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Card>
+        ))}
       </div>
     </div>
   );

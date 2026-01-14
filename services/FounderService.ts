@@ -44,18 +44,22 @@ export const FounderService = {
   },
 
   getFounders: async (): Promise<Founder[]> => {
+    // GET /founders/
     return api.get('/founders/');
   },
 
   getFounderById: async (id: string): Promise<Founder | undefined> => {
+    // GET /founders/{id}
     return api.get(`/founders/${id}`);
   },
 
   addFounder: async (founder: Omit<Founder, 'id' | 'status'>) => {
+    // POST /founders/
     return api.post('/founders/', founder);
   },
 
   updateFounder: async (id: string, updates: Partial<Founder>) => {
+    // PUT /founders/{id}
     return api.put(`/founders/${id}`, updates);
   },
 

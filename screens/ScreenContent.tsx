@@ -8,6 +8,7 @@ import { NotificationsScreen } from './NotificationsScreen';
 // Onboarding
 import { WelcomeScreen } from './WelcomeScreen';
 import { AccountCreationScreen } from './AccountCreationScreen';
+import { CompanyCreationScreen } from './CompanyCreationScreen';
 import { StartupBasicsScreen } from './StartupBasicsScreen';
 import { InitialReadinessScreen } from './InitialReadinessScreen';
 
@@ -19,6 +20,7 @@ import { EquityModelingScreen } from './EquityModelingScreen';
 import { ScenarioSimulatorScreen } from './ScenarioSimulatorScreen';
 import { LockAlignmentScreen } from './LockAlignmentScreen';
 import { AlignmentHistoryScreen } from './AlignmentHistoryScreen';
+import { CoFounderFindingScreen } from './CoFounderFindingScreen';
 
 // AI
 import { AIAdvisorsHomeScreen } from './AIAdvisorsHomeScreen';
@@ -30,6 +32,9 @@ import { AIEmployeeDetailScreen } from './AIEmployeeDetailScreen';
 import { CompanyDashboardScreen } from './CompanyDashboardScreen';
 import { RelevantConnectionsScreen } from './RelevantConnectionsScreen';
 import { StagesCapitalScreen } from './StagesCapitalScreen';
+import { ValidationChecklistScreen } from './ValidationChecklistScreen';
+import { BuildStatusScreen } from './BuildStatusScreen';
+import { FinancialDashboardScreen } from './FinancialDashboardScreen';
 
 // External
 import { InvestorsListScreen } from './InvestorsListScreen';
@@ -51,9 +56,11 @@ interface ScreenContentProps {
 const scrollableScreens = new Set([
   ScreenId.NOTIFICATIONS,
   ScreenId.ACCOUNT_CREATION,
+  ScreenId.COMPANY_CREATION,
   ScreenId.STARTUP_BASICS,
   ScreenId.INITIAL_READINESS,
   ScreenId.FOUNDERS_LIST,
+  ScreenId.COFOUNDER_FINDING,
   ScreenId.ALIGNMENT_OVERVIEW,
   ScreenId.SCENARIO_SIMULATOR,
   ScreenId.LOCK_ALIGNMENT,
@@ -64,6 +71,9 @@ const scrollableScreens = new Set([
   ScreenId.COMPANY_DASHBOARD,
   ScreenId.RELEVANT_CONNECTIONS,
   ScreenId.STAGES_CAPITAL,
+  ScreenId.VALIDATION_CHECKLIST,
+  ScreenId.BUILD_STATUS,
+  ScreenId.FINANCIAL_DASHBOARD,
   ScreenId.INVESTORS_LIST,
   ScreenId.INVESTOR_DETAIL,
   ScreenId.CUSTOMERS_LIST,
@@ -86,6 +96,8 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
         return <WelcomeScreen onNavigate={onNavigate} />;
       case ScreenId.ACCOUNT_CREATION:
         return <AccountCreationScreen onNavigate={onNavigate} />;
+      case ScreenId.COMPANY_CREATION:
+        return <CompanyCreationScreen onNavigate={onNavigate} />;
       case ScreenId.STARTUP_BASICS:
         return <StartupBasicsScreen onNavigate={onNavigate} />;
       case ScreenId.INITIAL_READINESS:
@@ -96,6 +108,8 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
         return <FoundersListScreen onNavigate={onNavigate} />;
       case ScreenId.FOUNDER_PROFILE:
         return <FounderProfileScreen onNavigate={onNavigate} />;
+      case ScreenId.COFOUNDER_FINDING:
+        return <CoFounderFindingScreen onNavigate={onNavigate} />;
       case ScreenId.ALIGNMENT_OVERVIEW:
         return <AlignmentOverviewScreen onNavigate={onNavigate} />;
       case ScreenId.EQUITY_MODELING:
@@ -120,6 +134,12 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
       // --- E. COMPANY INTELLIGENCE ---
       case ScreenId.COMPANY_DASHBOARD:
         return <CompanyDashboardScreen onNavigate={onNavigate} />;
+      case ScreenId.VALIDATION_CHECKLIST:
+        return <ValidationChecklistScreen onNavigate={onNavigate} />;
+      case ScreenId.BUILD_STATUS:
+        return <BuildStatusScreen onNavigate={onNavigate} />;
+      case ScreenId.FINANCIAL_DASHBOARD:
+        return <FinancialDashboardScreen onNavigate={onNavigate} />;
       case ScreenId.RELEVANT_CONNECTIONS:
         return <RelevantConnectionsScreen onNavigate={onNavigate} />;
       case ScreenId.STAGES_CAPITAL:

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card } from '../components/UI';
-import { AlertCircle, Target, Layers, Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 
 interface ScreenProps {
@@ -9,125 +9,68 @@ interface ScreenProps {
 }
 
 export const StartupBasicsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [industry, setIndustry] = useState('');
-  const [stage, setStage] = useState('');
-  const [errors, setErrors] = useState<{type?: boolean, industry?: boolean, stage?: boolean}>({});
+  const [problem, setProblem] = useState('');
+  const [customer, setCustomer] = useState('');
+  const [solution, setSolution] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Pre-fill
-  useEffect(() => {
-    const ws = AuthService.getWorkspace();
-    if (ws?.type) setSelectedType(ws.type);
-    if (ws?.industry) setIndustry(ws.industry);
-    if (ws?.stage) setStage(ws.stage);
-  }, []);
-
-  const handleNext = async () => {
-    const newErrors: {type?: boolean, industry?: boolean, stage?: boolean} = {};
-    if (!selectedType) newErrors.type = true;
-    if (!industry.trim()) newErrors.industry = true;
-    if (!stage) newErrors.stage = true;
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      setIsLoading(true);
-      await AuthService.updateWorkspace({ 
-        type: selectedType!, 
-        industry, 
-        stage,
-        onboardingStep: 3
-      });
-      setIsLoading(false);
-      onNavigate(ScreenId.FOUNDERS_LIST);
-    }
+  const handleSave = async () => {
+    if (!problem || !customer || !solution) return;
+    setIsLoading(true);
+    await AuthService.updateWorkspace({ onboardingStep: 4 });
+    setIsLoading(false);
+    onNavigate(ScreenId.COMPANY_DASHBOARD);
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-8 px-4 pb-12">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-slate-900">What are you building?</h2>
-        <p className="text-slate-500 mt-2">This helps our AI benchmark your equity and runway.</p>
-      </div>
-      
+    <div className="max-w-2xl mx-auto py-12 px-6">
+      <header className="mb-10 text-center">
+        <h1 className="text-3xl font-black text-slate-900 mb-2">Startup Basics</h1>
+        <p className="text-slate-500 font-medium">Define the core pillars of your venture.</p>
+      </header>
+
       <div className="space-y-8">
-        {/* Type Selection */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-3">
-            Business Model <span className="text-red-500">*</span>
-          </label>
-          <div className={`grid grid-cols-2 md:grid-cols-3 gap-3 p-1 rounded-xl transition-all ${errors.type ? 'ring-2 ring-red-100 bg-red-50/50' : ''}`}>
-            {['SaaS', 'Marketplace', 'Consumer App', 'Hard Tech', 'Service', 'Other'].map((type) => (
-              <button 
-                key={type} 
-                onClick={() => {
-                  setSelectedType(type);
-                  if(errors.type) setErrors({...errors, type: false});
-                }}
-                className={`p-4 border rounded-xl transition-all font-medium text-sm shadow-sm flex flex-col items-center justify-center gap-2 h-24
-                  ${selectedType === type 
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-600' 
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-slate-50'}`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-          {errors.type && <p className="text-xs text-red-500 mt-2 flex items-center gap-1 justify-center"><AlertCircle className="w-3 h-3"/> Please select a business model</p>}
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Problem Statement</label>
+          <textarea
+            className="w-full p-4 bg-white border border-slate-200 rounded-2xl h-32 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm"
+            placeholder="What pain are you solving? Be specific."
+            value={problem}
+            onChange={(e) => setProblem(e.target.value)}
+          />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Industry Input */}
-          <div>
-             <label className="block text-sm font-semibold text-slate-700 mb-1">
-               Industry / Vertical <span className="text-red-500">*</span>
-             </label>
-             <div className="relative">
-               <div className="absolute left-3 top-3 text-slate-400"><Target className="w-4 h-4"/></div>
-               <input 
-                 className={`w-full pl-9 pr-4 py-2.5 border rounded-lg outline-none focus:ring-2 ${errors.industry ? 'border-red-300 bg-red-50' : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-100'}`} 
-                 placeholder="e.g. Fintech, BioTech" 
-                 value={industry}
-                 onChange={(e) => {
-                   setIndustry(e.target.value);
-                   if(errors.industry) setErrors({...errors, industry: false});
-                 }}
-               />
-             </div>
-             {errors.industry && <p className="text-xs text-red-500 mt-1">Required</p>}
-          </div>
-
-          {/* Stage Dropdown */}
-          <div>
-             <label className="block text-sm font-semibold text-slate-700 mb-1">
-               Current Stage <span className="text-red-500">*</span>
-             </label>
-             <div className="relative">
-               <div className="absolute left-3 top-3 text-slate-400"><Layers className="w-4 h-4"/></div>
-               <select 
-                 className={`w-full pl-9 pr-4 py-2.5 border rounded-lg outline-none focus:ring-2 bg-white ${errors.stage ? 'border-red-300 bg-red-50' : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-100'}`}
-                 value={stage}
-                 onChange={(e) => {
-                   setStage(e.target.value);
-                   if(errors.stage) setErrors({...errors, stage: false});
-                 }}
-               >
-                 <option value="">Select Stage...</option>
-                 <option value="Idea">Idea / Exploration</option>
-                 <option value="Pre-incorporation">Pre-incorporation</option>
-                 <option value="Bootstrapping">Bootstrapping</option>
-                 <option value="Pre-seed">Pre-seed</option>
-                 <option value="Seed">Seed</option>
-               </select>
-             </div>
-             {errors.stage && <p className="text-xs text-red-500 mt-1">Required</p>}
-          </div>
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Target Customer</label>
+          <input
+            type="text"
+            className="w-full p-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all shadow-sm"
+            placeholder="Who is your ideal first user?"
+            value={customer}
+            onChange={(e) => setCustomer(e.target.value)}
+          />
         </div>
 
-        <div className="pt-4 flex justify-end border-t border-slate-100">
-          <Button onClick={handleNext} className="w-full md:w-auto px-8" disabled={isLoading}>
-             {isLoading ? <Loader2 className="w-4 h-4 animate-spin"/> : 'Next: Add Founders'}
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Proposed Solution</label>
+          <textarea
+            className="w-full p-4 bg-white border border-slate-200 rounded-2xl h-32 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm"
+            placeholder="How does your product solve the problem?"
+            value={solution}
+            onChange={(e) => setSolution(e.target.value)}
+          />
+        </div>
+
+        <div className="pt-6 border-t border-slate-100">
+          <Button
+            fullWidth
+            className="h-16 text-xl rounded-2xl flex items-center justify-center gap-3 font-black"
+            onClick={handleSave}
+            disabled={!problem || !customer || !solution || isLoading}
+          >
+            {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+              <>Save & Continue <ArrowRight className="w-6 h-6" /></>
+            )}
           </Button>
         </div>
       </div>

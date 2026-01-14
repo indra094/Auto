@@ -1,70 +1,66 @@
 import React from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { ArrowRight } from 'lucide-react';
+import { PlayCircle, PauseCircle, Users, Mail, Settings, ArrowRight } from 'lucide-react';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
-export const AIAdvisorPanelScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
-  <div className="flex h-full">
-    {/* Sidebar Context */}
-    <div className="w-80 border-r border-slate-200 bg-white p-4 hidden md:flex flex-col">
-      <h3 className="font-bold text-sm uppercase text-slate-500 mb-4">Context & Sources</h3>
-      <div className="space-y-3 overflow-y-auto flex-1">
-         <div className="p-3 bg-slate-50 rounded border border-slate-100 text-xs">
-           <div className="font-medium text-slate-800">Transcript #42</div>
-           <div className="text-slate-500 truncate">"Pricing is too high for the..."</div>
-         </div>
-         <div className="p-3 bg-slate-50 rounded border border-slate-100 text-xs">
-           <div className="font-medium text-slate-800">Competitor Analysis</div>
-           <div className="text-slate-500 truncate">Q1 2026 Report PDF</div>
-         </div>
-      </div>
-    </div>
-    
-    {/* Chat Area */}
-    <div className="flex-1 flex flex-col bg-slate-50">
-      <div className="p-4 border-b bg-white flex justify-between items-center shadow-sm">
-         <h2 className="font-bold text-slate-800 flex items-center gap-2">🕵️‍♂️ Customer Research Agent</h2>
-         <Button variant="secondary" className="text-xs">Export Report</Button>
-      </div>
-      
-      <div className="flex-1 p-6 overflow-y-auto space-y-6">
-         <div className="flex gap-4">
-           <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs">AI</div>
-           <div className="bg-white p-4 rounded-r-xl rounded-bl-xl shadow-sm border border-slate-100 max-w-2xl">
-             <p className="text-slate-800">I've analyzed the last 5 transcripts. A recurring pattern is that users love the "Scenario Simulator" but find the "Legal" section confusing.</p>
-             <div className="mt-3 flex gap-2">
-               <Badge color="blue">Product Feedback</Badge>
-               <Badge color="red">UX Issue</Badge>
-             </div>
-           </div>
-         </div>
-         <div className="flex gap-4 flex-row-reverse">
-           <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center text-white text-xs">ME</div>
-           <div className="bg-indigo-600 text-white p-4 rounded-l-xl rounded-br-xl shadow-sm max-w-2xl">
-             <p>What specific words do they use to describe the confusion?</p>
-           </div>
-         </div>
-         <div className="flex gap-4">
-           <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs">AI</div>
-           <div className="bg-white p-4 rounded-r-xl rounded-bl-xl shadow-sm border border-slate-100 max-w-2xl">
-             <div className="flex gap-2 mb-2">
-               <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
-               <span className="text-xs text-slate-400">Thinking...</span>
-             </div>
-           </div>
-         </div>
+export const AIAdvisorPanelScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
+  return (
+    <div className="p-8 max-w-4xl mx-auto">
+      <header className="mb-10 flex justify-between items-end">
+        <div>
+          <h2 className="text-4xl font-black text-slate-900 mb-2">AI Outreach Agent</h2>
+          <p className="text-slate-500 font-medium">Automated customer discovery and lead generation.</p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="secondary" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" /> Edit Script
+          </Button>
+          <Button variant="danger" className="flex items-center gap-2">
+            <PauseCircle className="w-4 h-4" /> Pause Agent
+          </Button>
+        </div>
+      </header>
+
+      <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <Card className="p-6 bg-white border-2 border-slate-50 shadow-sm text-center">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target</div>
+          <div className="text-lg font-bold text-slate-800">Series A Fintechs</div>
+        </Card>
+        <Card className="p-6 bg-white border-2 border-slate-50 shadow-sm text-center">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Status</div>
+          <Badge color="green" className="font-black">ACTIVE</Badge>
+        </Card>
+        <Card className="p-6 bg-white border-2 border-slate-50 shadow-sm text-center">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Leads Found</div>
+          <div className="text-3xl font-black text-indigo-600">124</div>
+        </Card>
       </div>
 
-      <div className="p-4 bg-white border-t">
-         <div className="relative">
-           <input className="w-full border border-slate-300 rounded-lg pl-4 pr-12 py-3 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ask your advisor..." />
-           <button className="absolute right-2 top-2 p-1 text-indigo-600 hover:bg-indigo-50 rounded"><ArrowRight/></button>
-         </div>
-      </div>
+      <Card className="p-8 bg-slate-900 text-white border-none shadow-2xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 p-8 opacity-10">
+          <Mail className="w-48 h-48" />
+        </div>
+        <h3 className="text-xl font-bold mb-6">Recent Activity</h3>
+        <div className="space-y-4 relative z-10">
+          {[
+            { label: "Email sent to CTO of Plaid", time: "2m ago" },
+            { label: "Meeting booked with VP at Stripe", time: "45m ago", highlight: true },
+            { label: "12 new leads scraped from LinkedIn", time: "2h ago" }
+          ].map((act, i) => (
+            <div key={i} className={`flex justify-between items-center p-3 rounded-xl ${act.highlight ? 'bg-indigo-500/20 border border-indigo-500/30' : 'bg-slate-800/50'}`}>
+              <span className={`text-sm ${act.highlight ? 'font-bold text-white' : 'text-slate-300'}`}>{act.label}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase">{act.time}</span>
+            </div>
+          ))}
+        </div>
+        <Button className="mt-8 bg-indigo-600 hover:bg-indigo-500 text-white font-bold w-full" onClick={() => onNavigate(ScreenId.CUSTOMERS_LIST)}>
+          Review All Customer Data <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </Card>
     </div>
-  </div>
-);
+  );
+};
