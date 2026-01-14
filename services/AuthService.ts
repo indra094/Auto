@@ -1,6 +1,8 @@
 import { DB } from './db';
 import { api } from './api';
 
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
 export interface User {
   id: string;
   fullName: string;
@@ -20,31 +22,59 @@ export interface Workspace {
 
 export const AuthService = {
   getUser: (): User | null => {
+    if (!AuthService.isSessionValid()) {
+      AuthService.logout();
+      return null;
+    }
     return DB.getItem<User | null>('user', null);
   },
 
   getWorkspace: (): Workspace | null => {
+    if (!AuthService.isSessionValid()) {
+      AuthService.logout();
+      return null;
+    }
     return DB.getItem<Workspace | null>('workspace', null);
   },
 
   login: async (email: string): Promise<User> => {
     // POST /auth/login
-    return api.post('/auth/login', { email });
+    const user = await api.post('/auth/login', { email });
+    AuthService.refreshSession();
+    return user;
   },
 
   signup: async (fullName: string, email: string): Promise<User> => {
     // POST /auth/signup
-    return api.post('/auth/signup', { fullName, email });
+    const user = await api.post('/auth/signup', { fullName, email });
+    AuthService.refreshSession();
+    return user;
   },
 
   googleSignup: async (): Promise<User> => {
     // POST /auth/google
-    return api.post('/auth/google', {});
+    const user = await api.post('/auth/google', {});
+    AuthService.refreshSession();
+    return user;
   },
 
   logout: () => {
     localStorage.removeItem('user');
     localStorage.removeItem('workspace');
+    localStorage.removeItem('lastActivity');
+  },
+
+  refreshSession: () => {
+    localStorage.setItem('lastActivity', Date.now().toString());
+  },
+
+  isSessionValid: (): boolean => {
+    const lastActivity = localStorage.getItem('lastActivity');
+    const user = localStorage.getItem('user');
+    if (!lastActivity || !user) return false;
+
+    const timeSinceLastActivity = Date.now() - parseInt(lastActivity, 10);
+    return timeSinceLastActivity < SESSION_TIMEOUT;
   },
 
   updateUser: async (data: Partial<User>) => {

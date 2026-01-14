@@ -133,8 +133,10 @@ export const Layout: React.FC = () => {
   };
 
   const getInitials = () => {
-    if (user?.fullName) return user.fullName.charAt(0).toUpperCase();
-    if (user?.email) return user.email.charAt(0).toUpperCase();
+    const name = user?.fullName?.trim();
+    if (name) return name.charAt(0).toUpperCase();
+    const email = user?.email?.trim();
+    if (email) return email.charAt(0).toUpperCase();
     return 'U';
   };
 
