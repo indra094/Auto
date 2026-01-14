@@ -41,7 +41,11 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                             className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
                             placeholder="e.g. Acme Corp"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setName(val);
+                                AuthService.updateWorkspace({ name: val });
+                            }}
                         />
                     </div>
                 </div>
@@ -52,7 +56,10 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                         {types.map(t => (
                             <button
                                 key={t}
-                                onClick={() => setType(t)}
+                                onClick={() => {
+                                    setType(t);
+                                    AuthService.updateWorkspace({ type: t });
+                                }}
                                 className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all ${type === t
                                     ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
                                     : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'
