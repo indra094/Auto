@@ -149,6 +149,26 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
 
                 <div className="relative mb-6">
                   <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                  <div className="relative flex justify-center text-xs uppercase tracking-wide font-semibold"><span className="px-3 bg-white text-slate-400">Demo Accounts</span></div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <button
+                    onClick={() => { setEmail('indra094@gmail.com'); setPassword('demo123'); }}
+                    className="p-3 border border-slate-200 rounded-xl text-xs font-bold hover:border-indigo-500 hover:bg-indigo-50 transition-all text-slate-600"
+                  >
+                    Indra Demo
+                  </button>
+                  <button
+                    onClick={() => { setEmail('inandy@umass.edu'); setPassword('demo123'); }}
+                    className="p-3 border border-slate-200 rounded-xl text-xs font-bold hover:border-indigo-500 hover:bg-indigo-50 transition-all text-slate-600"
+                  >
+                    Inandy Demo
+                  </button>
+                </div>
+
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
                   <div className="relative flex justify-center text-xs uppercase tracking-wide font-semibold"><span className="px-3 bg-white text-slate-400">Or email</span></div>
                 </div>
 

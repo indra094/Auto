@@ -35,7 +35,9 @@ const orderedNavStructure: NavGroup[] = [
       { id: ScreenId.COFOUNDER_FINDING, label: "Find Co-founders" },
       { id: ScreenId.ALIGNMENT_OVERVIEW, label: "Founder Alignment" },
       { id: ScreenId.EQUITY_MODELING, label: "Equity Modeling" },
+      { id: ScreenId.SCENARIO_SIMULATOR, label: "Scenario Simulator" },
       { id: ScreenId.LOCK_ALIGNMENT, label: "Lock Alignment" },
+      { id: ScreenId.MY_ROLE, label: "My Role" },
     ]
   },
   {
@@ -115,8 +117,8 @@ export const Layout: React.FC = () => {
     if ([ScreenId.FOUNDERS_LIST, ScreenId.COFOUNDER_FINDING].includes(screenId)) {
       return step >= 4 ? 'accessible' : 'locked';
     }
-    if ([ScreenId.ALIGNMENT_OVERVIEW, ScreenId.EQUITY_MODELING, ScreenId.LOCK_ALIGNMENT].includes(screenId)) {
-      return step >= 5 ? 'accessible' : 'locked';
+    if ([ScreenId.ALIGNMENT_OVERVIEW, ScreenId.EQUITY_MODELING, ScreenId.LOCK_ALIGNMENT, ScreenId.MY_ROLE].includes(screenId)) {
+      return step >= 2 ? 'accessible' : 'locked';
     }
 
     // E. External & Validation

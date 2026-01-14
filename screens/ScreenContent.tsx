@@ -21,6 +21,7 @@ import { ScenarioSimulatorScreen } from './ScenarioSimulatorScreen';
 import { LockAlignmentScreen } from './LockAlignmentScreen';
 import { AlignmentHistoryScreen } from './AlignmentHistoryScreen';
 import { CoFounderFindingScreen } from './CoFounderFindingScreen';
+import { MyRoleScreen } from './MyRoleScreen';
 
 // AI
 import { AIAdvisorsHomeScreen } from './AIAdvisorsHomeScreen';
@@ -65,6 +66,7 @@ const scrollableScreens = new Set([
   ScreenId.SCENARIO_SIMULATOR,
   ScreenId.LOCK_ALIGNMENT,
   ScreenId.ALIGNMENT_HISTORY,
+  ScreenId.MY_ROLE,
   ScreenId.AI_ADVISORS_HOME,
   ScreenId.TEAM_EMPLOYEES,
   ScreenId.AI_EMPLOYEE_DETAIL,
@@ -120,6 +122,8 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
         return <LockAlignmentScreen onNavigate={onNavigate} />;
       case ScreenId.ALIGNMENT_HISTORY:
         return <AlignmentHistoryScreen onNavigate={onNavigate} />;
+      case ScreenId.MY_ROLE:
+        return <MyRoleScreen onNavigate={onNavigate} />;
 
       // --- D. AI & TEAM ---
       case ScreenId.AI_ADVISORS_HOME:
