@@ -1,151 +1,100 @@
 import React from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { CheckCircle, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Milestone, DollarSign, Target, ArrowRight, Zap, Info } from 'lucide-react';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
-export const StagesCapitalScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
-  <div className="p-6 max-w-4xl mx-auto">
-     {/* Header */}
-     <div className="mb-8">
-       <div className="flex justify-between items-start">
-         <div>
-           <h2 className="text-3xl font-bold text-slate-900 mb-2">Startup Stages & Capital</h2>
-           <div className="flex items-center gap-3 mb-2">
-             <span className="text-slate-600 font-medium">Your current stage:</span>
-             <Badge color="amber">Pre-incorporation</Badge>
-             <span className="text-slate-400 text-sm">Confidence: Medium</span>
-           </div>
-           <p className="text-slate-500 italic">“Stages are defined by decisions and evidence — not labels.”</p>
-         </div>
-       </div>
-     </div>
+export const StagesCapitalScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
+  const roadmap = [
+    { stage: "Idea & Validation", tech: "POC / Mockups", capital: "$50k", time: "3 Months", status: "complete" },
+    { stage: "Seed Stage", tech: "Core MVP Build", capital: "$500k", time: "6-9 Months", status: "current" },
+    { stage: "Series A", tech: "Scale Infrastructure", capital: "$2.5M", time: "18 Months", status: "future" },
+    { stage: "Series B+", tech: "Global Expansion", capital: "$10M+", time: "Ongoing", status: "future" },
+  ];
 
-     <div className="relative pl-8 border-l-2 border-slate-200 space-y-12 my-8">
-       
-       {/* Stage 1: Idea */}
-       <div className="relative">
-         <div className="absolute -left-[41px] top-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white ring-4 ring-slate-50">✔</div>
-         <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 opacity-70 hover:opacity-100 transition-opacity">
-           <div className="flex justify-between items-start mb-2">
-             <h3 className="font-bold text-lg text-slate-700">Stage 1: Idea / Exploration</h3>
-             <Badge color="green">Completed</Badge>
-           </div>
-           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-             <div><span className="font-semibold text-slate-600 block">Purpose</span>Clarify problem worth solving</div>
-             <div><span className="font-semibold text-slate-600 block">Capital Needed</span>$0 – $10k</div>
-           </div>
-         </div>
-       </div>
-       
-       {/* Stage 2: Pre-incorporation (Active) */}
-       <div className="relative">
-         <div className="absolute -left-[43px] top-0 w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center text-white ring-4 ring-indigo-100 shadow-lg">2</div>
-         <Card className="border-indigo-500 shadow-lg ring-1 ring-indigo-500/20 bg-white">
-           <div className="flex justify-between items-start mb-4">
-             <div>
-                <h3 className="font-bold text-xl text-indigo-700">Stage 2: Pre-incorporation</h3>
-                <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider">You Are Here</span>
-             </div>
-             <div className="text-right">
-                <div className="text-2xl font-bold text-slate-800">$5k – $25k</div>
-                <div className="text-xs text-slate-500">Typical Capital Need</div>
-             </div>
-           </div>
-           
-           <div className="grid md:grid-cols-2 gap-6 mb-6">
-             <div className="bg-indigo-50/50 p-4 rounded-lg border border-indigo-100">
-               <h4 className="font-bold text-indigo-900 text-sm mb-3 flex items-center gap-2">
-                 <span className="text-lg">💰</span> Capital Breakdown
-               </h4>
-               <ul className="space-y-2 text-sm text-slate-700">
-                 <li className="flex justify-between"><span>Legal setup prep:</span> <span className="font-mono">$1k – $3k</span></li>
-                 <li className="flex justify-between"><span>Tools & infra:</span> <span className="font-mono">$1k – $5k</span></li>
-                 <li className="flex justify-between"><span>Living runway buffer:</span> <span className="font-mono">$3k – $15k</span></li>
-               </ul>
-               <p className="text-xs text-indigo-700 mt-3 italic border-t border-indigo-200 pt-2">
-                 “This stage is about reducing irreversible risk, not scaling.”
-               </p>
-             </div>
+  return (
+    <div className="p-8 max-w-6xl mx-auto space-y-10">
+      <header className="flex justify-between items-end">
+        <div>
+          <h2 className="text-4xl font-black text-slate-900 tracking-tight">Stages & Capital Planning</h2>
+          <p className="text-slate-500 mt-2 font-medium">Strategic roadmap for growth and funding milestones.</p>
+        </div>
+        <Badge color="indigo" className="px-5 py-2 text-sm font-bold">Planned Raise: $500k</Badge>
+      </header>
 
-             <div>
-               <h4 className="font-bold text-slate-800 text-sm mb-3">Readiness Indicators</h4>
-               <ul className="space-y-3 text-sm">
-                 <li className="flex items-center gap-2">
-                   <AlertTriangle className="w-4 h-4 text-amber-500" />
-                   <span>Founder alignment locked</span>
-                   <span className="text-xs text-amber-600 bg-amber-50 px-1 rounded ml-auto">Warning</span>
-                 </li>
-                 <li className="flex items-center gap-2">
-                   <Clock className="w-4 h-4 text-slate-400" />
-                   <span>5–10 customer conversations</span>
-                   <span className="text-xs text-slate-500 bg-slate-100 px-1 rounded ml-auto">Pending</span>
-                 </li>
-                 <li className="flex items-center gap-2">
-                   <CheckCircle className="w-4 h-4 text-green-500" />
-                   <span>Equity & vesting discussed</span>
-                   <span className="text-xs text-green-600 bg-green-50 px-1 rounded ml-auto">Done</span>
-                 </li>
-               </ul>
-               <Button variant="secondary" className="mt-4 w-full text-xs" onClick={() => onNavigate(ScreenId.COMPANY_DASHBOARD)}>
-                 See what's missing <ArrowRight className="w-3 h-3 ml-1"/>
-               </Button>
-             </div>
-           </div>
-         </Card>
-       </div>
+      <div className="relative pt-12">
+        {/* Timeline Line */}
+        <div className="absolute top-[4.5rem] left-0 w-full h-1 bg-slate-100 hidden lg:block"></div>
 
-       {/* Stage 3: Incorporated */}
-       <div className="relative">
-         <div className="absolute -left-[41px] top-0 w-8 h-8 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center text-slate-400 font-bold">3</div>
-         <div className="bg-white p-6 rounded-lg border border-slate-200 border-dashed">
-           <div className="flex justify-between items-start mb-2">
-             <h3 className="font-bold text-lg text-slate-700">Stage 3: Incorporated / Early Build</h3>
-           </div>
-           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-             <div><span className="font-semibold text-slate-600 block">Purpose</span>Build MVP and test usage</div>
-             <div><span className="font-semibold text-slate-600 block">Capital Needed</span>$25k – $150k</div>
-           </div>
-           <div className="text-xs text-slate-500 bg-slate-50 p-2 rounded">
-             <span className="font-bold">Risk Warning:</span> Raising here without usage data often leads to down rounds.
-           </div>
-         </div>
-       </div>
+        <div className="grid lg:grid-cols-4 gap-8 relative z-10">
+          {roadmap.map((r, i) => (
+            <div key={i} className="space-y-6">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-white shadow-lg mx-auto lg:mx-0 ${r.status === 'complete' ? 'bg-emerald-500 text-white' : r.status === 'current' ? 'bg-indigo-600 text-white animate-pulse' : 'bg-slate-200 text-slate-400'}`}>
+                {r.status === 'complete' ? '✓' : i + 1}
+              </div>
+              <Card className={`p-6 border-slate-100 ${r.status === 'current' ? 'ring-2 ring-indigo-500 shadow-xl' : ''}`}>
+                <h4 className="font-bold text-slate-900 mb-1">{r.stage}</h4>
+                <Badge color={r.status === 'complete' ? 'emerald' : r.status === 'current' ? 'indigo' : 'slate'} className="mb-4">{r.status}</Badge>
 
-       {/* Stage 4: Early Traction */}
-       <div className="relative">
-         <div className="absolute -left-[41px] top-0 w-8 h-8 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center text-slate-400 font-bold">4</div>
-         <div className="bg-white p-6 rounded-lg border border-slate-200 border-dashed">
-           <div className="flex justify-between items-start mb-2">
-             <h3 className="font-bold text-lg text-slate-700">Stage 4: Early Traction</h3>
-           </div>
-           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-             <div><span className="font-semibold text-slate-600 block">Purpose</span>Prove someone cares</div>
-             <div><span className="font-semibold text-slate-600 block">Capital Needed</span>$150k – $500k</div>
-           </div>
-           <div className="flex gap-2 mt-2">
-             <Badge color="slate">Usage Signal</Badge>
-             <Badge color="slate">Retention</Badge>
-           </div>
-         </div>
-       </div>
+                <div className="space-y-3 mt-4">
+                  <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                    <DollarSign className="w-3 h-3" /> {r.capital}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                    <Target className="w-3 h-3" /> {r.tech}
+                  </div>
+                </div>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </div>
 
-       {/* Stage 5: Seed */}
-       <div className="relative">
-         <div className="absolute -left-[41px] top-0 w-8 h-8 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center text-slate-400 font-bold">5</div>
-         <div className="bg-white p-6 rounded-lg border border-slate-200 border-dashed opacity-75">
-            <h3 className="font-bold text-lg text-slate-700">Stage 5: Seed / Scale Prep</h3>
-            <p className="text-sm text-slate-500 mt-1">Capital Needed: $500k – $2M+</p>
-         </div>
-       </div>
+      <div className="grid md:grid-cols-2 gap-8 pt-10">
+        <section className="space-y-6">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-2">Use of Funds (Seed)</h3>
+          <Card className="p-8 border-slate-100">
+            <div className="space-y-6">
+              {[
+                { l: "Product & Engineering", v: 60, c: "bg-indigo-500" },
+                { l: "Marketing & Growth", v: 25, c: "bg-emerald-500" },
+                { l: "Legal & Ops", v: 15, c: "bg-amber-500" }
+              ].map((f, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between text-sm font-bold">
+                    <span className="text-slate-700">{f.l}</span>
+                    <span className="text-slate-900">{f.v}%</span>
+                  </div>
+                  <div className="h-3 bg-slate-50 rounded-full overflow-hidden">
+                    <div className={`h-full ${f.c}`} style={{ width: `${f.v}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
 
-     </div>
-     
-     <div className="text-center text-sm text-slate-400 mt-12 pb-6 border-t border-slate-200 pt-6">
-       “Stages describe decision readiness, not success. Many great companies revisit stages.”
-     </div>
-  </div>
-);
+        <section className="space-y-6">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-2">AI Capital Commentary</h3>
+          <Card className="p-8 bg-indigo-900 text-white border-none shadow-2xl relative overflow-hidden">
+            <Zap className="w-10 h-10 text-yellow-400 mb-4 opacity-50 absolute top-4 right-4" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-widest mb-4">
+                <Info className="w-4 h-4" /> Dynamic Insight
+              </div>
+              <p className="text-lg font-medium leading-relaxed italic">
+                "Your current burn rate is highly efficient. However, your Series A scale-out infrastructure estimate is <strong>20% below market average</strong> for AI-SaaS. Consider adjusting for GPU reservation costs."
+              </p>
+              <Button className="mt-8 bg-white text-indigo-900 hover:bg-indigo-50 font-black border-none" fullWidth>
+                Optimize Projections
+              </Button>
+            </div>
+          </Card>
+        </section>
+      </div>
+    </div>
+  );
+};

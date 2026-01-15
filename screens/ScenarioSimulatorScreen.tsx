@@ -1,70 +1,83 @@
 import React from 'react';
 import { ScreenId } from '../types';
-import { Button, Card, AIInsightBox } from '../components/UI';
+import { Button, Card, Badge } from '../components/UI';
+import { Play, ShieldAlert, Zap, ArrowRight, BarChart3 } from 'lucide-react';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
-export const ScenarioSimulatorScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
-  <div className="p-6 max-w-5xl mx-auto">
-     <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Future Shock Simulator</h2>
-          <p className="text-slate-500">See the pain before it happens.</p>
+export const ScenarioSimulatorScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
+  const scenarios = [
+    { title: "Early Exit ($10M Acquisition)", desc: "Founder A exits after 18 months.", risk: "High", impact: "-30% Pool" },
+    { title: "Series A Dilution", desc: "Raising $5M at $25M Post-Money.", risk: "Low", impact: "-20% Equity" },
+    { title: "Founder Inactivity", desc: "Founder C reduces to 10hrs/week.", risk: "Severe", impact: "Clawback Trigger" },
+  ];
+
+  return (
+    <div className="p-8 max-w-5xl mx-auto space-y-10">
+      <header className="text-center max-w-2xl mx-auto">
+        <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Scenario Simulator</h2>
+        <p className="text-slate-500 font-medium">Stress-test your equity and alignment against real-world events.</p>
+      </header>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        <section className="space-y-6">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-2">Active Scenarios</h3>
+          {scenarios.map((s, i) => (
+            <Card key={i} className="p-6 border-slate-100 hover:border-indigo-200 transition-all cursor-pointer group">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{s.title}</h4>
+                  <p className="text-sm text-slate-500 mt-1">{s.desc}</p>
+                </div>
+                <Badge color={s.risk === 'Severe' ? 'red' : s.risk === 'High' ? 'amber' : 'emerald'}>{s.risk} Risk</Badge>
+              </div>
+              <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                <span className="text-xs font-bold text-slate-400">Equity Impact: <span className="text-slate-900">{s.impact}</span></span>
+                <Button size="sm" variant="secondary" className="text-[10px] uppercase font-black tracking-widest px-3">Simulate <Play className="w-3 h-3 ml-1 fill-current" /></Button>
+              </div>
+            </Card>
+          ))}
+          <Button fullWidth variant="secondary" className="h-14 border-dashed border-2 border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-100 bg-transparent">
+            + Create Custom Scenario
+          </Button>
+        </section>
+
+        <section className="space-y-6">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-2">Simulation Visualizer</h3>
+          <Card className="p-8 bg-slate-900 text-white min-h-[400px] flex flex-col justify-center items-center text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-indigo-500/10 blur-[100px] rounded-full"></div>
+            <BarChart3 className="w-16 h-16 text-indigo-400 mb-6 opacity-30" />
+            <h4 className="text-xl font-bold mb-2">Waiting for Input</h4>
+            <p className="text-slate-500 text-sm max-w-xs leading-relaxed">Select a scenario on the left to see the projected equity outcomes and vesting cliff impacts.</p>
+
+            <div className="mt-12 w-full space-y-4">
+              <div className="h-2 bg-white/5 rounded-full w-full"></div>
+              <div className="h-2 bg-white/5 rounded-full w-3/4"></div>
+              <div className="h-2 bg-white/5 rounded-full w-1/2"></div>
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-amber-50 border-amber-100 flex gap-4">
+            <ShieldAlert className="w-6 h-6 text-amber-500 shrink-0" />
+            <div>
+              <h5 className="font-bold text-amber-900 text-sm">Vesting Warning</h5>
+              <p className="text-xs text-amber-700 mt-1">Under "Early Exit", 40% of Founder B's equity remains unvested and will return to the treasury pool.</p>
+            </div>
+          </Card>
+        </section>
+      </div>
+
+      <footer className="pt-10 flex justify-between items-center border-t border-slate-100">
+        <div className="flex items-center gap-3">
+          <Zap className="w-5 h-5 text-yellow-500" />
+          <span className="text-sm font-bold text-slate-400">AI Recommendation: Implement multi-year triggers.</span>
         </div>
-        <Button variant="secondary" onClick={() => onNavigate(ScreenId.EQUITY_MODELING)}>Back to Model</Button>
-     </div>
-
-     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-       {/* Scenario Selector */}
-       <div className="col-span-1 lg:col-span-4 space-y-3">
-         <h4 className="font-bold text-xs uppercase text-slate-400 tracking-wider mb-2">Choose Scenario</h4>
-         <div className="p-4 bg-red-50 border-2 border-red-500 rounded-lg cursor-pointer shadow-sm">
-           <div className="font-bold text-red-900">Jamie leaves after 14 months</div>
-           <div className="text-xs text-red-700 mt-1">Post-cliff departure</div>
-         </div>
-         <div className="p-4 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 opacity-60">
-           <div className="font-bold text-slate-800">Series A Dilution (20%)</div>
-           <div className="text-xs text-slate-500 mt-1">Impact on control</div>
-         </div>
-         <div className="p-4 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 opacity-60">
-           <div className="font-bold text-slate-800">Early Acquisition ($5M)</div>
-           <div className="text-xs text-slate-500 mt-1">Cash out analysis</div>
-         </div>
-       </div>
-
-       {/* Results */}
-       <div className="col-span-1 lg:col-span-8 space-y-6">
-         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Card title="Equity Impact">
-             <div className="text-4xl font-bold text-slate-800 mb-1">12%</div>
-             <p className="text-sm text-slate-500 mb-3">Dead Equity on Cap Table</p>
-             <div className="w-full bg-slate-100 h-2 rounded mb-2"><div className="bg-slate-400 w-[12%] h-2 rounded"></div></div>
-             <p className="text-xs text-slate-400">Owned by Jamie (outsider)</p>
-           </Card>
-           <Card title="Emotional Risk">
-             <div className="text-4xl font-bold text-red-600 mb-1">Critical</div>
-             <p className="text-sm text-slate-500 mb-3">Conflict Probability</p>
-             <div className="flex gap-1">
-               <div className="h-2 w-full bg-red-500 rounded"></div>
-               <div className="h-2 w-full bg-red-500 rounded"></div>
-               <div className="h-2 w-full bg-red-500 rounded"></div>
-             </div>
-           </Card>
-         </div>
-
-         <AIInsightBox type="insight" title="AI Narrative">
-           <p className="mb-2"><strong>Who gets upset?</strong> You (Alex).</p>
-           <p className="mb-2"><strong>Why?</strong> You will be working 60h/week for the next 5 years, while Jamie holds 12% of the company for working part-time for one year.</p>
-           <p className="text-slate-600 italic">"This creates a cap table structure that most Series A investors will reject, forcing a painful recapitalization."</p>
-         </AIInsightBox>
-
-         <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
-            <Button variant="secondary" onClick={() => onNavigate(ScreenId.EQUITY_MODELING)}>Fix the Split</Button>
-            <Button variant="primary" onClick={() => onNavigate(ScreenId.LOCK_ALIGNMENT)}>I Accept the Risk</Button>
-         </div>
-       </div>
-     </div>
-  </div>
-);
+        <Button className="h-14 px-10 rounded-2xl bg-slate-900 font-bold" onClick={() => onNavigate(ScreenId.EQUITY_MODELING)}>
+          Back to Model <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </footer>
+    </div>
+  );
+};

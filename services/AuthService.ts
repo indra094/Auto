@@ -15,6 +15,7 @@ export interface Workspace {
   id: string;
   name: string;
   industry?: string;
+  geography?: string;
   type?: string;
   stage?: string;
   onboardingStep: number;
@@ -50,6 +51,21 @@ export const AuthService = {
       return null;
     }
     return DB.getItem<Workspace | null>('workspace', null);
+  },
+
+  getWorkspaces: async (): Promise<Workspace[]> => {
+    const user = AuthService.getUser();
+    if (!user) return [];
+    return await api.get(`/auth/workspaces?email=${user.email}`);
+  },
+
+  setCurrentWorkspace: async (workspace: Workspace): Promise<void> => {
+    DB.setItem('workspace', workspace);
+    // After switching, we need to sync the role for this specific org
+    // Note: The backend get_my_role should ideally take org_id too, 
+    // but for now it returns the role for the user's current context.
+    // We'll update the syncState to handle the new workspace.
+    await AuthService.syncState();
   },
 
   getMyRole: (): MyRole => {

@@ -31,7 +31,7 @@ export const CustomersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   }, []);
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
+    <div className="p-8 max-w-6xl mx-auto">
       <header className="mb-10 flex justify-between items-end">
         <div>
           <h2 className="text-4xl font-black text-slate-900 mb-2">Customers</h2>

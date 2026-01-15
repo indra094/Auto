@@ -1,145 +1,134 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScreenId } from '../types';
-import { Button, Card } from '../components/UI';
-import { Scale, AlertOctagon, ArrowRight, Loader2 } from 'lucide-react';
-import { FounderService, Founder } from '../services/FounderService';
-import { AuthService } from '../services/AuthService';
+import { Button, Card, Badge } from '../components/UI';
+import { TrendingUp, Users, DollarSign, Clock, ArrowRight, Info } from 'lucide-react';
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
 export const EquityModelingScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const [founders, setFounders] = React.useState<Founder[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [timeHorizon, setTimeHorizon] = useState(4); // years
+  const [capitalRaised, setCapitalRaised] = useState(2000000); // $
 
-  React.useEffect(() => {
-    const user = AuthService.getUser();
-    if (!user) return;
-
-    const load = async () => {
-      const data = await FounderService.getFounders(user.email);
-      setFounders(data || []);
-      setIsLoading(false);
-    };
-    load();
-  }, []);
-
-  if (isLoading) return <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-indigo-500" /></div>;
+  const founders = [
+    { name: "Indrajeet", role: "CEO", weighting: 40, equity: 35 },
+    { name: "John Doe", role: "CTO", weighting: 40, equity: 35 },
+    { name: "Jane Smith", role: "COO", weighting: 20, equity: 10 },
+  ];
 
   return (
-    <div className="h-full flex flex-col p-4 md:p-6 overflow-y-auto">
-      <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-2">
-        <h2 className="text-2xl font-bold">Equity & Commitment Modeling</h2>
-        <div className="text-sm text-slate-500">Changes here update the agreement draft automatically.</div>
-      </div>
+    <div className="p-8 max-w-6xl mx-auto space-y-8">
+      <header className="flex justify-between items-end">
+        <div>
+          <h2 className="text-4xl font-black text-slate-900 tracking-tight">Equity Modeling</h2>
+          <p className="text-slate-500 mt-2 font-medium">Dynamic simulation of ownership based on contribution and capital.</p>
+        </div>
+        <div className="flex gap-4">
+          <Button variant="secondary" onClick={() => onNavigate(ScreenId.ALIGNMENT_HISTORY)}>View History</Button>
+          <Button onClick={() => onNavigate(ScreenId.SCENARIO_SIMULATOR)}>Run Simulator</Button>
+        </div>
+      </header>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid lg:grid-cols-3 gap-8">
         {/* Controls */}
-        <div className="space-y-6">
-          {founders.map((f, i) => (
-            <Card key={f.id} title={`${f.name}'s Parameters`}>
-              <div className="space-y-6">
-                <div>
-                  <label className="flex justify-between text-sm font-medium mb-2">
-                    <span>Weekly Hours</span>
-                    <span className="text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{f.hoursPerWeek}h</span>
-                  </label>
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="p-6 border-slate-100">
+            <h3 className="text-sm font-bold text-slate-800 mb-6 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-indigo-500" /> Time Horizon
+            </h3>
+            <input
+              type="range"
+              min="1" max="10"
+              value={timeHorizon}
+              onChange={(e) => setTimeHorizon(parseInt(e.target.value))}
+              className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            />
+            <div className="flex justify-between mt-4 text-xs font-bold text-slate-400">
+              <span>1 Year</span>
+              <span className="text-indigo-600 font-black">{timeHorizon} Years</span>
+              <span>10 Years</span>
+            </div>
+          </Card>
+
+          <Card className="p-6 border-slate-100">
+            <h3 className="text-sm font-bold text-slate-800 mb-6 flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-emerald-500" /> Capital Attraction
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Total Raise Target</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-3 text-slate-400">$</span>
                   <input
-                    type="range"
-                    className="w-full accent-indigo-600"
-                    min="0" max="80"
-                    value={f.hoursPerWeek}
-                    onChange={async (e) => {
-                      const val = parseInt(e.target.value);
-                      const updated = [...founders];
-                      updated[i].hoursPerWeek = val;
-                      setFounders(updated);
-                      await FounderService.updateFounder(f.id, { hoursPerWeek: val });
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="flex justify-between text-sm font-medium mb-2">
-                    <span>Equity Allocation</span>
-                    <span className="text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{f.equity}%</span>
-                  </label>
-                  <input
-                    type="range"
-                    className="w-full accent-indigo-600"
-                    min="0" max="100"
-                    value={f.equity}
-                    onChange={async (e) => {
-                      const val = parseFloat(e.target.value);
-                      const updated = [...founders];
-                      updated[i].equity = val;
-                      setFounders(updated);
-                      await FounderService.updateFounder(f.id, { equity: val });
-                    }}
-                  />
-                </div>
-                <div className="pt-4 border-t">
-                  <label className="flex justify-between text-sm font-medium mb-2">
-                    <span>Vesting Cliff</span>
-                    <span className="text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{f.vestingCliff} Year{f.vestingCliff !== 1 ? 's' : ''}</span>
-                  </label>
-                  <input
-                    type="range"
-                    className="w-full accent-slate-600"
-                    min="0" max="4"
-                    value={f.vestingCliff}
-                    onChange={async (e) => {
-                      const val = parseInt(e.target.value);
-                      const updated = [...founders];
-                      updated[i].vestingCliff = val;
-                      setFounders(updated);
-                      await FounderService.updateFounder(f.id, { vestingCliff: val });
-                    }}
+                    type="number"
+                    value={capitalRaised}
+                    onChange={(e) => setCapitalRaised(parseInt(e.target.value))}
+                    className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-indigo-100 font-bold"
                   />
                 </div>
               </div>
-            </Card>
-          ))}
-          {founders.length === 0 && (
-            <div className="p-8 text-center text-slate-400 bg-slate-50 rounded-2xl border-2 border-dashed">
-              No founders found. Add them in the Founders screen.
             </div>
-          )}
+          </Card>
+
+          <Card className="p-6 bg-indigo-50 border-none">
+            <div className="flex gap-3">
+              <Info className="w-5 h-5 text-indigo-500 shrink-0" />
+              <p className="text-xs text-indigo-700 leading-relaxed font-medium">
+                The <strong>Weighting Factor</strong> accounts for technical vs. non-technical leadership and market rate risk taken.
+              </p>
+            </div>
+          </Card>
         </div>
 
-        {/* Live Consequences */}
-        <div className="flex flex-col gap-4">
-          <div className="bg-indigo-50 text-indigo-900 p-6 rounded-xl border border-indigo-100 shadow-sm flex-1 flex flex-col justify-center relative overflow-hidden min-h-[300px]">
-            <div className="absolute top-0 right-0 p-4 opacity-10 text-indigo-400">
-              <Scale size={120} />
-            </div>
-            <div className="relative z-10">
-              <h3 className="text-indigo-600 uppercase tracking-widest text-xs font-bold mb-2">AI Real-Time Analysis</h3>
-              <p className="text-xl md:text-2xl font-light leading-relaxed mb-6">
-                {founders.some(f => f.hoursPerWeek < 40 && f.equity > 30) ? (
-                  <>"Giving <span className="text-red-600 font-medium">part-time</span> founders high equity creates a <span className="text-red-600 font-medium">dead equity risk</span>."</>
-                ) : (
-                  <>"The current split looks <span className="text-emerald-600 font-medium">balanced</span> and reflects real-time contribution."</>
-                )}
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 p-3 bg-white/60 rounded border border-indigo-100">
-                  <AlertOctagon className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-sm block">Vesting Analysis</span>
-                    <span className="text-xs text-indigo-800/80">
-                      Standard 4-year vesting with 1-year cliff is recommended for all members.
-                    </span>
+        {/* Results */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="p-8 border-slate-100 min-h-[400px]">
+            <h3 className="text-lg font-bold text-slate-800 mb-8 flex items-center gap-2">
+              <Users className="w-5 h-5 text-indigo-500" /> Ownership Distribution
+            </h3>
+            <div className="space-y-8">
+              {founders.map((f, i) => (
+                <div key={i} className="space-y-3">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <div className="font-bold text-slate-900">{f.name}</div>
+                      <div className="text-xs text-slate-400">{f.role} • {f.weighting}% Weighing</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-black text-slate-900">{f.equity}%</div>
+                      <div className="text-[10px] font-bold text-emerald-500">+$1.2M Value</div>
+                    </div>
+                  </div>
+                  <div className="h-4 bg-slate-50 rounded-full overflow-hidden flex">
+                    <div className="h-full bg-indigo-600" style={{ width: `${f.equity}%` }}></div>
+                    <div className="h-full bg-indigo-100" style={{ width: `${f.weighting - f.equity}%` }}></div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            <div className="mt-12 pt-8 border-t border-slate-50 grid grid-cols-2 gap-8">
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase mb-2">Unallocated Pool</div>
+                <div className="text-2xl font-black text-slate-900">20%</div>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase mb-2">Dilution Forecast</div>
+                <div className="text-2xl font-black text-amber-500">-12.5%</div>
               </div>
             </div>
-          </div>
-
-          <Button variant="primary" fullWidth className="h-14 text-lg" onClick={() => onNavigate(ScreenId.SCENARIO_SIMULATOR)}>
-            Test This Split in Simulator <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+          </Card>
         </div>
+      </div>
+
+      <div className="flex justify-center pt-8">
+        <Button
+          className="h-14 px-12 text-lg rounded-2xl bg-indigo-600 font-black shadow-xl shadow-indigo-200"
+          onClick={() => onNavigate(ScreenId.LOCK_ALIGNMENT)}
+        >
+          Finalize Model & Lock Alignment
+        </Button>
       </div>
     </div>
   );

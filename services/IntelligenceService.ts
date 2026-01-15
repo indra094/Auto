@@ -9,5 +9,10 @@ export const IntelligenceService = {
   // GET /intelligence/connections
   getRelevantConnections: async (email: string) => {
     return api.get(`/intelligence/connections?email=${email}`);
+  },
+
+  // POST /intelligence/decision
+  logDecision: async (email: string, decision: { type: string; details: string; impact: string }) => {
+    return api.post(`/intelligence/decision?email=${email}`, decision);
   }
 };

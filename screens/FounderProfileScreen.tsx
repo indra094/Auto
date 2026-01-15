@@ -70,8 +70,8 @@ export const FounderProfileScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                 key={c}
                 onClick={() => setCommitment(c)}
                 className={`p-4 rounded-2xl border-2 font-bold transition-all ${commitment === c
-                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200'
-                    : 'bg-white border-slate-100 text-slate-600 hover:border-indigo-100'
+                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200'
+                  : 'bg-white border-slate-100 text-slate-600 hover:border-indigo-100'
                   }`}
               >
                 {c}
@@ -81,10 +81,39 @@ export const FounderProfileScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Expectations / Vision</label>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Responsibilities</label>
           <textarea
-            className="w-full p-4 bg-white border border-slate-200 rounded-2xl h-32 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm"
-            placeholder="What do you expect from this venture? 100x return? Lifestyle business? World change?"
+            className="w-full p-4 bg-white border border-slate-200 rounded-2xl h-24 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm"
+            placeholder="What parts of the company do you exclusively own?"
+            value={expectations}
+            onChange={(e) => setExpectations(e.target.value)}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Equity %</label>
+            <input
+              type="number"
+              className="w-full p-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all shadow-sm"
+              placeholder="0.0"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Vesting Schedule</label>
+            <input
+              type="text"
+              className="w-full p-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all shadow-sm"
+              placeholder="4 Year / 1 Year Cliff"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Personal Vision</label>
+          <textarea
+            className="w-full p-4 bg-white border border-slate-200 rounded-2xl h-24 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm"
+            placeholder="100x return? Lifestyle business? World change?"
             value={expectations}
             onChange={(e) => setExpectations(e.target.value)}
           />

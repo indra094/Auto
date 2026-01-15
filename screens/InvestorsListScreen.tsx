@@ -31,7 +31,7 @@ export const InvestorsListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   }, []);
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
+    <div className="p-8 max-w-6xl mx-auto">
       <header className="mb-10 flex justify-between items-end">
         <div>
           <h2 className="text-4xl font-black text-slate-900 mb-2">Investors</h2>
@@ -47,19 +47,46 @@ export const InvestorsListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
       ) : (
         <div className="space-y-4">
           {investors.map((v, i) => (
-            <Card key={v.id || i} className="p-6 flex justify-between items-center bg-white border-2 border-slate-50 hover:border-indigo-100 transition-all cursor-pointer">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-indigo-600">
-                  <Building className="w-6 h-6" />
+            <Card key={v.id || i} className="p-6 bg-white border-2 border-slate-50 hover:border-indigo-100 transition-all cursor-pointer group">
+              <div className="flex flex-col md:flex-row justify-between gap-6">
+                <div className="flex items-center gap-4 min-w-[200px]">
+                  <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-indigo-600 shrink-0">
+                    <Building className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800">{v.name}</h3>
+                    <div className="flex gap-2 mt-1">
+                      {i % 2 === 0 && <Badge color="indigo" className="text-[8px] px-1.5 py-0">On Foundry</Badge>}
+                      <Badge color="emerald" className="text-[8px] px-1.5 py-0">Warm</Badge>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-800">{v.name}</h3>
-                  <p className="text-sm text-slate-400 font-medium">{v.type} • {v.stage}</p>
+
+                <div className="grid grid-cols-2 flex-1 gap-4 border-l border-slate-50 pl-6">
+                  <div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Check Size</div>
+                    <div className="text-sm font-bold text-slate-700">$250k - $1M</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Stage</div>
+                    <div className="text-sm font-bold text-slate-700">{v.stage}</div>
+                  </div>
+                </div>
+
+                <div className="text-right flex flex-col items-end border-l border-slate-50 pl-6 min-w-[120px]">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Likelihood</div>
+                  <div className="text-2xl font-black text-indigo-600">82%</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Badge color={v.status === 'Meeting Set' ? 'green' : v.status === 'Contacted' ? 'indigo' : 'slate'}>{v.status}</Badge>
-                <ArrowRight className="w-4 h-4 text-slate-300" />
+
+              <div className="mt-6 flex flex-wrap items-center justify-between pt-4 border-t border-slate-50 gap-4">
+                <div className="flex gap-4">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact: <span className="text-slate-900 normal-case ml-1">{v.email || 'partner@vc.com'}</span></div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Source: <span className="text-indigo-600 normal-case ml-1">{v.notes || "Warm Intro"}</span></div>
+                </div>
+                <Button variant="secondary" className="px-3 py-1.5 text-xs font-bold border-indigo-100 text-indigo-600 hover:bg-slate-50">
+                  Draft Intro
+                </Button>
               </div>
             </Card>
           ))}

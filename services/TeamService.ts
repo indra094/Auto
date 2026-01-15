@@ -22,5 +22,10 @@ export const TeamService = {
   // GET /team/ai-history/{ai_id}
   getAIHistory: async (aiId: string) => {
     return api.get(`/team/ai-history/${aiId}`);
+  },
+
+  // POST /team/invite
+  inviteExecutive: async (email: string, executive: { name: string; email: string; role: string }) => {
+    return api.post(`/team/invite?email=${email}`, executive);
   }
 };

@@ -29,6 +29,7 @@ export enum ScreenId {
 
   // E. Company Intelligence
   COMPANY_DASHBOARD = 'COMPANY_DASHBOARD',
+  SUB_ORG_DETAIL = 'SUB_ORG_DETAIL',
   RELEVANT_CONNECTIONS = 'RELEVANT_CONNECTIONS',
   STAGES_CAPITAL = 'STAGES_CAPITAL',
   VALIDATION_CHECKLIST = 'VALIDATION_CHECKLIST',
@@ -41,12 +42,33 @@ export enum ScreenId {
   CUSTOMERS_LIST = 'CUSTOMERS_LIST',
   CUSTOMER_DETAIL = 'CUSTOMER_DETAIL',
 
-  // G. Gates
+  // G. AI & Idea
+  AI_IDEA_VALIDATION = 'AI_IDEA_VALIDATION',
+
+  // H. Gates & Systems
   INCORPORATION_READINESS = 'INCORPORATION_READINESS',
   PROCEED_ANYWAY = 'PROCEED_ANYWAY',
+  DOCUMENTS = 'DOCUMENTS',
 }
 
 export interface NavGroup {
   label: string;
   screens: { id: ScreenId; label: string; icon?: any }[];
 }
+
+export interface User {
+  fullName: string;
+  email: string;
+  role: string;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
+  onboardingStep: number;
+  industry?: string;
+  geography?: string;
+  stage?: string;
+}
+
+export type ScreenStatus = 'accessible' | 'locked' | 'hidden';

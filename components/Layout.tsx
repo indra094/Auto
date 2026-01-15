@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavGroup, ScreenId } from '../types';
 import {
   Menu, Bell, Search, Lock, AlertTriangle, CheckCircle,
-  Circle, PlayCircle
+  Circle, PlayCircle, ChevronDown, Plus
 } from 'lucide-react';
 import { ScreenContent } from '../screens/ScreenContent';
 import { AuthService } from '../services/AuthService';
@@ -17,12 +17,15 @@ const orderedNavStructure: NavGroup[] = [
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
       { id: ScreenId.COMPANY_CREATION, label: "Create Company" },
       { id: ScreenId.STARTUP_BASICS, label: "Startup Basics" },
+      { id: ScreenId.AI_IDEA_VALIDATION, label: "AI Idea Validation" },
+      { id: ScreenId.INITIAL_READINESS, label: "Initial Readiness" },
     ]
   },
   {
     label: "Company Intelligence",
     screens: [
       { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" },
+      { id: ScreenId.SUB_ORG_DETAIL, label: "SubOrg Detail" },
       { id: ScreenId.BUILD_STATUS, label: "Build Status" },
       { id: ScreenId.FINANCIAL_DASHBOARD, label: "Financials" },
       { id: ScreenId.STAGES_CAPITAL, label: "Stages & Capital" },
@@ -61,6 +64,7 @@ const orderedNavStructure: NavGroup[] = [
     label: "System",
     screens: [
       { id: ScreenId.NOTIFICATIONS, label: "Notifications" },
+      { id: ScreenId.DOCUMENTS, label: "Documents" },
       { id: ScreenId.APP_SHELL, label: "App Settings" },
     ]
   }
@@ -78,15 +82,26 @@ export const Layout: React.FC = () => {
 
   const [currentScreen, setCurrentScreen] = useState<ScreenId>(initialScreen);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [workspaces, setWorkspaces] = useState<any[]>([]);
   const [user, setUser] = useState(AuthService.getUser());
   const [onboardingProgress, setOnboardingProgress] = useState(0);
 
   useEffect(() => {
-    const refreshData = () => {
+    const refreshData = async () => {
       const u = AuthService.getUser();
       const w = AuthService.getWorkspace();
       setUser(u);
       setWorkspace(w);
+
+      if (u) {
+        try {
+          const list = await AuthService.getWorkspaces();
+          setWorkspaces(list);
+        } catch (e) {
+          console.error("Layout: Error fetching workspaces", e);
+        }
+      }
 
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
@@ -112,10 +127,12 @@ export const Layout: React.FC = () => {
     if (screenId === ScreenId.ACCOUNT_CREATION) return step >= 1 ? 'accessible' : 'locked';
     if (screenId === ScreenId.COMPANY_CREATION) return step >= 2 ? 'accessible' : 'locked';
     if (screenId === ScreenId.STARTUP_BASICS) return step >= 3 ? 'accessible' : 'locked';
+    if (screenId === ScreenId.AI_IDEA_VALIDATION) return step >= 3 ? 'accessible' : 'locked';
+    if (screenId === ScreenId.INITIAL_READINESS) return step >= 4 ? 'accessible' : 'locked';
 
     // C. Core Dashboard & Intelligence
-    if (screenId === ScreenId.COMPANY_DASHBOARD) return step >= 4 ? 'accessible' : 'locked';
-    if ([ScreenId.BUILD_STATUS, ScreenId.FINANCIAL_DASHBOARD, ScreenId.STAGES_CAPITAL].includes(screenId)) {
+    if (screenId === ScreenId.COMPANY_DASHBOARD) return step >= 5 ? 'accessible' : 'locked';
+    if ([ScreenId.BUILD_STATUS, ScreenId.FINANCIAL_DASHBOARD, ScreenId.STAGES_CAPITAL, ScreenId.SUB_ORG_DETAIL].includes(screenId)) {
       return step >= 4 ? 'accessible' : 'locked';
     }
 
@@ -137,6 +154,9 @@ export const Layout: React.FC = () => {
       return step >= 6 ? 'accessible' : 'locked';
     }
 
+    // G. Documents
+    if (screenId === ScreenId.DOCUMENTS) return 'accessible';
+
     return 'locked';
   };
 
@@ -152,6 +172,19 @@ export const Layout: React.FC = () => {
     if (status === 'locked') return; // Do nothing if locked
     setCurrentScreen(screenId);
     setMobileMenuOpen(false);
+    setSwitcherOpen(false);
+  };
+
+  const handleSwitchWorkspace = async (w: any) => {
+    await AuthService.setCurrentWorkspace(w);
+    setWorkspace(w);
+    setSwitcherOpen(false);
+    setCurrentScreen(ScreenId.COMPANY_DASHBOARD);
+  };
+
+  const handleCreateNewCompany = () => {
+    setSwitcherOpen(false);
+    setCurrentScreen(ScreenId.COMPANY_CREATION);
   };
 
   const companyName = workspace?.name || "New Startup";
@@ -257,15 +290,52 @@ export const Layout: React.FC = () => {
             </button>
 
             {/* Company Switcher */}
-            <div
-              className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors group"
-              onClick={() => window.location.reload()}
-            >
-              <span className="font-bold text-slate-900 text-lg">{companyName}</span>
-              <div className="flex items-center gap-1 text-slate-400 group-hover:text-slate-600">
-                <span className="text-[10px] font-bold uppercase tracking-tight">Switch</span>
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
+            <div className="relative">
+              <div
+                className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors group"
+                onClick={() => setSwitcherOpen(!switcherOpen)}
+              >
+                <div className="flex flex-col">
+                  <span className="font-bold text-slate-900 text-lg leading-none">{companyName}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-1">Switch Company</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform ${switcherOpen ? 'rotate-180' : ''}`} />
               </div>
+
+              {switcherOpen && (
+                <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-3 border-b border-slate-100 bg-slate-50/50">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Your Companies</span>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto py-1">
+                    {workspaces.map((w) => (
+                      <button
+                        key={w.id}
+                        onClick={() => handleSwitchWorkspace(w)}
+                        className={`w-full flex items-center justify-between px-4 py-3 hover:bg-indigo-50 transition-colors text-left ${workspace?.id === w.id ? 'bg-indigo-50/50' : ''}`}
+                      >
+                        <div>
+                          <div className={`font-bold ${workspace?.id === w.id ? 'text-indigo-600' : 'text-slate-700'}`}>{w.name}</div>
+                          <div className="text-[10px] text-slate-400 font-medium">{w.stage || 'Onboarding'}</div>
+                        </div>
+                        {workspace?.id === w.id && <CheckCircle className="w-4 h-4 text-indigo-500" />}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleCreateNewCompany}
+                    className="w-full flex items-center gap-3 px-4 py-4 border-t border-slate-100 hover:bg-emerald-50 text-emerald-600 transition-colors text-left"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                      <Plus className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm">Create New Company</div>
+                      <div className="text-[10px] text-emerald-500/70 font-medium">Start your next venture</div>
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
 
             {stage && (

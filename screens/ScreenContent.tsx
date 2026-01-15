@@ -31,6 +31,7 @@ import { AIEmployeeDetailScreen } from './AIEmployeeDetailScreen';
 
 // Intelligence
 import { CompanyDashboardScreen } from './CompanyDashboardScreen';
+import { SubOrgDetailScreen } from './SubOrgDetailScreen';
 import { RelevantConnectionsScreen } from './RelevantConnectionsScreen';
 import { StagesCapitalScreen } from './StagesCapitalScreen';
 import { ValidationChecklistScreen } from './ValidationChecklistScreen';
@@ -43,9 +44,13 @@ import { InvestorDetailScreen } from './InvestorDetailScreen';
 import { CustomersListScreen } from './CustomersListScreen';
 import { CustomerDetailScreen } from './CustomerDetailScreen';
 
-// Gates
+// AI & Idea
+import { AIIdeaValidationScreen } from './AIIdeaValidationScreen';
+
+// Groups & Systems
 import { IncorporationReadinessScreen } from './IncorporationReadinessScreen';
 import { ProceedAnywayScreen } from './ProceedAnywayScreen';
+import { DocumentsScreen } from './DocumentsScreen';
 
 interface ScreenContentProps {
   screenId: ScreenId;
@@ -71,6 +76,7 @@ const scrollableScreens = new Set([
   ScreenId.TEAM_EMPLOYEES,
   ScreenId.AI_EMPLOYEE_DETAIL,
   ScreenId.COMPANY_DASHBOARD,
+  ScreenId.SUB_ORG_DETAIL,
   ScreenId.RELEVANT_CONNECTIONS,
   ScreenId.STAGES_CAPITAL,
   ScreenId.VALIDATION_CHECKLIST,
@@ -80,8 +86,10 @@ const scrollableScreens = new Set([
   ScreenId.INVESTOR_DETAIL,
   ScreenId.CUSTOMERS_LIST,
   ScreenId.CUSTOMER_DETAIL,
+  ScreenId.AI_IDEA_VALIDATION,
   ScreenId.INCORPORATION_READINESS,
-  ScreenId.PROCEED_ANYWAY
+  ScreenId.PROCEED_ANYWAY,
+  ScreenId.DOCUMENTS
 ]);
 
 export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNavigate }) => {
@@ -138,6 +146,8 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
       // --- E. COMPANY INTELLIGENCE ---
       case ScreenId.COMPANY_DASHBOARD:
         return <CompanyDashboardScreen onNavigate={onNavigate} />;
+      case ScreenId.SUB_ORG_DETAIL:
+        return <SubOrgDetailScreen onNavigate={onNavigate} />;
       case ScreenId.VALIDATION_CHECKLIST:
         return <ValidationChecklistScreen onNavigate={onNavigate} />;
       case ScreenId.BUILD_STATUS:
@@ -159,11 +169,17 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
       case ScreenId.CUSTOMER_DETAIL:
         return <CustomerDetailScreen onNavigate={onNavigate} />;
 
-      // --- G. GATES ---
+      // --- G. AI & IDEA ---
+      case ScreenId.AI_IDEA_VALIDATION:
+        return <AIIdeaValidationScreen onNavigate={onNavigate} />;
+
+      // --- H. GATES & SYSTEM ---
       case ScreenId.INCORPORATION_READINESS:
         return <IncorporationReadinessScreen onNavigate={onNavigate} />;
       case ScreenId.PROCEED_ANYWAY:
         return <ProceedAnywayScreen onNavigate={onNavigate} />;
+      case ScreenId.DOCUMENTS:
+        return <DocumentsScreen onNavigate={onNavigate} />;
 
       default:
         return <div className="p-10 text-center text-slate-400">Screen content not implemented yet.</div>;

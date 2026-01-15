@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { Heart, CheckCircle, Smartphone, DollarSign, Users, Zap, Loader2, ArrowRight } from 'lucide-react';
+import { Heart, CheckCircle, Smartphone, DollarSign, Users, Zap, Loader2, ArrowRight, AlertTriangle } from 'lucide-react';
 import { AuthService, Workspace } from '../services/AuthService';
 import { IntelligenceService } from '../services/IntelligenceService';
 
@@ -95,6 +95,26 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         <Badge color="indigo" className="px-4 py-2 text-sm font-bold">{workspace?.stage || "Pre-Seed"}</Badge>
       </header>
 
+      {workspace && workspace.onboardingStep < 6 && (
+        <Card className="mb-10 p-6 bg-indigo-900 text-white border-none shadow-xl flex flex-col md:flex-row justify-between items-center gap-6 overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <Zap className="w-24 h-24" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-xl font-bold mb-2">Complete Your Setup</h3>
+            <p className="text-indigo-200 text-sm max-w-md">
+              Foundry needs more data to provide high-fidelity intelligence. Complete your Startup Basics and Initial Readiness audit.
+            </p>
+          </div>
+          <Button
+            className="bg-white text-indigo-900 hover:bg-indigo-50 font-black relative z-10 px-8"
+            onClick={() => onNavigate(ScreenId.STARTUP_BASICS)}
+          >
+            Finish Onboarding
+          </Button>
+        </Card>
+      )}
+
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map((card, i) => (
           <Card key={i} className="p-6 hover:shadow-xl transition-all border-2 border-slate-50 hover:border-indigo-100 group">
@@ -118,6 +138,55 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
             </Button>
           </Card>
         ))}
+      </div>
+
+      <div className="mt-12 grid lg:grid-cols-3 gap-8">
+        <section className="lg:col-span-2 space-y-6">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <Zap className="w-4 h-4 text-yellow-500" /> This Week's Actions (AI)
+          </h3>
+          <div className="space-y-4">
+            {[
+              "Finalize cap table before next board advisory sync.",
+              "Reach out to 3 potential lead investors identified by AI.",
+              "Review MVP build progress with engineering lead."
+            ].map((action, i) => (
+              <div key={i} className="p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-4 hover:shadow-md transition-shadow">
+                <div className="w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400">{i + 1}</div>
+                <span className="text-sm font-medium text-slate-700">{action}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <aside className="space-y-10">
+          <section className="space-y-4">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-500" /> Alerts
+            </h3>
+            <Card className="p-4 bg-red-50 border-red-100">
+              <p className="text-xs font-bold text-red-700">Runway Warning</p>
+              <p className="text-xs text-red-600 mt-1">Based on current burn, you have less than 9 months left.</p>
+            </Card>
+          </section>
+
+          <section className="space-y-4">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500" /> Recent Decisions
+            </h3>
+            <div className="space-y-3">
+              {[
+                { d: "Incorporation Jurisdiction", v: "Delaware C-Corp" },
+                { d: "Equity Split", v: "50/50 Locked" }
+              ].map((dec, i) => (
+                <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-slate-50">
+                  <span className="text-xs font-medium text-slate-500">{dec.d}</span>
+                  <span className="text-xs font-black text-slate-800">{dec.v}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
   );
