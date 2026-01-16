@@ -97,7 +97,7 @@ export const AuthService = {
 
     try {
       // Sync Workspace
-      const workspace = await api.get(`/auth/workspace?email=${user.email}`);
+      const workspace = await api.get(`/auth/workspaces?email=${user.email}`);
       if (workspace) DB.setItem('workspace', workspace);
 
       // Sync MyRole
@@ -175,7 +175,7 @@ export const AuthService = {
     const user = AuthService.getUser();
     if (!user) return null;
 
-    const updated = await api.patch(`/auth/workspace?email=${user.email}`, data);
+    const updated = await api.patch(`/auth/workspaces?email=${user.email}`, data);
     DB.setItem('workspace', updated);
     return updated;
   },
