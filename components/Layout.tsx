@@ -117,6 +117,9 @@ export const Layout: React.FC = () => {
   const [onboardingProgress, setOnboardingProgress] = useState(0);
   // Ref for switcher to detect outside clicks
   const switcherRef = useRef<HTMLDivElement>(null);
+  // Add state for profile dropdown
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const refreshData = async () => {
@@ -149,6 +152,9 @@ export const Layout: React.FC = () => {
     const handleClickOutside = (e: MouseEvent) => {
       if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
         setSwitcherOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileMenuOpen(false);
       }
     };
 
@@ -399,25 +405,55 @@ export const Layout: React.FC = () => {
             <div className="h-6 w-px bg-slate-200 mx-2 hidden md:block"></div>
 
             {/* User Profile */}
-            <div
-              className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-full pr-3 transition-colors"
-              onClick={() => setCurrentScreen(ScreenId.APP_SHELL)}
-            >
-              <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs border border-slate-200 shadow-sm">
-                {getInitials()}
+            <div ref={profileRef} className="relative">
+              <div
+                className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-full pr-3 transition-colors"
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              >
+                <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs border border-slate-200 shadow-sm">
+                  {getInitials()}
+                </div>
+                <div className="hidden md:block text-left">
+                  {user?.fullName ? (
+                    <>
+                      <div className="text-sm font-bold text-slate-800 leading-none">{user.fullName}</div>
+                      <div className="text-[10px] text-slate-500 leading-none mt-1">{user.email}</div>
+                    </>
+                  ) : (
+                    <div className="text-sm font-bold text-slate-800 leading-none">{user?.email || "Guest"}</div>
+                  )}
+                </div>
+                <svg className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
               </div>
-              <div className="hidden md:block text-left">
-                {user?.fullName ? (
-                  <>
-                    <div className="text-sm font-bold text-slate-800 leading-none">{user.fullName}</div>
-                    <div className="text-[10px] text-slate-500 leading-none mt-1">{user.email}</div>
-                  </>
-                ) : (
-                  <div className="text-sm font-bold text-slate-800 leading-none">{user?.email || "Guest"}</div>
-                )}
-              </div>
-              <svg className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
+
+              {/* Dropdown Menu */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <button
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      setCurrentScreen(ScreenId.APP_SHELL); // Navigate to user info screen
+                    }}
+                  >
+                    Change User Info
+                  </button>
+                  <button
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors text-sm font-medium text-red-600"
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      AuthService.logout();
+                      window.location.reload(); // Or navigate to login
+                    }}
+                  >
+                    Log Out
+                  </button>
+                </div>
+              )}
             </div>
+
           </div>
         </header>
 
