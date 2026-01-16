@@ -6,7 +6,6 @@ import { AppShellScreen } from './AppShellScreen';
 import { NotificationsScreen } from './NotificationsScreen';
 
 // Onboarding
-import { WelcomeScreen } from './WelcomeScreen';
 import { AccountCreationScreen } from './AccountCreationScreen';
 import { CompanyCreationScreen } from './CompanyCreationScreen';
 import { StartupBasicsScreen } from './StartupBasicsScreen';
@@ -102,8 +101,6 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
         return <NotificationsScreen onNavigate={onNavigate} />;
 
       // --- B. ONBOARDING ---
-      case ScreenId.WELCOME:
-        return <WelcomeScreen onNavigate={onNavigate} />;
       case ScreenId.ACCOUNT_CREATION:
         return <AccountCreationScreen onNavigate={onNavigate} />;
       case ScreenId.COMPANY_CREATION:

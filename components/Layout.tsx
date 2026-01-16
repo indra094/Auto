@@ -20,7 +20,6 @@ const beforeOnboardingNav: NavGroup[] = [
   {
     label: "Get Started",
     screens: [
-      { id: ScreenId.WELCOME, label: "Welcome" },
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
       { id: ScreenId.COMPANY_CREATION, label: "Create Company" },
       { id: ScreenId.STARTUP_BASICS, label: "Startup Basics" },
@@ -104,10 +103,7 @@ type ScreenStatus = 'locked' | 'partial' | 'accessible';
 export const Layout: React.FC = () => {
   const [workspace, setWorkspace] = useState(AuthService.getWorkspace());
 
-  // Start on Dashboard if onboarding is already completed
-  const initialScreen = (workspace?.onboardingStep || 0) >= 4
-    ? ScreenId.COMPANY_DASHBOARD
-    : ScreenId.WELCOME;
+  const initialScreen = ScreenId.COMPANY_DASHBOARD;
 
   const [currentScreen, setCurrentScreen] = useState<ScreenId>(initialScreen);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -171,13 +167,13 @@ export const Layout: React.FC = () => {
     const step = workspace?.onboardingStep || 1;
 
     // Always accessible
-    if ([ScreenId.APP_SHELL, ScreenId.NOTIFICATIONS, ScreenId.WELCOME, ScreenId.COMPANY_DASHBOARD].includes(screenId)) return 'accessible';
+    if ([ScreenId.APP_SHELL, ScreenId.NOTIFICATIONS, ScreenId.COMPANY_DASHBOARD].includes(screenId)) return 'accessible';
 
     // During activation (before onboarding complete)
     if (isActivationMode) {
       // Onboarding screens - only current and previous are accessible
       const onboardingSteps = [
-        { id: ScreenId.WELCOME, minStep: 0 },
+        { id: ScreenId.COMPANY_DASHBOARD, minStep: 0 },
         { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
         { id: ScreenId.COMPANY_CREATION, minStep: 2 },
         { id: ScreenId.STARTUP_BASICS, minStep: 3 },
@@ -243,7 +239,7 @@ export const Layout: React.FC = () => {
         {/* Brand Header */}
         <div
           className="p-4 border-b border-slate-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors shrink-0"
-          onClick={() => setCurrentScreen(ScreenId.WELCOME)}
+          onClick={() => setCurrentScreen(ScreenId.COMPANY_DASHBOARD)}
         >
           <div className="w-10 h-10 flex items-center justify-center">
             <img

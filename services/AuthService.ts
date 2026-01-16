@@ -98,7 +98,8 @@ export const AuthService = {
     try {
       // Sync Workspace
       const workspace = await api.get(`/auth/workspaces?email=${user.email}`);
-      if (workspace) DB.setItem('workspace', workspace);
+      if (workspace) DB.setItem('workspace', workspace[0]);
+      //console.log("in sync state", workspace);
 
       // Sync MyRole
       const myRole = await api.get(`/auth/myrole?email=${user.email}`);
@@ -176,6 +177,7 @@ export const AuthService = {
     if (!user) return null;
 
     const updated = await api.patch(`/auth/workspaces?email=${user.email}`, data);
+    //console.log("in update workspace");
     DB.setItem('workspace', updated);
     return updated;
   },
