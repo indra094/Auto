@@ -2,16 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { NavGroup, ScreenId } from '../types';
 import {
   Menu, Bell, Search, Lock, AlertTriangle, CheckCircle,
-  Circle, PlayCircle, ChevronDown, Plus
+  Circle, PlayCircle, ChevronDown, Plus, Home, Rocket, Brain,
+  Users, Target, Briefcase, DollarSign, Bot, FileText
 } from 'lucide-react';
 import { ScreenContent } from '../screens/ScreenContent';
 import { AuthService } from '../services/AuthService';
 import { ProgressBar } from './UI';
 
-// Strict ordered structure as requested
-const orderedNavStructure: NavGroup[] = [
+// BEFORE ONBOARDING - Minimal, completion-focused navigation
+const beforeOnboardingNav: NavGroup[] = [
   {
-    label: "Onboarding",
+    label: "Dashboard",
+    screens: [
+      { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" }
+    ]
+  },
+  {
+    label: "Get Started",
     screens: [
       { id: ScreenId.WELCOME, label: "Welcome" },
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
@@ -22,42 +29,64 @@ const orderedNavStructure: NavGroup[] = [
     ]
   },
   {
-    label: "Company Intelligence",
+    label: "System",
     screens: [
-      { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" },
-      { id: ScreenId.SUB_ORG_DETAIL, label: "SubOrg Detail" },
-      { id: ScreenId.BUILD_STATUS, label: "Build Status" },
-      { id: ScreenId.FINANCIAL_DASHBOARD, label: "Financials" },
+      { id: ScreenId.NOTIFICATIONS, label: "Notifications" },
+    ]
+  }
+];
+
+// AFTER ONBOARDING - Full operating system navigation
+const afterOnboardingNav: NavGroup[] = [
+  {
+    label: "Dashboard",
+    screens: [
+      { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" }
+    ]
+  },
+  {
+    label: "Strategy",
+    screens: [
+      { id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
       { id: ScreenId.STAGES_CAPITAL, label: "Stages & Capital" },
     ]
   },
   {
-    label: "Founders & Equity",
+    label: "Organization",
     screens: [
       { id: ScreenId.FOUNDERS_LIST, label: "Founders" },
-      { id: ScreenId.COFOUNDER_FINDING, label: "Find Co-founders" },
-      { id: ScreenId.ALIGNMENT_OVERVIEW, label: "Founder Alignment" },
-      { id: ScreenId.EQUITY_MODELING, label: "Equity Modeling" },
-      { id: ScreenId.SCENARIO_SIMULATOR, label: "Scenario Simulator" },
-      { id: ScreenId.LOCK_ALIGNMENT, label: "Lock Alignment" },
       { id: ScreenId.MY_ROLE, label: "My Role" },
+      { id: ScreenId.TEAM_EMPLOYEES, label: "Team & Employees" },
+      { id: ScreenId.EQUITY_MODELING, label: "Equity Modeling" },
+      { id: ScreenId.ALIGNMENT_OVERVIEW, label: "Founder Alignment" },
     ]
   },
   {
-    label: "External & Validation",
+    label: "Customers",
     screens: [
-      { id: ScreenId.CUSTOMERS_LIST, label: "Prospective Customers" },
+      { id: ScreenId.CUSTOMERS_LIST, label: "Customer Discovery" },
       { id: ScreenId.VALIDATION_CHECKLIST, label: "Validation Checklist" },
+    ]
+  },
+  {
+    label: "Investors",
+    screens: [
       { id: ScreenId.INVESTORS_LIST, label: "Investor Signals" },
       { id: ScreenId.RELEVANT_CONNECTIONS, label: "Connections" },
     ]
   },
   {
-    label: "Execution & Gates",
+    label: "Financials",
     screens: [
-      { id: ScreenId.AI_ADVISORS_HOME, label: "AI Advisors" },
-      { id: ScreenId.TEAM_EMPLOYEES, label: "People & Talent" },
-      { id: ScreenId.INCORPORATION_READINESS, label: "Incorporation Gate" },
+      { id: ScreenId.FINANCIAL_DASHBOARD, label: "Financial Dashboard" },
+      { id: ScreenId.SUB_ORG_DETAIL, label: "Company Intelligence" },
+      { id: ScreenId.BUILD_STATUS, label: "Build Status" },
+    ]
+  },
+  {
+    label: "AI Advisors",
+    screens: [
+      { id: ScreenId.AI_ADVISORS_HOME, label: "Advisory Home" },
     ]
   },
   {
@@ -65,10 +94,10 @@ const orderedNavStructure: NavGroup[] = [
     screens: [
       { id: ScreenId.NOTIFICATIONS, label: "Notifications" },
       { id: ScreenId.DOCUMENTS, label: "Documents" },
-      { id: ScreenId.APP_SHELL, label: "App Settings" },
     ]
   }
 ];
+
 
 type ScreenStatus = 'locked' | 'partial' | 'accessible';
 
@@ -117,47 +146,35 @@ export const Layout: React.FC = () => {
   }, []);
 
   // Determine status of each screen based on onboarding step
-  const getScreenStatus = (screenId: ScreenId): ScreenStatus => {
+  const getScreenStatus = (screenId: ScreenId, isActivationMode: boolean): ScreenStatus => {
     const step = workspace?.onboardingStep || 1;
 
-    // A. Always Accessible
-    if ([ScreenId.APP_SHELL, ScreenId.NOTIFICATIONS, ScreenId.WELCOME].includes(screenId)) return 'accessible';
+    // Always accessible
+    if ([ScreenId.APP_SHELL, ScreenId.NOTIFICATIONS, ScreenId.WELCOME, ScreenId.COMPANY_DASHBOARD].includes(screenId)) return 'accessible';
 
-    // B. Onboarding
-    if (screenId === ScreenId.ACCOUNT_CREATION) return step >= 1 ? 'accessible' : 'locked';
-    if (screenId === ScreenId.COMPANY_CREATION) return step >= 2 ? 'accessible' : 'locked';
-    if (screenId === ScreenId.STARTUP_BASICS) return step >= 3 ? 'accessible' : 'locked';
-    if (screenId === ScreenId.AI_IDEA_VALIDATION) return step >= 3 ? 'accessible' : 'locked';
-    if (screenId === ScreenId.INITIAL_READINESS) return step >= 4 ? 'accessible' : 'locked';
+    // During activation (before onboarding complete)
+    if (isActivationMode) {
+      // Onboarding screens - only current and previous are accessible
+      const onboardingSteps = [
+        { id: ScreenId.WELCOME, minStep: 0 },
+        { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
+        { id: ScreenId.COMPANY_CREATION, minStep: 2 },
+        { id: ScreenId.STARTUP_BASICS, minStep: 3 },
+        { id: ScreenId.AI_IDEA_VALIDATION, minStep: 4 },
+        { id: ScreenId.INITIAL_READINESS, minStep: 5 },
+      ];
 
-    // C. Core Dashboard & Intelligence
-    if (screenId === ScreenId.COMPANY_DASHBOARD) return step >= 5 ? 'accessible' : 'locked';
-    if ([ScreenId.BUILD_STATUS, ScreenId.FINANCIAL_DASHBOARD, ScreenId.STAGES_CAPITAL, ScreenId.SUB_ORG_DETAIL].includes(screenId)) {
-      return step >= 4 ? 'accessible' : 'locked';
+      const onboardingStep = onboardingSteps.find(s => s.id === screenId);
+      if (onboardingStep) {
+        return step >= onboardingStep.minStep ? 'accessible' : 'locked';
+      }
+
+      // Everything else is locked during activation
+      return 'locked';
     }
 
-    // D. Founders & Equity
-    if ([ScreenId.FOUNDERS_LIST, ScreenId.COFOUNDER_FINDING].includes(screenId)) {
-      return step >= 4 ? 'accessible' : 'locked';
-    }
-    if ([ScreenId.ALIGNMENT_OVERVIEW, ScreenId.EQUITY_MODELING, ScreenId.LOCK_ALIGNMENT, ScreenId.MY_ROLE].includes(screenId)) {
-      return step >= 2 ? 'accessible' : 'locked';
-    }
-
-    // E. External & Validation
-    if ([ScreenId.CUSTOMERS_LIST, ScreenId.VALIDATION_CHECKLIST, ScreenId.INVESTORS_LIST, ScreenId.RELEVANT_CONNECTIONS].includes(screenId)) {
-      return step >= 5 ? 'accessible' : 'locked';
-    }
-
-    // F. Execution & Gates
-    if ([ScreenId.AI_ADVISORS_HOME, ScreenId.TEAM_EMPLOYEES, ScreenId.INCORPORATION_READINESS].includes(screenId)) {
-      return step >= 6 ? 'accessible' : 'locked';
-    }
-
-    // G. Documents
-    if (screenId === ScreenId.DOCUMENTS) return 'accessible';
-
-    return 'locked';
+    // After onboarding - everything is accessible
+    return 'accessible';
   };
 
   const getInitials = () => {
@@ -190,6 +207,10 @@ export const Layout: React.FC = () => {
   const companyName = workspace?.name || "New Startup";
   const stage = workspace?.stage || "Onboarding";
 
+  // Determine which navigation to show
+  const isActivationMode = (workspace?.onboardingStep || 0) < 6;
+  const currentNav = isActivationMode ? beforeOnboardingNav : afterOnboardingNav;
+
   // Hide search/notifications during early onboarding to minimize distraction
   const isSetupMode = (workspace?.onboardingStep || 0) < 3;
 
@@ -209,23 +230,25 @@ export const Layout: React.FC = () => {
           <span className="font-bold text-slate-900 tracking-wide text-xl">Foundry</span>
         </div>
 
-        {/* Progress Bar Area */}
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-          <div className="flex justify-between text-xs font-bold text-slate-400 uppercase mb-2">
-            <span>Setup Progress</span>
-            <span>{onboardingProgress}%</span>
+        {/* Progress Bar Area - Only show during activation */}
+        {isActivationMode && (
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex justify-between text-xs font-bold text-slate-400 uppercase mb-2">
+              <span>Setup Progress</span>
+              <span>{onboardingProgress}%</span>
+            </div>
+            <ProgressBar value={onboardingProgress} height="h-1.5" className="bg-slate-200" color="bg-indigo-500" />
           </div>
-          <ProgressBar value={onboardingProgress} height="h-1.5" className="bg-slate-200" color="bg-indigo-500" />
-        </div>
+        )}
 
         {/* Navigation List */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide">
-          {orderedNavStructure.map((group) => (
-            <div key={group.label}>
+          {currentNav.map((group) => (
+            <div key={group.label} className="animate-in fade-in slide-in-from-left-2 duration-300">
               <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 pl-2">{group.label}</h3>
               <ul className="space-y-0.5">
                 {group.screens.map((screen) => {
-                  const status = getScreenStatus(screen.id);
+                  const status = getScreenStatus(screen.id, isActivationMode);
                   const isActive = currentScreen === screen.id;
 
                   let Icon = Circle;
@@ -256,7 +279,7 @@ export const Layout: React.FC = () => {
                       <button
                         onClick={() => handleNavClick(screen.id, status)}
                         className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md transition-all ${containerClass}`}
-                        title={status === 'locked' ? "Unlock after completing required onboarding steps." : ""}
+                        title={status === 'locked' ? "Complete onboarding to unlock." : ""}
                       >
                         <Icon className={`w-3.5 h-3.5 ${statusColor}`} />
                         <span className="truncate">{screen.label}</span>

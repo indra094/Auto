@@ -13,6 +13,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     const [name, setName] = useState(currentWorkspace?.name || '');
     const [type, setType] = useState(currentWorkspace?.type || '');
     const [isLoading, setIsLoading] = useState(false);
+    const [touched, setTouched] = useState({ name: false, type: false });
 
     const handleCreate = async () => {
         if (!name || !type) return;
@@ -33,12 +34,15 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
             <div className="space-y-6">
                 <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Company Name</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        Company Name <span className="text-red-500">*</span>
+                    </label>
                     <div className="relative">
                         <Building className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                         <input
                             type="text"
-                            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
+                            className={`w-full pl-11 pr-4 py-3 bg-white border rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all ${touched.name && !name ? 'border-red-300 bg-red-50/30' : 'border-slate-200'
+                                }`}
                             placeholder="e.g. Acme Corp"
                             value={name}
                             onChange={(e) => {
@@ -46,18 +50,25 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                                 setName(val);
                                 AuthService.updateWorkspace({ name: val });
                             }}
+                            onBlur={() => setTouched(prev => ({ ...prev, name: true }))}
                         />
                     </div>
+                    {touched.name && !name && (
+                        <p className="text-xs text-red-600 mt-1">Company name is required</p>
+                    )}
                 </div>
 
                 <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Company Type</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        Company Type <span className="text-red-500">*</span>
+                    </label>
                     <div className="grid grid-cols-2 gap-3">
                         {types.map(t => (
                             <button
                                 key={t}
                                 onClick={() => {
                                     setType(t);
+                                    setTouched(prev => ({ ...prev, type: true }));
                                     AuthService.updateWorkspace({ type: t });
                                 }}
                                 className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all ${type === t
@@ -69,6 +80,9 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                             </button>
                         ))}
                     </div>
+                    {touched.type && !type && (
+                        <p className="text-xs text-red-600 mt-1">Company type is required</p>
+                    )}
                 </div>
 
                 <div>

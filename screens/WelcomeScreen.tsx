@@ -9,7 +9,7 @@ interface ScreenProps {
 
 export const WelcomeScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   return (
-    <div className="min-h-full bg-slate-50 flex flex-col items-center justify-center p-6 relative overflow-hidden font-inter">
+    <div className="min-h-full bg-slate-50 flex flex-col items-center justify-center p-6 relative overflow-y-auto font-inter">
       {/* Decorative Gradients */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/30 rounded-full blur-[120px]"></div>
@@ -21,16 +21,11 @@ export const WelcomeScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         <div className="w-24 h-24 mb-10 relative">
           <div className="absolute inset-0 bg-indigo-600/20 rounded-3xl blur-2xl animate-pulse"></div>
           <div className="relative w-full h-full bg-white rounded-3xl shadow-2xl flex items-center justify-center border border-slate-100">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-12 h-12 text-indigo-600">
-              <path d="M12 2L3 22h18L12 2z" />
-              <path d="M8 12h8" strokeWidth="4" className="opacity-20" />
-              <path d="M12 12v4" strokeWidth="4" className="opacity-20" />
-              <circle cx="12" cy="18" r="1.5" fill="currentColor" className="text-amber-500" stroke="none" />
-            </svg>
+            <img src="/foundry-icon.png" alt="Foundry" className="w-16 h-16" />
           </div>
         </div>
 
-        <h1 className="text-6xl md:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-b from-slate-900 via-slate-800 to-slate-700">
+        <h1 className="text-6xl md:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
           Build Companies<br />The Right Way.
         </h1>
 
