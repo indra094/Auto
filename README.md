@@ -19,5 +19,6 @@ View your app in AI Studio: https://ai.studio/apps/drive/1SWg8OIYVquttYNykSizzZo
 3. Run the app:
    `npm run dev`
 
+cd Auto
 npm install
 npm run dev

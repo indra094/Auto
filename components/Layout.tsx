@@ -203,14 +203,8 @@ export const Layout: React.FC = () => {
           className="p-4 border-b border-slate-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors shrink-0"
           onClick={() => setCurrentScreen(ScreenId.WELCOME)}
         >
-          <div className="w-10 h-10 flex items-center justify-center text-indigo-500">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-              <path d="M12 2L3 22h18L12 2z" />
-              <path d="M8 12h8" />
-              <path d="M12 12v4" />
-              <circle cx="12" cy="18" r="2" fill="currentColor" className="text-yellow-400" stroke="none" />
-              <path d="M12 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-            </svg>
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img src="/foundry-icon.png" alt="Foundry" className="w-full h-full rounded-lg" />
           </div>
           <span className="font-bold text-slate-900 tracking-wide text-xl">Foundry</span>
         </div>
