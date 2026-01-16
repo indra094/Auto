@@ -21,7 +21,7 @@ export const WelcomeScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         <div className="w-24 h-24 mb-10 relative">
           <div className="absolute inset-0 bg-indigo-600/20 rounded-3xl blur-2xl animate-pulse"></div>
           <div className="relative w-full h-full bg-white rounded-3xl shadow-2xl flex items-center justify-center border border-slate-100">
-            <img src="/foundry-icon.png" alt="Foundry" className="w-16 h-16" />
+            <img src="/images/foundry-icon.png" alt="Foundry" className="w-16 h-16" />
           </div>
         </div>
 

@@ -3,18 +3,18 @@ import { Button } from '../components/UI';
 import { Users, PieChart, Cpu, Rocket, ChevronRight, X, Loader2 } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 
-// Foundry Logo Component for reuse
+// Foundry Logo Component for reuse (PNG-based)
 const FoundryLogo = () => (
-  <div className="w-10 h-10 flex items-center justify-center text-indigo-600">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-      <path d="M12 2L3 22h18L12 2z" />
-      <path d="M8 12h8" />
-      <path d="M12 12v4" />
-      <circle cx="12" cy="18" r="2" fill="currentColor" className="text-yellow-400" stroke="none" />
-      <path d="M12 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-    </svg>
+  <div className="w-10 h-10 flex items-center justify-center">
+    <img
+      src="/images/foundry-icon.png"  // relative to public/
+      alt="Foundry Logo"
+      className="w-full h-full object-contain"
+    />
   </div>
 );
+
+export default FoundryLogo;
 
 export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }) => {
   const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null);

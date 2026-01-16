@@ -225,7 +225,11 @@ export const Layout: React.FC = () => {
           onClick={() => setCurrentScreen(ScreenId.WELCOME)}
         >
           <div className="w-10 h-10 flex items-center justify-center">
-            <img src="/foundry-icon.png" alt="Foundry" className="w-full h-full rounded-lg" />
+            <img
+              src="/images/foundry-icon.png"  // <-- include 'images/' folder
+              alt="Foundry"
+              className="w-full h-full rounded-lg"
+            />
           </div>
           <span className="font-bold text-slate-900 tracking-wide text-xl">Foundry</span>
         </div>
