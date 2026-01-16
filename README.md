@@ -19,6 +19,6 @@ View your app in AI Studio: https://ai.studio/apps/drive/1SWg8OIYVquttYNykSizzZo
 3. Run the app:
    `npm run dev`
 
-cd Auto
+cd c:\Users\Indrajeet\OneDrive\Documents\FoundryAuto
 npm install
 npm run dev
