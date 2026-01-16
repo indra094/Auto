@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavGroup, ScreenId } from '../types';
 import {
   Menu, Bell, Search, Lock, AlertTriangle, CheckCircle,
@@ -115,6 +115,8 @@ export const Layout: React.FC = () => {
   const [workspaces, setWorkspaces] = useState<any[]>([]);
   const [user, setUser] = useState(AuthService.getUser());
   const [onboardingProgress, setOnboardingProgress] = useState(0);
+  // Ref for switcher to detect outside clicks
+  const switcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const refreshData = async () => {
@@ -141,9 +143,22 @@ export const Layout: React.FC = () => {
     };
 
     refreshData();
-    const interval = setInterval(refreshData, 300000);
-    return () => clearInterval(interval);
+    const interval = setInterval(refreshData, 300000); // every 5 mins
+
+    // Outside click handler
+    const handleClickOutside = (e: MouseEvent) => {
+      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
+        setSwitcherOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
+
 
   // Determine status of each screen based on onboarding step
   const getScreenStatus = (screenId: ScreenId, isActivationMode: boolean): ScreenStatus => {
@@ -311,7 +326,7 @@ export const Layout: React.FC = () => {
             </button>
 
             {/* Company Switcher */}
-            <div className="relative">
+            <div ref={switcherRef} className="relative">
               <div
                 className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors group"
                 onClick={() => setSwitcherOpen(!switcherOpen)}
