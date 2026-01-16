@@ -1,3 +1,4 @@
+
 import { DB } from './db';
 import { api } from './api';
 
@@ -56,22 +57,36 @@ export const AuthService = {
   getWorkspaces: async (): Promise<Workspace[]> => {
     const user = AuthService.getUser();
     if (!user) return [];
-    return await api.get(`/auth/workspaces?email=${user.email}`);
+    // Handle potential null response if API fails
+    const res = await api.get(`/auth/workspaces?email=${user.email}`);
+    return res || [];
   },
 
   setCurrentWorkspace: async (workspace: Workspace): Promise<void> => {
     DB.setItem('workspace', workspace);
     // After switching, we need to sync the role for this specific org
-    // Note: The backend get_my_role should ideally take org_id too, 
-    // but for now it returns the role for the user's current context.
-    // We'll update the syncState to handle the new workspace.
     await AuthService.syncState();
   },
 
   getMyRole: (): MyRole => {
     const role = DB.getItem<MyRole | null>('myRole', null);
     if (!role) {
-      throw new Error("MyRole state missing - all information must be in DB");
+      // Return default empty role instead of throwing error to allow app to load
+      return {
+        title: '',
+        responsibility: '',
+        authority: [],
+        commitment: 0,
+        startDate: '',
+        plannedChange: 'none',
+        salary: 0,
+        bonus: '',
+        equity: 0,
+        vesting: '',
+        expectations: [],
+        lastUpdated: new Date().toISOString().split('T')[0],
+        status: 'Active'
+      };
     }
     return role;
   },
@@ -83,14 +98,14 @@ export const AuthService = {
     try {
       // Sync Workspace
       const workspace = await api.get(`/auth/workspace?email=${user.email}`);
-      DB.setItem('workspace', workspace);
+      if (workspace) DB.setItem('workspace', workspace);
 
       // Sync MyRole
       const myRole = await api.get(`/auth/myrole?email=${user.email}`);
-      DB.setItem('myRole', myRole);
+      if (myRole) DB.setItem('myRole', myRole);
     } catch (e) {
       console.error("Failed to sync state from backend", e);
-      throw e; // Throw instead of falling back
+      // Don't throw here to allow UI to continue with cached data
     }
   },
 

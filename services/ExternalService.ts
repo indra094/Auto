@@ -7,6 +7,7 @@ export interface Investor {
   stage: string;
   status: string;
   notes?: string;
+  email?: string;
 }
 
 export interface Customer {

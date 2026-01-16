@@ -1,5 +1,5 @@
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:8000';
 
 export const api = {
   get: async (endpoint: string) => {
@@ -11,8 +11,12 @@ export const api = {
         throw new Error(`API Error: ${res.statusText}`);
       }
       return await res.json();
-    } catch (err) {
+    } catch (err: any) {
       console.error(`[API] GET ${endpoint} Exception:`, err);
+      // Helpful logging for CORS issues
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        console.warn(`NETWORK/CORS ERROR: Ensure your backend is running at ${API_URL} and has CORS enabled.`);
+      }
       return null;
     }
   },

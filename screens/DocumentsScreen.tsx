@@ -44,7 +44,7 @@ export const DocumentsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     <Card key={i} className="p-5 flex items-center justify-between hover:shadow-lg transition-all border-slate-100 group">
                         <div className="flex items-center gap-5">
                             <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-white transition-colors">
-                                {React.cloneElement(doc.icon as React.ReactElement, { className: "w-6 h-6" })}
+                                {React.cloneElement(doc.icon as React.ReactElement<any>, { className: "w-6 h-6" })}
                             </div>
                             <div>
                                 <h3 className="font-bold text-slate-900 text-lg">{doc.title}</h3>

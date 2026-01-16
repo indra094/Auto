@@ -141,7 +141,7 @@ export const Layout: React.FC = () => {
     };
 
     refreshData();
-    const interval = setInterval(refreshData, 1000);
+    const interval = setInterval(refreshData, 300000);
     return () => clearInterval(interval);
   }, []);
 

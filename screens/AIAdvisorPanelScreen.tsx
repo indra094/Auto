@@ -1,3 +1,7 @@
+import React from 'react';
+import { ScreenId } from '../types';
+import { Button, Card, Badge } from '../components/UI';
+import { Settings, PauseCircle, Mail, Loader2, ArrowRight } from 'lucide-react';
 import { ReadinessService, Notification } from '../services/ReadinessService';
 import { AuthService } from '../services/AuthService';
 

@@ -98,8 +98,8 @@ export const MyRoleScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                                         key={auth.id}
                                         onClick={() => toggleAuthority(auth.id)}
                                         className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${role.authority.includes(auth.id)
-                                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
-                                                : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200'
+                                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
+                                            : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200'
                                             }`}
                                     >
                                         <div className={`w-3 h-3 rounded-sm border ${role.authority.includes(auth.id) ? 'bg-white border-white' : 'border-slate-300'}`}>
@@ -173,7 +173,7 @@ export const MyRoleScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-800">90-Day Accountability</h3>
                             </div>
-                            <Button size="sm" variant="outline" className="text-[10px] font-bold group">
+                            <Button size="sm" variant="secondary" className="text-[10px] font-bold group">
                                 <Sparkles className="w-3 h-3 mr-2 text-indigo-500 group-hover:animate-pulse" /> Ask AI for help
                             </Button>
                         </div>
@@ -207,10 +207,9 @@ export const MyRoleScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                 <div className="space-y-8">
                     {/* AI HINT PANEL */}
                     <div className="sticky top-8 space-y-8">
-                        <AIInsightBox
-                            title="Role Calibration"
-                            insight="This level of authority typically pairs with 30–45% equity in pre-seed startups."
-                        />
+                        <AIInsightBox title="Role Calibration">
+                            This level of authority typically pairs with 30–45% equity in pre-seed startups.
+                        </AIInsightBox>
 
                         {/* 4. COMPENSATION */}
                         <Card className="p-6 bg-slate-900 text-white border-none shadow-xl">
