@@ -10,6 +10,8 @@ import {
     Briefcase,
     Users
 } from 'lucide-react';
+import { AuthService } from '../services/AuthService';
+import { ScreenId } from '../types';
 
 // --- CSS Styles (Light Mode) ---
 
@@ -198,9 +200,31 @@ const styles = `
 
 // --- Component ---
 
-export const CompanyCreationScreen = () => {
+interface ScreenProps {
+    onNavigate: (id: ScreenId) => void;
+}
+
+type FormData = {
+    name: string;
+    type: string;
+    problem: string;
+    solution: string;
+    industry: string;
+    geography: string;
+    stage: string;
+    customer: string;
+};
+
+type TouchedState = {
+    name: boolean;
+    type: boolean;
+    problem: boolean;
+    solution: boolean;
+};
+
+export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     // --- State ---
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         name: '',
         type: '',
         problem: '',
@@ -211,20 +235,42 @@ export const CompanyCreationScreen = () => {
         customer: ''
     });
 
-    const [touched, setTouched] = useState<Record<string, boolean>>({});
+    const [touched, setTouched] = useState<Record<keyof TouchedState, boolean>>({
+        name: false,
+        type: false,
+        problem: false,
+        solution: false
+    });
+
+    const currentWorkspace = AuthService.getWorkspace();
+    const [name, setName] = useState(currentWorkspace?.name || '');
+    const [type, setType] = useState(currentWorkspace?.type || '');
     const [isLoading, setIsLoading] = useState(false);
     const [retryCooldown, setRetryCooldown] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
     // --- Effects ---
 
-    useEffect(() => {
-        // Load initial data if any
-        const workspace = AuthService.getWorkspace();
-        if (workspace) {
-            setFormData(prev => ({ ...prev, name: workspace.name, type: workspace.type }));
+    const handleCreate = async () => {
+        if (!formData.name || !formData.type) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            await AuthService.updateWorkspace({
+                ...formData,
+                onboardingStep: 3
+            });
+
+            onNavigate(ScreenId.AI_IDEA_VALIDATION);
+        } catch (err: any) {
+            setError(err?.message || "Something went wrong.");
+            setRetryCooldown(5);
+        } finally {
+            setIsLoading(false);
         }
-    }, []);
+    };
 
     useEffect(() => {
         if (retryCooldown <= 0) return;
@@ -234,16 +280,21 @@ export const CompanyCreationScreen = () => {
 
     // --- Handlers ---
 
-    const handleChange = (field: string, value: string) => {
+    const handleChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         if (error) setError(null);
     };
 
-    const handleBlur = (field: string) => {
+    const handleBlur = (field: keyof TouchedState) => {
         setTouched(prev => ({ ...prev, [field]: true }));
     };
+    const requiredFields: (keyof TouchedState)[] = [
+        'name',
+        'type',
+        'problem',
+        'solution'
+    ];
 
-    const requiredFields = ['name', 'type', 'problem', 'solution'] as const;
 
     const validate = () => {
         let valid = true;
@@ -258,31 +309,11 @@ export const CompanyCreationScreen = () => {
         return valid;
     };
 
-    const handleCreate = async () => {
-        if (!validate()) return;
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            await AuthService.updateWorkspace({
-                ...formData,
-                onboardingStep: 'complete'
-            });
-
-            alert("Company Created Successfully!");
-            // In a real app, you would navigate here
-        } catch (err: any) {
-            setError(err?.message || "Something went wrong.");
-            setRetryCooldown(5);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     // --- Render Helpers ---
 
-    const isError = (field: string) => touched[field] && !formData[field as keyof typeof formData];
+    const isError = (field: keyof TouchedState) =>
+        touched[field] && !formData[field];
+
     const isFormValid =
         formData.name &&
         formData.type &&
@@ -322,6 +353,7 @@ export const CompanyCreationScreen = () => {
                         <div className="grid-options">
                             {['SaaS', 'Marketplace', 'HardTech', 'FinTech', 'Consumer', 'Other'].map(t => (
                                 <button
+                                    type="button"
                                     key={t}
                                     className={`option-btn ${formData.type === t ? 'selected' : ''}`}
                                     onClick={() => handleChange('type', t)}
@@ -419,6 +451,7 @@ export const CompanyCreationScreen = () => {
                         <div className="grid-options">
                             {["Idea", "Pre-Seed", "Seed", "Series A"].map(s => (
                                 <button
+                                    type="button"
                                     key={s}
                                     className={`option-btn ${formData.stage === s ? 'selected' : ''}`}
                                     onClick={() => handleChange('stage', s)}
@@ -426,6 +459,7 @@ export const CompanyCreationScreen = () => {
                                     {s}
                                 </button>
                             ))}
+
                         </div>
                     </div>
                 </div>
