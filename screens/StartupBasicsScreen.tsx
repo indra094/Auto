@@ -36,9 +36,9 @@ export const StartupBasicsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     } catch (err) {
       console.error(err);
 
-      // lock retry for 15 seconds
+      // lock retry for 5 seconds
       setIsRetryLocked(true);
-      setRetryTimer(15);
+      setRetryTimer(5);
 
       const timer = setInterval(() => {
         setRetryTimer((prev) => {
