@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ScreenId } from '../types';
 
 // Global
@@ -92,6 +92,18 @@ const scrollableScreens = new Set([
 ]);
 
 export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNavigate }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'auto',
+      });
+    }
+  }, [screenId]);
+
   const renderContent = () => {
     switch (screenId) {
       // --- A. GLOBAL ---
@@ -186,7 +198,14 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
   const content = renderContent();
 
   if (scrollableScreens.has(screenId)) {
-    return <div className="h-full overflow-y-auto bg-slate-50">{content}</div>;
+    return (
+      <div
+        ref={scrollRef}
+        className="h-full overflow-y-auto bg-slate-50"
+      >
+        {content}
+      </div>
+    );
   }
 
   return <>{content}</>;
