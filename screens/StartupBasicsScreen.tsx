@@ -16,30 +16,61 @@ export const StartupBasicsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [stage, setStage] = useState('Idea');
   const [solution, setSolution] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRetryLocked, setIsRetryLocked] = useState(false);
+  const [retryTimer, setRetryTimer] = useState(0);
 
   const handleSave = async () => {
     if (!problem || !solution) return;
+
     setIsLoading(true);
-    await AuthService.updateWorkspace({
-      onboardingStep: 4,
-      industry,
-      geography,
-      stage
-    });
-    setIsLoading(false);
-    onNavigate(ScreenId.COMPANY_DASHBOARD);
+
+    try {
+      await AuthService.updateWorkspace({
+        onboardingStep: 4,
+        industry,
+        geography,
+        stage
+      });
+
+      onNavigate(ScreenId.COMPANY_DASHBOARD);
+    } catch (err) {
+      console.error(err);
+
+      // lock retry for 15 seconds
+      setIsRetryLocked(true);
+      setRetryTimer(15);
+
+      const timer = setInterval(() => {
+        setRetryTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setIsRetryLocked(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
 
   return (
     <div className="max-w-2xl mx-auto py-12 px-6">
       <header className="mb-10 text-center">
         <h1 className="text-3xl font-black text-slate-900 mb-2">Startup Basics</h1>
         <p className="text-slate-500 font-medium">Define the core pillars of your venture.</p>
+        <p className="text-sm text-slate-500 mt-2">
+          <span className="text-red-500">*</span> Required fields
+        </p>
       </header>
 
       <div className="space-y-8">
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Problem Statement</label>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+            Problem Statement <span className="text-red-500">*</span>
+          </label>
           <textarea
             className="w-full p-4 bg-white border border-slate-200 rounded-2xl h-32 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm"
             placeholder="What pain are you solving? Be specific."
@@ -98,7 +129,9 @@ export const StartupBasicsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Proposed Solution</label>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+            Proposed Solution <span className="text-red-500">*</span>
+          </label>
           <textarea
             className="w-full p-4 bg-white border border-slate-200 rounded-2xl h-24 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all resize-none shadow-sm"
             placeholder="How does your product solve the problem?"
@@ -112,9 +145,13 @@ export const StartupBasicsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             fullWidth
             className="h-16 text-xl rounded-2xl flex items-center justify-center gap-3 font-black"
             onClick={handleSave}
-            disabled={!problem || !solution || isLoading}
+            disabled={!problem || !solution || isLoading || isRetryLocked}
           >
-            {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+            {isLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : isRetryLocked ? (
+              <>Retry in {retryTimer}s</>
+            ) : (
               <>Save & Continue <ArrowRight className="w-6 h-6" /></>
             )}
           </Button>
