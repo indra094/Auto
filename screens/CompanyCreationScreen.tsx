@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card } from '../components/UI';
-import { Building, Globe, Loader2, ArrowRight } from 'lucide-react';
+import { Building, Globe, Loader2, ArrowRight, RefreshCw } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 
 interface ScreenProps {
@@ -15,15 +15,36 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     const [isLoading, setIsLoading] = useState(false);
     const [touched, setTouched] = useState({ name: false, type: false });
 
+    // Retry timer state
+    const [retryCooldown, setRetryCooldown] = useState(0);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (retryCooldown <= 0) return;
+
+        const timer = setInterval(() => {
+            setRetryCooldown(prev => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [retryCooldown]);
+
     const handleCreate = async () => {
         if (!name || !type) return;
-        setIsLoading(true);
-        await AuthService.updateWorkspace({ name, type, onboardingStep: 3 });
-        setIsLoading(false);
-        onNavigate(ScreenId.STARTUP_BASICS);
-    };
 
-    const types = ['SaaS', 'Marketplace', 'HardTech', 'FinTech', 'Consumer', 'Other'];
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            await AuthService.updateWorkspace({ name, type, onboardingStep: 3 });
+            setIsLoading(false);
+            onNavigate(ScreenId.STARTUP_BASICS);
+        } catch (err: any) {
+            setIsLoading(false);
+            setError(err?.message || "Something went wrong.");
+            setRetryCooldown(5); // 5 seconds cooldown
+        }
+    };
 
     return (
         <div className="max-w-md mx-auto py-12 px-6">
@@ -33,6 +54,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
             </header>
 
             <div className="space-y-6">
+                {/* Company Name */}
                 <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
                         Company Name <span className="text-red-500">*</span>
@@ -58,12 +80,13 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                     )}
                 </div>
 
+                {/* Company Type */}
                 <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
                         Company Type <span className="text-red-500">*</span>
                     </label>
                     <div className="grid grid-cols-2 gap-3">
-                        {types.map(t => (
+                        {['SaaS', 'Marketplace', 'HardTech', 'FinTech', 'Consumer', 'Other'].map(t => (
                             <button
                                 key={t}
                                 onClick={() => {
@@ -85,6 +108,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                     )}
                 </div>
 
+                {/* Role */}
                 <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Your Role</label>
                     <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 font-medium">
@@ -92,6 +116,14 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                     </div>
                 </div>
 
+                {/* Error message */}
+                {error && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                        {error}
+                    </div>
+                )}
+
+                {/* Create Button */}
                 <div className="pt-4">
                     <Button
                         fullWidth
@@ -104,6 +136,26 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                         )}
                     </Button>
                 </div>
+
+                {/* Retry Button */}
+                {error && (
+                    <div className="pt-2">
+                        <Button
+                            fullWidth
+                            className="h-12 rounded-xl text-lg flex items-center justify-center gap-2"
+                            onClick={handleCreate}
+                            disabled={retryCooldown > 0}
+                        >
+                            {retryCooldown > 0
+                                ? `Retry in ${retryCooldown}s`
+                                : (
+                                    <>
+                                        Retry <RefreshCw className="w-5 h-5" />
+                                    </>
+                                )}
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );

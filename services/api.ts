@@ -28,12 +28,16 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+
+      // If API returns error
       if (!res.ok) {
-        console.error(`[API] POST ${endpoint} failed: ${res.status} ${res.statusText}`);
-        throw new Error(`API Error: ${res.statusText}`);
+        const errBody = await res.json();   // 👈 read error details
+        console.error(`[API] POST ${endpoint} failed:`, errBody);
+        throw new Error(errBody.detail || res.statusText);
       }
+
       return await res.json();
-    } catch (err) {
+    } catch (err: any) {
       console.error(`[API] POST ${endpoint} Exception:`, err);
       throw err;
     }

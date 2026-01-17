@@ -97,9 +97,11 @@ export const AuthService = {
 
     try {
       // Sync Workspace
-      const workspace = await api.get(`/auth/workspaces?email=${user.email}`);
-      if (workspace) DB.setItem('workspace', workspace[0]);
-      //console.log("in sync state", workspace);
+      const workspaces = await api.get(`/auth/workspaces?email=${user.email}`);
+      if (workspaces && workspaces.length > 0) {
+        DB.setItem('workspace', workspaces[0]);
+      }
+      console.log("in sync state", workspaces);
 
       // Sync MyRole
       const myRole = await api.get(`/auth/myrole?email=${user.email}`);
@@ -122,11 +124,20 @@ export const AuthService = {
   },
 
   signup: async (fullName: string, email: string): Promise<User> => {
-    const user = await api.post('/auth/signup', { fullName, email });
+    let user: User | null = null;
+
+    try {
+      user = await api.post("/auth/signup", { fullName, email });
+    } catch (err: any) {
+      onerror?.(err.message);
+      throw err;
+    }
+
+    if (!user) throw new Error("Signup failed");
+
     DB.setItem('user', user);
     AuthService.refreshSession();
 
-    // Fetch initial state
     await AuthService.syncState();
 
     return user;
@@ -176,7 +187,7 @@ export const AuthService = {
     const user = AuthService.getUser();
     if (!user) return null;
 
-    const updated = await api.patch(`/auth/workspaces?email=${user.email}`, data);
+    const updated = await api.patch(`/auth/workspace?email=${user.email}`, data);
     //console.log("in update workspace");
     DB.setItem('workspace', updated);
     return updated;

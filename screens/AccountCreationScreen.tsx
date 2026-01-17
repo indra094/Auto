@@ -13,20 +13,45 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
   const [email, setEmail] = useState(AuthService.getUser()?.email || '');
   const [role, setRole] = useState(AuthService.getUser()?.role || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retryLocked, setRetryLocked] = useState(false);
+  const [retryTimer, setRetryTimer] = useState(0);
 
   const handleContinue = async () => {
     if (!fullName || !email || !role) return;
+
     setIsLoading(true);
-    await AuthService.updateUser({ fullName, email, role });
+    setError(null);
 
-    // Set onboarding step to 2
-    const ws = AuthService.getWorkspace();
-    if (ws) {
-      await AuthService.updateWorkspace({ onboardingStep: 2 });
+    try {
+      await AuthService.updateUser({ fullName, email, role });
+
+      const ws = AuthService.getWorkspace();
+      if (ws) {
+        await AuthService.updateWorkspace({ onboardingStep: 2 });
+      }
+
+      onNavigate(ScreenId.COMPANY_CREATION);
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong");
+
+      // lock retry for 5 seconds
+      setRetryLocked(true);
+      setRetryTimer(5);
+
+      const timer = setInterval(() => {
+        setRetryTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setRetryLocked(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
-    onNavigate(ScreenId.COMPANY_CREATION);
   };
 
   const roles = ['Founder', 'Executive', 'Investor', 'Advisor'];
@@ -101,12 +126,21 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
             fullWidth
             className="h-14 rounded-xl text-lg flex items-center justify-center gap-2"
             onClick={handleContinue}
-            disabled={!fullName || !email || !role || isLoading}
+            disabled={!fullName || !email || !role || isLoading || retryLocked}
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-              <>Continue <ArrowRight className="w-5 h-5" /></>
+            {isLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : retryLocked ? (
+              <>Retry in {retryTimer}s</>
+            ) : (
+              <>Save & Continue <ArrowRight className="w-6 h-6" /></>
             )}
           </Button>
+          {error && (
+            <p className="mt-3 text-sm text-red-500 text-center">
+              {error}
+            </p>
+          )}
         </div>
       </div>
     </div >
