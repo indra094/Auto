@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScreenId } from '../types';
-import { Button } from '../components/UI';
-import {
-    Building,
-    Loader2,
-    ArrowRight,
-    RefreshCw
-} from 'lucide-react';
+import { Button, Card } from '../components/UI';
+import { Building, Globe, Loader2, ArrowRight, RefreshCw } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 
 interface ScreenProps {
@@ -15,26 +10,14 @@ interface ScreenProps {
 
 export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     const currentWorkspace = AuthService.getWorkspace();
-
-    // Company fields
     const [name, setName] = useState(currentWorkspace?.name || '');
     const [type, setType] = useState(currentWorkspace?.type || '');
-
-    // Startup basics fields
-    const [problem, setProblem] = useState('');
-    const [customer, setCustomer] = useState('');
-    const [industry, setIndustry] = useState('');
-    const [geography, setGeography] = useState('');
-    const [stage, setStage] = useState('Idea');
-    const [solution, setSolution] = useState('');
-
-    // UI states
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [touched, setTouched] = useState({ name: false, type: false });
 
     // Retry timer state
     const [retryCooldown, setRetryCooldown] = useState(0);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (retryCooldown <= 0) return;
@@ -46,36 +29,25 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
         return () => clearInterval(timer);
     }, [retryCooldown]);
 
-    const handleSave = async () => {
-        if (!name || !type || !problem || !solution) {
-            setTouched({ name: true, type: true });
-            return;
-        }
+    const handleCreate = async () => {
+        if (!name || !type) return;
 
         setIsLoading(true);
         setError(null);
 
         try {
-            await AuthService.updateWorkspace({
-                name,
-                type,
-                onboardingStep: 4,
-                industry,
-                geography,
-                stage
-            });
-
+            await AuthService.updateWorkspace({ name, type, onboardingStep: 3 });
             setIsLoading(false);
-            onNavigate(ScreenId.COMPANY_DASHBOARD);
+            onNavigate(ScreenId.STARTUP_BASICS);
         } catch (err: any) {
             setIsLoading(false);
             setError(err?.message || "Something went wrong.");
-            setRetryCooldown(5);
+            setRetryCooldown(5); // 5 seconds cooldown
         }
     };
 
     return (
-        <div className="max-w-2xl mx-auto py-12 px-6">
+        <div className="max-w-md mx-auto py-12 px-6">
             <header className="text-center mb-10">
                 <h1 className="text-3xl font-bold text-slate-900 mb-2">Create Company</h1>
                 <p className="text-slate-500">Now, tell us about your venture.</p>
@@ -136,25 +108,31 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                     )}
                 </div>
 
-                {/* Error */}
+                {/* Role */}
+                <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Your Role</label>
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 font-medium">
+                        Founder
+                    </div>
+                </div>
+
+                {/* Error message */}
                 {error && (
                     <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
                         {error}
                     </div>
                 )}
 
-                {/* Save Button */}
+                {/* Create Button */}
                 <div className="pt-4">
                     <Button
                         fullWidth
-                        className="h-16 text-xl rounded-2xl flex items-center justify-center gap-3 font-black"
-                        onClick={handleSave}
-                        disabled={!name || !type || !problem || !solution || isLoading}
+                        className="h-14 rounded-xl text-lg flex items-center justify-center gap-2"
+                        onClick={handleCreate}
+                        disabled={!name || !type || isLoading}
                     >
-                        {isLoading ? (
-                            <Loader2 className="w-6 h-6 animate-spin" />
-                        ) : (
-                            <>Save & Continue <ArrowRight className="w-6 h-6" /></>
+                        {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                            <>Create Company <ArrowRight className="w-5 h-5" /></>
                         )}
                     </Button>
                 </div>
@@ -165,14 +143,16 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                         <Button
                             fullWidth
                             className="h-12 rounded-xl text-lg flex items-center justify-center gap-2"
-                            onClick={handleSave}
+                            onClick={handleCreate}
                             disabled={retryCooldown > 0}
                         >
-                            {retryCooldown > 0 ? `Retry in ${retryCooldown}s` : (
-                                <>
-                                    Retry <RefreshCw className="w-5 h-5" />
-                                </>
-                            )}
+                            {retryCooldown > 0
+                                ? `Retry in ${retryCooldown}s`
+                                : (
+                                    <>
+                                        Retry <RefreshCw className="w-5 h-5" />
+                                    </>
+                                )}
                         </Button>
                     </div>
                 )}
