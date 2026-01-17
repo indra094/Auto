@@ -115,7 +115,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
             <div className="w-80 shrink-0">
                 <aside className="sticky top-8 space-y-6">
-                    <Card className="p-6 bg-slate-900 text-white border-transparent shadow-2xl overflow-hidden relative">
+                    <Card className="p-6 bg-white text-slate-900 border-slate-100 shadow-xl overflow-hidden relative">
                         <div className="absolute top-0 right-0 p-8 transform translate-x-1/2 -translate-y-1/2 bg-indigo-500/10 rounded-full w-48 h-48"></div>
 
                         <h3 className="text-xl font-bold mb-6 relative z-10">Roadmap Estimate</h3>
@@ -123,7 +123,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
                         <div className="space-y-6 relative z-10">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-indigo-400">
+                                    <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500">
                                         <Calendar className="w-4 h-4" />
                                     </div>
                                     <div>
@@ -133,7 +133,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-emerald-400">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
                                         <DollarSign className="w-4 h-4" />
                                     </div>
                                     <div>
@@ -143,7 +143,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-white/10">
+                            <div className="pt-6 border-t border-slate-100">
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Milestone Timeline</div>
                                 <div className="space-y-4">
                                     {[
@@ -151,7 +151,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
                                         { label: "MVP Build", days: "60 days", active: false },
                                         { label: "Beta Testing", days: "30 days", active: false },
                                     ].map((m, i) => (
-                                        <div key={i} className={`flex justify-between items-center text-sm ${m.active ? 'text-white' : 'text-slate-500'}`}>
+                                        <div key={i} className={`flex justify-between items-center text-sm ${m.active ? 'text-slate-900' : 'text-slate-500'}`}>
                                             <span>{m.label}</span>
                                             <span className="font-mono text-xs font-bold">{m.days}</span>
                                         </div>

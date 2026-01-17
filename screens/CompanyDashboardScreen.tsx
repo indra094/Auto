@@ -59,24 +59,17 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       why: "This affects how much money you need."
     },
     {
-      id: ScreenId.STARTUP_BASICS,
-      label: "Startup Basics",
-      completed: (workspace?.onboardingStep || 0) >= 4,
-      current: (workspace?.onboardingStep || 0) === 3,
-      why: "This affects who will invest in you."
-    },
-    {
       id: ScreenId.AI_IDEA_VALIDATION,
       label: "AI Idea Validation",
-      completed: (workspace?.onboardingStep || 0) >= 5,
-      current: (workspace?.onboardingStep || 0) === 4,
+      completed: (workspace?.onboardingStep || 0) >= 4,
+      current: (workspace?.onboardingStep || 0) === 3,
       why: "This validates your market opportunity."
     },
     {
       id: ScreenId.INITIAL_READINESS,
       label: "Initial Readiness",
-      completed: (workspace?.onboardingStep || 0) >= 6,
-      current: (workspace?.onboardingStep || 0) === 5,
+      completed: (workspace?.onboardingStep || 0) >= 5,
+      current: (workspace?.onboardingStep || 0) === 4,
       why: "This unlocks AI-powered insights."
     },
   ];
@@ -119,19 +112,19 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
               <Card
                 key={i}
                 className={`p-5 transition-all ${step.current
-                    ? 'border-2 border-indigo-500 shadow-lg bg-indigo-50'
-                    : step.completed
-                      ? 'border-emerald-200 bg-emerald-50/50'
-                      : 'border-slate-200 bg-slate-50 opacity-60'
+                  ? 'border-2 border-indigo-500 shadow-lg bg-indigo-50'
+                  : step.completed
+                    ? 'border-emerald-200 bg-emerald-50/50'
+                    : 'border-slate-200 bg-slate-50 opacity-60'
                   }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step.completed
-                        ? 'bg-emerald-500 text-white'
-                        : step.current
-                          ? 'bg-indigo-500 text-white animate-pulse'
-                          : 'bg-slate-300 text-slate-500'
+                      ? 'bg-emerald-500 text-white'
+                      : step.current
+                        ? 'bg-indigo-500 text-white animate-pulse'
+                        : 'bg-slate-300 text-slate-500'
                       }`}>
                       {step.completed ? <CheckCircle className="w-5 h-5" /> : <span className="font-bold text-sm">{i + 1}</span>}
                     </div>

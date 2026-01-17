@@ -22,7 +22,6 @@ const beforeOnboardingNav: NavGroup[] = [
     screens: [
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
       { id: ScreenId.COMPANY_CREATION, label: "Create Company" },
-      { id: ScreenId.STARTUP_BASICS, label: "Startup Basics" },
       { id: ScreenId.AI_IDEA_VALIDATION, label: "AI Idea Validation" },
       { id: ScreenId.INITIAL_READINESS, label: "Initial Readiness" },
     ]
@@ -176,9 +175,8 @@ export const Layout: React.FC = () => {
         { id: ScreenId.COMPANY_DASHBOARD, minStep: 0 },
         { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
         { id: ScreenId.COMPANY_CREATION, minStep: 2 },
-        { id: ScreenId.STARTUP_BASICS, minStep: 3 },
-        { id: ScreenId.AI_IDEA_VALIDATION, minStep: 4 },
-        { id: ScreenId.INITIAL_READINESS, minStep: 5 },
+        { id: ScreenId.AI_IDEA_VALIDATION, minStep: 3 },
+        { id: ScreenId.INITIAL_READINESS, minStep: 4 },
       ];
 
       const onboardingStep = onboardingSteps.find(s => s.id === screenId);

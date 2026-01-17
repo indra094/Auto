@@ -8,7 +8,6 @@ import { NotificationsScreen } from './NotificationsScreen';
 // Onboarding
 import { AccountCreationScreen } from './AccountCreationScreen';
 import { CompanyCreationScreen } from './CompanyCreationScreen';
-import { StartupBasicsScreen } from './StartupBasicsScreen';
 import { InitialReadinessScreen } from './InitialReadinessScreen';
 
 // Founders
@@ -62,7 +61,6 @@ const scrollableScreens = new Set([
   ScreenId.NOTIFICATIONS,
   ScreenId.ACCOUNT_CREATION,
   ScreenId.COMPANY_CREATION,
-  ScreenId.STARTUP_BASICS,
   ScreenId.INITIAL_READINESS,
   ScreenId.FOUNDERS_LIST,
   ScreenId.COFOUNDER_FINDING,
@@ -117,8 +115,6 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
         return <AccountCreationScreen onNavigate={onNavigate} />;
       case ScreenId.COMPANY_CREATION:
         return <CompanyCreationScreen onNavigate={onNavigate} />;
-      case ScreenId.STARTUP_BASICS:
-        return <StartupBasicsScreen onNavigate={onNavigate} />;
       case ScreenId.INITIAL_READINESS:
         return <InitialReadinessScreen onNavigate={onNavigate} />;
 
