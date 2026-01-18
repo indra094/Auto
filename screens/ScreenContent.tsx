@@ -177,7 +177,7 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
 
       // --- G. AI & IDEA ---
       case ScreenId.AI_IDEA_VALIDATION:
-        return <AIIdeaValidationScreen onNavigate={onNavigate} />;
+        return <AIIdeaValidationScreen onNavigate={onNavigate} active={true} />;
 
       // --- H. GATES & SYSTEM ---
       case ScreenId.INCORPORATION_READINESS:

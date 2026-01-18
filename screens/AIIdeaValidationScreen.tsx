@@ -47,13 +47,59 @@ export const Tooltip: React.FC<TooltipProps> = ({ content }) => {
     );
 };
 
-
+type FormData = {
+    name: string;
+    type: string;
+    problem: string;
+    solution: string;
+    industry: string;
+    geography: string;
+    stage: string;
+    customer: string;
+};
 
 interface ScreenProps {
     onNavigate: (id: ScreenId) => void;
+    active: boolean;
 }
 
-export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
+export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, active }) => {
+    // --- State ---
+    const [formData, setFormData] = useState<FormData>({
+        name: '',
+        type: '',
+        problem: '',
+        solution: '',
+        industry: '',
+        geography: '',
+        stage: 'Idea',
+        customer: ''
+    });
+
+    useEffect(() => {
+        if (!active) return;
+        // Always fetch latest workspace info when screen is opened
+        const fetchWorkspace = async () => {
+            const ws1 = await AuthService.getWorkspace();
+            if (!ws1) return;
+            console.log("here")
+            const ws = await AuthService.fetchWorkspaceFromServer(ws1.id);
+            setFormData(prev => ({
+                ...prev,
+                name: ws.name ?? prev.name,
+                type: ws.type ?? prev.type,
+                problem: ws.problem ?? prev.problem,
+                solution: ws.solution ?? prev.solution,
+                industry: ws.industry ?? prev.industry,
+                geography: ws.geography ?? prev.geography,
+                stage: ws.stage ?? prev.stage,
+                customer: ws.customer ?? prev.customer,
+            }));
+        };
+        fetchWorkspace();
+    }, [active]);
+
+
     return (
         <div className="p-8 max-w-7xl mx-auto flex gap-8">
             <div className="flex-1 space-y-8">
