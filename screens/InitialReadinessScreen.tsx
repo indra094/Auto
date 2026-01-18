@@ -15,6 +15,7 @@ export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const hasBasics = ws?.industry && ws?.geography && ws?.stage;
   const baseScore = hasBasics ? 40 : 10;
   const readinessScore = baseScore + (ws?.onboardingStep ? ws.onboardingStep * 10 : 0);
+  const isActivationDone = (ws?.onboardingStep || 0) >= 5;
 
   const checklist = [
     { label: "Company Mission & Vision", status: "complete" },
@@ -71,14 +72,17 @@ export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         </Card>
       </div>
 
-      <div className="flex justify-center">
-        <Button
-          className="h-16 px-8 text-lg rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-black shadow-lg shadow-indigo-200 flex items-center gap-3"
-          onClick={finalizeSetup}
-        >
-          Finalize Setup <ArrowRight className="w-5 h-5" />
-        </Button>
-      </div>
+      {!isActivationDone && (
+        <div className="flex justify-center">
+          <Button
+            className="h-16 px-8 text-lg rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-black shadow-lg shadow-indigo-200 flex items-center gap-3"
+            onClick={finalizeSetup}
+          >
+            Finalize Setup <ArrowRight className="w-5 h-5" />
+          </Button>
+        </div>
+      )}
+
 
       <div className="mt-16 p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-start gap-4">
         <ShieldCheck className="w-8 h-8 text-indigo-500 shrink-0" />

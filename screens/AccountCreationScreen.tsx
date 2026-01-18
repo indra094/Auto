@@ -31,7 +31,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
         await AuthService.updateWorkspace({ onboardingStep: 2 });
       }
 
-      onNavigate(ScreenId.COMPANY_CREATION);
+      onNavigate(ScreenId.COMPANY_INFORMATION);
     } catch (err: any) {
       setError(err?.message || "Something went wrong");
 

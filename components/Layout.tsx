@@ -21,7 +21,7 @@ const beforeOnboardingNav: NavGroup[] = [
     label: "Get Started",
     screens: [
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
-      { id: ScreenId.COMPANY_CREATION, label: "Create Company" },
+      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
       { id: ScreenId.AI_IDEA_VALIDATION, label: "AI Idea Validation" },
       { id: ScreenId.INITIAL_READINESS, label: "Initial Readiness" },
     ]
@@ -46,6 +46,7 @@ const afterOnboardingNav: NavGroup[] = [
     label: "Strategy",
     screens: [
       { id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
+      { id: ScreenId.INITIAL_READINESS, label: "Initial Readiness" },
       { id: ScreenId.STAGES_CAPITAL, label: "Stages & Capital" },
     ]
   },
@@ -53,6 +54,7 @@ const afterOnboardingNav: NavGroup[] = [
     label: "Organization",
     screens: [
       { id: ScreenId.FOUNDERS_LIST, label: "Founders" },
+      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
       { id: ScreenId.MY_ROLE, label: "My Role" },
       { id: ScreenId.TEAM_EMPLOYEES, label: "Team & Employees" },
       { id: ScreenId.EQUITY_MODELING, label: "Equity Modeling" },
@@ -186,7 +188,7 @@ export const Layout: React.FC = () => {
       const onboardingSteps = [
         { id: ScreenId.COMPANY_DASHBOARD, minStep: 0 },
         { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
-        { id: ScreenId.COMPANY_CREATION, minStep: 2 },
+        { id: ScreenId.COMPANY_INFORMATION, minStep: 2 },
         { id: ScreenId.AI_IDEA_VALIDATION, minStep: 3 },
         { id: ScreenId.INITIAL_READINESS, minStep: 4 },
       ];
@@ -228,7 +230,7 @@ export const Layout: React.FC = () => {
 
   const handleCreateNewCompany = () => {
     setSwitcherOpen(false);
-    setCurrentScreen(ScreenId.COMPANY_CREATION);
+    setCurrentScreen(ScreenId.COMPANY_INFORMATION);
   };
 
   const companyName = workspace?.name || "New Startup";
@@ -465,7 +467,11 @@ export const Layout: React.FC = () => {
 
         {/* Screen Content Wrapper */}
         <main className="flex-1 overflow-hidden relative bg-slate-50/50">
-          <ScreenContent screenId={currentScreen} onNavigate={setCurrentScreen} />
+          <ScreenContent
+            screenId={currentScreen}
+            onNavigate={setCurrentScreen}
+            active={currentScreen === ScreenId.COMPANY_INFORMATION}
+          />
         </main>
       </div>
     </div>

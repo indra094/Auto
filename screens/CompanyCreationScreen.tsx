@@ -202,6 +202,7 @@ const styles = `
 
 interface ScreenProps {
     onNavigate: (id: ScreenId) => void;
+    active: boolean;
 }
 
 type FormData = {
@@ -222,7 +223,7 @@ type TouchedState = {
     solution: boolean;
 };
 
-export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
+export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, active }) => {
     // --- State ---
     const [formData, setFormData] = useState<FormData>({
         name: '',
@@ -272,6 +273,28 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
         }
     };
 
+    const handleSave = async () => {
+        if (!formData.name || !formData.type || !formData.problem || !formData.solution) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            await AuthService.updateWorkspace({
+                ...formData,
+                // DO NOT update onboarding step, just save
+            });
+
+            alert("Saved successfully!");
+        } catch (err: any) {
+            setError(err?.message || "Something went wrong.");
+            setRetryCooldown(5);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
     useEffect(() => {
         if (retryCooldown <= 0) return;
         const timer = setInterval(() => setRetryCooldown(p => p - 1), 1000);
@@ -279,8 +302,10 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     }, [retryCooldown]);
 
     useEffect(() => {
+        //      if (!active) return;
+
         const ws = AuthService.getWorkspace();
-        if (!ws) return;
+        //        if (!ws?.id) return;
 
         setFormData(prev => ({
             ...prev,
@@ -293,7 +318,8 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
             stage: ws.stage ?? prev.stage,
             customer: ws.customer ?? prev.customer,
         }));
-    }, []);
+    }, [active]);
+
 
     // --- Handlers ---
 
@@ -325,6 +351,9 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
         setTouched(newTouched);
         return valid;
     };
+
+    const ws = AuthService.getWorkspace();
+    const onboardingStep = ws?.onboardingStep || 0;
 
     // --- Render Helpers ---
 
@@ -489,19 +518,33 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                         </div>
                     )}
 
-                    <button
-                        className="btn-primary"
-                        onClick={handleCreate}
-                        disabled={isLoading || !isFormValid}
-                    >
-                        {isLoading ? <Loader2 className="animate-spin" /> : <>Create Company <ArrowRight size={20} /></>}
-                    </button>
+                    {/* Continue flow */}
+                    {onboardingStep !== 5 && (
+                        <button
+                            className="btn-primary"
+                            onClick={handleCreate}
+                            disabled={isLoading || !isFormValid}
+                        >
+                            {isLoading ? <Loader2 className="animate-spin" /> : <>Company Information <ArrowRight size={20} /></>}
+                        </button>
+                    )}
+
+                    {/* SAVE flow when onboardingStep === 5 */}
+                    {onboardingStep === 5 && (
+                        <button
+                            className="btn-primary"
+                            onClick={handleSave}
+                            disabled={isLoading || !isFormValid}
+                        >
+                            {isLoading ? <Loader2 className="animate-spin" /> : <>Save</>}
+                        </button>
+                    )}
 
                     {error && (
                         <button
                             className="btn-primary btn-retry"
                             disabled={retryCooldown > 0}
-                            onClick={handleCreate}
+                            onClick={onboardingStep === 5 ? handleSave : handleCreate}
                         >
                             {retryCooldown > 0
                                 ? `Retry available in ${retryCooldown}s`
@@ -509,6 +552,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
                         </button>
                     )}
                 </div>
+
             </div>
         </>
     );

@@ -54,8 +54,8 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       why: "This affects founder equity."
     },
     {
-      id: ScreenId.COMPANY_CREATION,
-      label: "Create Company",
+      id: ScreenId.COMPANY_INFORMATION,
+      label: "Company Information",
       completed: (workspace?.onboardingStep || 0) >= 3,
       current: (workspace?.onboardingStep || 0) === 2,
       why: "This affects how much money you need."

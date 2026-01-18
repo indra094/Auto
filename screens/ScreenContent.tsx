@@ -53,6 +53,7 @@ import { DocumentsScreen } from './DocumentsScreen';
 interface ScreenContentProps {
   screenId: ScreenId;
   onNavigate: (id: ScreenId) => void;
+  active?: boolean;
 }
 
 // Set of screens that are "pages" and need their own scrolling container because they don't handle it internally
@@ -60,7 +61,7 @@ interface ScreenContentProps {
 const scrollableScreens = new Set([
   ScreenId.NOTIFICATIONS,
   ScreenId.ACCOUNT_CREATION,
-  ScreenId.COMPANY_CREATION,
+  ScreenId.COMPANY_INFORMATION,
   ScreenId.INITIAL_READINESS,
   ScreenId.FOUNDERS_LIST,
   ScreenId.COFOUNDER_FINDING,
@@ -113,7 +114,7 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
       // --- B. ONBOARDING ---
       case ScreenId.ACCOUNT_CREATION:
         return <AccountCreationScreen onNavigate={onNavigate} />;
-      case ScreenId.COMPANY_CREATION:
+      case ScreenId.COMPANY_INFORMATION:
         return <CompanyCreationScreen onNavigate={onNavigate} />;
       case ScreenId.INITIAL_READINESS:
         return <InitialReadinessScreen onNavigate={onNavigate} />;

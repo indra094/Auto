@@ -54,6 +54,15 @@ export const AuthService = {
     return DB.getItem<User | null>('user', null);
   },
 
+
+  fetchWorkspaceFromServer: async (workspaceId: string) => {
+    const response = await api.get(`/auth/workspace/${workspaceId}`);
+    const workspace = response.data;
+
+    DB.setItem('workspace', workspace);
+    return workspace;
+  },
+
   getWorkspace: (): Workspace | null => {
     if (!AuthService.isSessionValid()) {
       return null;

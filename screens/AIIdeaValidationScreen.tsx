@@ -10,6 +10,10 @@ interface TooltipProps {
     content: string;
 }
 
+const ws = AuthService.getWorkspace();
+const onboardingStep = ws?.onboardingStep || 0;
+const canProceedToReadiness = onboardingStep < 4;
+
 export const Tooltip: React.FC<TooltipProps> = ({ content }) => {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -226,25 +230,28 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
                                     ))}
                                 </div>
                             </div>
-                            <Button
-                                fullWidth
-                                className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white border-transparent font-bold py-3"
-                                onClick={async () => {
-                                    try {
-                                        const ws = AuthService.getWorkspace();
-                                        if (!ws?.id) throw new Error("Workspace not found");
+                            {canProceedToReadiness && (
+                                <Button
+                                    fullWidth
+                                    className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white border-transparent font-bold py-3"
+                                    onClick={async () => {
+                                        try {
+                                            const ws = AuthService.getWorkspace();
+                                            if (!ws?.id) throw new Error("Workspace not found");
 
-                                        await AuthService.setOnboarding(ws.id, 4);
+                                            await AuthService.setOnboarding(ws.id, 4);
 
-                                        onNavigate(ScreenId.INITIAL_READINESS);
-                                    } catch (err) {
-                                        console.error(err);
-                                        alert("Could not advance onboarding. Please try again.");
-                                    }
-                                }}
-                            >
-                                Proceed to Readiness Check <ArrowRight className="w-4 h-4 ml-2" />
-                            </Button>
+                                            onNavigate(ScreenId.INITIAL_READINESS);
+                                        } catch (err) {
+                                            console.error(err);
+                                            alert("Could not advance onboarding. Please try again.");
+                                        }
+                                    }}
+                                >
+                                    Proceed to Readiness Check <ArrowRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            )}
+
                         </div>
                     </Card>
                 </aside>
