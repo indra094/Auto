@@ -10,12 +10,9 @@ interface TooltipProps {
     content: string;
 }
 
-const ws = AuthService.getWorkspace();
-const onboardingStep = ws?.onboardingStep || 0;
-const canProceedToReadiness = onboardingStep < 4;
-
 export const Tooltip: React.FC<TooltipProps> = ({ content }) => {
     const [open, setOpen] = useState(false);
+
     const ref = useRef<HTMLDivElement>(null);
 
     // close when clicking outside
@@ -28,6 +25,8 @@ export const Tooltip: React.FC<TooltipProps> = ({ content }) => {
         document.addEventListener("mousedown", onClick);
         return () => document.removeEventListener("mousedown", onClick);
     }, []);
+
+
 
     return (
         <div className="relative inline-flex items-center" ref={ref}>
@@ -46,17 +45,41 @@ export const Tooltip: React.FC<TooltipProps> = ({ content }) => {
         </div>
     );
 };
-
 type FormData = {
-    name: string;
-    type: string;
-    problem: string;
-    solution: string;
-    industry: string;
-    geography: string;
-    stage: string;
-    customer: string;
+    org_id: string;
+
+    seed_funding_probability: number | null;
+
+    market: {
+        tam_value?: number | null;
+        growth_rate_percent?: number | null;
+        growth_index?: number | null;
+        insight?: string | null;
+    };
+
+    investor_verdict?: string | null;
+
+    strengths: string[];
+    weaknesses: string[];
+
+    personas: {
+        name: string;
+        pain: string;
+        solution: string;
+    }[];
+
+    roadmap: {
+        recommended_stage?: string | null;
+        min_capital?: number | null;
+        max_capital?: number | null;
+        milestones: {
+            label: string;
+            duration_days: number;
+            is_active: boolean;
+        }[];
+    };
 };
+
 
 interface ScreenProps {
     onNavigate: (id: ScreenId) => void;
@@ -66,38 +89,116 @@ interface ScreenProps {
 export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, active }) => {
     // --- State ---
     const [formData, setFormData] = useState<FormData>({
-        name: '',
-        type: '',
-        problem: '',
-        solution: '',
-        industry: '',
-        geography: '',
-        stage: 'Idea',
-        customer: ''
+        org_id: '',
+
+        seed_funding_probability: null,
+
+        market: {
+            tam_value: null,
+            growth_rate_percent: null,
+            growth_index: null,
+            insight: '',
+        },
+
+        investor_verdict: '',
+
+        strengths: [],
+        weaknesses: [],
+
+        personas: [],
+
+        roadmap: {
+            recommended_stage: '',
+            min_capital: null,
+            max_capital: null,
+            milestones: [],
+        },
     });
+
+    const showOrFallback = (value: any, fallback = "Analysis not yet generated. Try reloading the page.") => {
+        if (value === null || value === undefined) return fallback;
+        if (typeof value === "string" && value.trim() === "") return fallback;
+        if (Array.isArray(value) && value.length === 0) return fallback;
+        return value;
+    };
+    const isAnalysisIncomplete = (data: FormData) => {
+        // Check all required fields
+        if (!data.seed_funding_probability && data.seed_funding_probability !== 0) return true;
+        if (!data.market || data.market.tam_value === null || data.market.growth_rate_percent === null || !data.market.insight) return true;
+        if (!data.investor_verdict) return true;
+        if (!data.strengths.length || !data.weaknesses.length) return true;
+        if (!data.personas.length) return true;
+        if (!data.roadmap || !data.roadmap.milestones.length) return true;
+
+        return false;
+    };
+
+    const [canProceedToReadiness, setCanProceedToReadiness] = useState(false);
+
+    const [isIncomplete, setIsIncomplete] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const fetchAnalysis = async () => {
+        setIsLoading(true);
+
+        const ws = await AuthService.getWorkspace();
+        if (!ws) return;
+
+        const analysis = await AuthService.fetchIdeaAnalysisFromServer(ws.id);
+        if (!analysis) {
+            setIsLoading(false);
+            setIsIncomplete(true);
+            return;
+        }
+
+        setFormData({
+            org_id: ws.id,
+            seed_funding_probability: analysis.seed_funding_probability ?? null,
+            market: analysis.market ?? { tam_value: null, growth_rate_percent: null, growth_index: null, insight: '' },
+            investor_verdict: analysis.investor_verdict ?? '',
+            strengths: analysis.strengths ?? [],
+            weaknesses: analysis.weaknesses ?? [],
+            personas: analysis.personas ?? [],
+            roadmap: analysis.roadmap ?? { recommended_stage: '', min_capital: null, max_capital: null, milestones: [] },
+        });
+
+        setIsLoading(false);
+    };
 
     useEffect(() => {
         if (!active) return;
-        // Always fetch latest workspace info when screen is opened
-        const fetchWorkspace = async () => {
-            const ws1 = await AuthService.getWorkspace();
-            if (!ws1) return;
-            console.log("here")
-            const ws = await AuthService.fetchWorkspaceFromServer(ws1.id);
-            setFormData(prev => ({
-                ...prev,
-                name: ws.name ?? prev.name,
-                type: ws.type ?? prev.type,
-                problem: ws.problem ?? prev.problem,
-                solution: ws.solution ?? prev.solution,
-                industry: ws.industry ?? prev.industry,
-                geography: ws.geography ?? prev.geography,
-                stage: ws.stage ?? prev.stage,
-                customer: ws.customer ?? prev.customer,
-            }));
-        };
-        fetchWorkspace();
+        fetchAnalysis();
     }, [active]);
+
+    if (isLoading) {
+        return (
+            <div className="p-8 max-w-7xl mx-auto">
+                <div className="text-center text-lg font-bold text-slate-700">
+                    Loading AI analysis..
+                </div>
+            </div>
+        );
+    }
+
+    if (isIncomplete || isAnalysisIncomplete(formData)) {
+        return (
+            <div className="p-8 max-w-7xl mx-auto flex flex-col items-center justify-center gap-4">
+                <div className="p-8 bg-white rounded-2xl shadow-xl border border-slate-100">
+                    <div className="text-2xl font-bold text-slate-900 mb-2">
+                        AI Analysis Not Generated Yet
+                    </div>
+                    <div className="text-sm text-slate-500">
+                        Try reloading the page or waiting a few seconds.
+                    </div>
+                    <button
+                        className="mt-6 px-6 py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700"
+                        onClick={() => fetchAnalysis()}
+                    >
+                        Reload
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
 
     return (
@@ -125,7 +226,10 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                                         Total Addressable Market Reach
                                         <Tooltip content="Estimated total revenue opportunity this product can realistically access across all target customers." />
                                     </span>
-                                    <span className="text-sm font-black text-slate-900">$14.2B</span>
+                                    <span className="text-sm font-black text-slate-900">
+                                        {showOrFallback(formData.market.tam_value ? `$${formData.market.tam_value}B` : null)}
+                                    </span>
+
                                 </div>
                                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                     <div className="h-full bg-indigo-500 rounded-full" style={{ width: '75%' }}></div>
@@ -138,16 +242,19 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                                         Growth Index
                                         <Tooltip content="Projected annual market growth rate based on industry trends, funding velocity, and adoption signals." />
                                     </span>
-                                    <span className="text-sm font-black text-emerald-500">+18.5%</span>
+                                    <span className="text-sm font-black text-emerald-500">
+                                        {showOrFallback(formData.market.growth_rate_percent ? `+${formData.market.growth_rate_percent}%` : null)}
+                                    </span>
+
                                 </div>
                                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: '85%' }}></div>
                                 </div>
                             </div>
-
                             <p className="text-sm text-slate-600 leading-relaxed italic border-t border-slate-50 pt-4">
-                                "Market signal indicates high fragmentation. 72% of SMEs lack a dedicated foundry tooling layer."
+                                {showOrFallback(formData.market.insight)}
                             </p>
+
                         </div>
 
                     </Card>
@@ -159,13 +266,14 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                             <Tooltip content="Core competitive advantages that improve defensibility, scalability, or execution speed." />
                         </h3>
                         <ul className="space-y-3">
-                            {["High data moat via organizational intelligence", "Scalable decision framework", "Low competition in 'Pre-Incorporation' space"].map((s, i) => (
+                            {(formData.strengths.length ? formData.strengths : [""]).map((s, i) => (
                                 <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
                                     <Badge color="emerald" className="mt-0.5 whitespace-nowrap">Strength</Badge>
-                                    {s}
+                                    {showOrFallback(s)}
                                 </li>
                             ))}
                         </ul>
+
                     </Card>
 
                     <Card className="p-6 border-slate-100">
@@ -176,13 +284,14 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                         </h3>
 
                         <ul className="space-y-3">
-                            {["High reliance on manual data input initially", "Long sales cycle for enterprise execs", "Complex compliance across geographies"].map((w, i) => (
+                            {(formData.weaknesses.length ? formData.weaknesses : [""]).map((s, i) => (
                                 <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                                    <Badge color="amber" className="mt-0.5 whitespace-nowrap">Risk</Badge>
-                                    {w}
+                                    <Badge color="amber" className="mt-0.5 whitespace-nowrap">Weakness</Badge>
+                                    {showOrFallback(s)}
                                 </li>
                             ))}
                         </ul>
+
                     </Card>
 
                     <Card className="p-6 border-slate-100">
@@ -195,12 +304,14 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                             <div className="p-4 bg-indigo-50 rounded-xl">
                                 <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Verdict</div>
                                 <p className="text-indigo-900 font-bold italic text-lg">
-                                    "A potential Category King in the emerging Venture Infrastructure space."
+                                    {showOrFallback(formData.investor_verdict)}
                                 </p>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-slate-500">Likelihood of Seed Funding</span>
-                                <Badge color="indigo">85%</Badge>
+                                <Badge color="indigo">
+                                    {showOrFallback(formData.seed_funding_probability, "Analysis not yet generated. Try reloading the page.")}%
+                                </Badge>
                             </div>
                         </div>
                     </Card>
@@ -214,17 +325,16 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                     </h3>
 
                     <div className="grid md:grid-cols-3 gap-4 text-center">
-                        {[
-                            { name: "First-time Founder", pain: "Uncertainty", solution: "Structure" },
-                            { name: "Serial Entrepreneur", pain: "Slow Decison Making", solution: "Efficiency" },
-                            { name: "VC Portfolio Manager", pain: "Org Visibility", solution: "Data" }
-                        ].map((p, i) => (
+                        {(formData.personas.length ? formData.personas : [{ name: '', pain: '', solution: '' }]).map((p, i) => (
                             <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div className="font-bold text-slate-900">{p.name}</div>
-                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-1">{p.pain} → {p.solution}</div>
+                                <div className="font-bold text-slate-900">{showOrFallback(p.name)}</div>
+                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-1">
+                                    {showOrFallback(`${p.pain} → ${p.solution}`)}
+                                </div>
                             </div>
                         ))}
                     </div>
+
                 </Card>
             </div>
 
@@ -246,7 +356,9 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                                     </div>
                                     <div>
                                         <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Recommended Stage</div>
-                                        <div className="font-bold text-lg">Pre-Seed Validation</div>
+                                        <div className="font-bold text-lg">
+                                            {showOrFallback(formData.roadmap.recommended_stage)}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -256,7 +368,9 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                                     </div>
                                     <div>
                                         <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Target Capital</div>
-                                        <div className="font-bold text-lg">$250k - $500k</div>
+                                        <div className="font-bold text-lg">
+                                            {showOrFallback(formData.roadmap.min_capital)} - {showOrFallback(formData.roadmap.max_capital)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -264,16 +378,13 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                             <div className="pt-6 border-t border-slate-100">
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Milestone Timeline</div>
                                 <div className="space-y-4">
-                                    {[
-                                        { label: "Idea Validation", days: "14 days", active: true },
-                                        { label: "MVP Build", days: "60 days", active: false },
-                                        { label: "Beta Testing", days: "30 days", active: false },
-                                    ].map((m, i) => (
-                                        <div key={i} className={`flex justify-between items-center text-sm ${m.active ? 'text-slate-900' : 'text-slate-500'}`}>
-                                            <span>{m.label}</span>
-                                            <span className="font-mono text-xs font-bold">{m.days}</span>
-                                        </div>
-                                    ))}
+                                    {(formData.roadmap.milestones.length ? formData.roadmap.milestones : [{ label: '', duration_days: 0, is_active: false }])
+                                        .map((m, i) => (
+                                            <div key={i} className={`flex justify-between items-center text-sm ${m.is_active ? 'text-slate-900' : 'text-slate-500'}`}>
+                                                <span>{showOrFallback(m.label)}</span>
+                                                <span className="font-mono text-xs font-bold">{showOrFallback(m.duration_days, "N/A")} days</span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                             {canProceedToReadiness && (

@@ -10,6 +10,7 @@ export interface User {
   email: string;
   role?: string;
   avatarUrl?: string;
+  current_org_id: string;
 }
 
 export interface Workspace {
@@ -62,6 +63,14 @@ export const AuthService = {
       DB.setItem('workspace', workspace);
     }
     return workspace;
+  },
+
+  fetchIdeaAnalysisFromServer: async (workspaceId: string) => {
+    const analysis = await api.get(`/auth/${workspaceId}/idea-analysis`);
+    if (analysis) {
+      DB.setItem('ideaAnalysis', analysis);
+    }
+    return analysis;
   },
 
   getWorkspace: (): Workspace | null => {
@@ -204,7 +213,7 @@ export const AuthService = {
     const user = AuthService.getUser();
     if (!user) return null;
 
-    const updated = await api.patch(`/auth/workspace?email=${user.email}`, data);
+    const updated = await api.patch(`/auth/${user.current_org_id}/workspace-and-insights`, data);
 
     DB.setItem('workspace', updated); // << IMPORTANT
     return updated;
