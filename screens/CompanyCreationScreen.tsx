@@ -243,9 +243,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         solution: false
     });
 
-    const currentWorkspace = AuthService.getWorkspace();
-    const [name, setName] = useState(currentWorkspace?.name || '');
-    const [type, setType] = useState(currentWorkspace?.type || '');
+    // Remove unused currentWorkspace, name, type state
     const [isLoading, setIsLoading] = useState(false);
     const [retryCooldown, setRetryCooldown] = useState(0);
     const [error, setError] = useState<string | null>(null);
@@ -302,22 +300,26 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
     }, [retryCooldown]);
 
     useEffect(() => {
-        //      if (!active) return;
-
-        const ws = AuthService.getWorkspace();
-        //        if (!ws?.id) return;
-
-        setFormData(prev => ({
-            ...prev,
-            name: ws.name ?? prev.name,
-            type: ws.type ?? prev.type,
-            problem: ws.problem ?? prev.problem,
-            solution: ws.solution ?? prev.solution,
-            industry: ws.industry ?? prev.industry,
-            geography: ws.geography ?? prev.geography,
-            stage: ws.stage ?? prev.stage,
-            customer: ws.customer ?? prev.customer,
-        }));
+        if (!active) return;
+        // Always fetch latest workspace info when screen is opened
+        const fetchWorkspace = async () => {
+            const ws1 = await AuthService.getWorkspace();
+            if (!ws1) return;
+            console.log("here")
+            const ws = await AuthService.fetchWorkspaceFromServer(ws1.id);
+            setFormData(prev => ({
+                ...prev,
+                name: ws.name ?? prev.name,
+                type: ws.type ?? prev.type,
+                problem: ws.problem ?? prev.problem,
+                solution: ws.solution ?? prev.solution,
+                industry: ws.industry ?? prev.industry,
+                geography: ws.geography ?? prev.geography,
+                stage: ws.stage ?? prev.stage,
+                customer: ws.customer ?? prev.customer,
+            }));
+        };
+        fetchWorkspace();
     }, [active]);
 
 
@@ -352,8 +354,16 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         return valid;
     };
 
-    const ws = AuthService.getWorkspace();
-    const onboardingStep = ws?.onboardingStep || 0;
+    // Always get latest onboardingStep from workspace
+    const [onboardingStep, setOnboardingStep] = useState(0);
+    useEffect(() => {
+        if (!active) return;
+        const fetchStep = async () => {
+            const ws = await AuthService.getWorkspace();
+            setOnboardingStep(ws?.onboardingStep || 0);
+        };
+        fetchStep();
+    }, [active, formData]);
 
     // --- Render Helpers ---
 

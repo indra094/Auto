@@ -56,10 +56,11 @@ export const AuthService = {
 
 
   fetchWorkspaceFromServer: async (workspaceId: string) => {
-    const response = await api.get(`/auth/workspace/${workspaceId}`);
-    const workspace = response.data;
+    const workspace = await api.get(`/auth/workspace/${workspaceId}`);
 
-    DB.setItem('workspace', workspace);
+    if (workspace) {
+      DB.setItem('workspace', workspace);
+    }
     return workspace;
   },
 
