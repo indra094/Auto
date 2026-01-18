@@ -135,8 +135,8 @@ export const Layout: React.FC = () => {
 
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
-        const progressMap = [0, 10, 25, 50, 75, 90, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 6)]);
+        const progressMap = [0, 10, 25, 50, 75, 100];
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 5)]);
       }
     };
 
@@ -149,8 +149,8 @@ export const Layout: React.FC = () => {
 
       // also update progress when workspace changes
       if (w) {
-        const progressMap = [0, 10, 25, 50, 75, 90, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 6)]);
+        const progressMap = [0, 10, 25, 50, 75, 100];
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 5)]);
       }
     });
 
@@ -235,7 +235,7 @@ export const Layout: React.FC = () => {
   const stage = workspace?.stage || "Onboarding";
 
   // Determine which navigation to show
-  const isActivationMode = (workspace?.onboardingStep || 0) < 6;
+  const isActivationMode = (workspace?.onboardingStep || 0) < 5;
   const currentNav = isActivationMode ? beforeOnboardingNav : afterOnboardingNav;
 
   // Hide search/notifications during early onboarding to minimize distraction
