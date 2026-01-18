@@ -14,6 +14,14 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Calculate readiness score for activation mode
+  const calculateReadiness = React.useMemo(() => {
+    const step = workspace?.onboardingStep || 1;
+    const baseScore = Math.min(step * 15, 90);
+    console.log(baseScore)
+    return baseScore;
+  }, [workspace?.onboardingStep]);
+
   useEffect(() => {
     const user = AuthService.getUser();
     if (!user) return;
@@ -34,14 +42,8 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
   if (loading) return <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-indigo-500" /></div>;
 
-  const isActivationMode = (workspace?.onboardingStep || 0) < 6;
+  const isActivationMode = (workspace?.onboardingStep || 0) < 5;
 
-  // Calculate readiness score for activation mode
-  const calculateReadiness = () => {
-    const step = workspace?.onboardingStep || 1;
-    const baseScore = Math.min(step * 15, 90);
-    return baseScore;
-  };
 
   const onboardingSteps = [
     {

@@ -8,24 +8,27 @@ export const DB = {
     await new Promise(resolve => setTimeout(resolve, delay));
   },
 
-  getItem: <T>(key: string, defaultValue: T): T => {
+  getItem: <T>(key: string, fallback: T | null = null): T | null => {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+
     try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
+      return JSON.parse(raw) as T;
     } catch (e) {
-      console.error(`Error reading ${key} from DB`, e);
-      return defaultValue;
+      console.warn(`Invalid JSON for key ${key}`, raw);
+      return fallback;
     }
   },
 
   setItem: (key: string, value: any) => {
+    if (value === undefined) return;
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (e) {
       console.error(`Error writing ${key} to DB`, e);
     }
   },
-  
+
   // Initialize default data if empty
   initCollection: <T>(key: string, defaultData: T) => {
     if (!localStorage.getItem(key)) {

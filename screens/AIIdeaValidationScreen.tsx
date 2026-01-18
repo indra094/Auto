@@ -1,7 +1,49 @@
-import React from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
 import { Lightbulb, Target, TrendingUp, AlertCircle, Users, DollarSign, Calendar, ArrowRight } from 'lucide-react';
+
+import React, { useState, useRef, useEffect } from "react";
+import { Info } from "lucide-react";
+import { AuthService } from '../services/AuthService';
+
+interface TooltipProps {
+    content: string;
+}
+
+export const Tooltip: React.FC<TooltipProps> = ({ content }) => {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    // close when clicking outside
+    useEffect(() => {
+        const onClick = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", onClick);
+        return () => document.removeEventListener("mousedown", onClick);
+    }, []);
+
+    return (
+        <div className="relative inline-flex items-center" ref={ref}>
+            <Info
+                className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+                onClick={() => setOpen((prev) => !prev)}
+            />
+
+            {open && (
+                <div className="absolute left-1/2 top-full mt-2 w-64 -translate-x-1/2
+                        rounded-lg bg-slate-900 text-white text-xs
+                        px-3 py-2 z-50 shadow-xl">
+                    {content}
+                </div>
+            )}
+        </div>
+    );
+};
+
+
 
 interface ScreenProps {
     onNavigate: (id: ScreenId) => void;
@@ -22,36 +64,49 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
                     <Card className="p-6 border-slate-100 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <Target className="w-5 h-5 text-indigo-500" /> Market Size & Clarity
+                            <Target className="w-5 h-5 text-indigo-500" />
+                            Market Size & Clarity
+                            <Tooltip content="Evaluates how large and accessible the market is, and whether demand is clearly defined and growing." />
                         </h3>
                         <div className="space-y-6 relative z-10">
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs font-bold text-slate-400 uppercase">TAM Reach</span>
+                                    <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                                        Total Addressable Market Reach
+                                        <Tooltip content="Estimated total revenue opportunity this product can realistically access across all target customers." />
+                                    </span>
                                     <span className="text-sm font-black text-slate-900">$14.2B</span>
                                 </div>
                                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                     <div className="h-full bg-indigo-500 rounded-full" style={{ width: '75%' }}></div>
                                 </div>
                             </div>
+
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs font-bold text-slate-400 uppercase">Growth Index</span>
+                                    <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                                        Growth Index
+                                        <Tooltip content="Projected annual market growth rate based on industry trends, funding velocity, and adoption signals." />
+                                    </span>
                                     <span className="text-sm font-black text-emerald-500">+18.5%</span>
                                 </div>
                                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: '85%' }}></div>
                                 </div>
                             </div>
+
                             <p className="text-sm text-slate-600 leading-relaxed italic border-t border-slate-50 pt-4">
                                 "Market signal indicates high fragmentation. 72% of SMEs lack a dedicated foundry tooling layer."
                             </p>
                         </div>
+
                     </Card>
 
                     <Card className="p-6 border-slate-100">
                         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-emerald-500" /> Strengths
+                            <TrendingUp className="w-5 h-5 text-emerald-500" />
+                            Strengths
+                            <Tooltip content="Core competitive advantages that improve defensibility, scalability, or execution speed." />
                         </h3>
                         <ul className="space-y-3">
                             {["High data moat via organizational intelligence", "Scalable decision framework", "Low competition in 'Pre-Incorporation' space"].map((s, i) => (
@@ -65,8 +120,11 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
                     <Card className="p-6 border-slate-100">
                         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <AlertCircle className="w-5 h-5 text-amber-500" /> Weaknesses
+                            <AlertCircle className="w-5 h-5 text-amber-500" />
+                            Weaknesses
+                            <Tooltip content="Risks or constraints that may slow adoption, execution, or fundraising if not mitigated." />
                         </h3>
+
                         <ul className="space-y-3">
                             {["High reliance on manual data input initially", "Long sales cycle for enterprise execs", "Complex compliance across geographies"].map((w, i) => (
                                 <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
@@ -79,12 +137,16 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
                     <Card className="p-6 border-slate-100">
                         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <Lightbulb className="w-5 h-5 text-indigo-500" /> Investor Appeal
+                            <Lightbulb className="w-5 h-5 text-indigo-500" />
+                            Investor Appeal
+                            <Tooltip content="Overall attractiveness of the idea from a venture investor perspective, combining market size, differentiation, and timing." />
                         </h3>
                         <div className="space-y-4">
                             <div className="p-4 bg-indigo-50 rounded-xl">
                                 <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Verdict</div>
-                                <p className="text-indigo-900 font-bold italic text-lg line-clamp-2">"A potential Category King in the emerging Venture Infrastructure space."</p>
+                                <p className="text-indigo-900 font-bold italic text-lg">
+                                    "A potential Category King in the emerging Venture Infrastructure space."
+                                </p>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-slate-500">Likelihood of Seed Funding</span>
@@ -96,8 +158,11 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
                 <Card className="p-6 border-slate-100">
                     <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-                        <Users className="w-5 h-5 text-blue-500" /> Target Customer Personas
+                        <Users className="w-5 h-5 text-blue-500" />
+                        Target Customer Personas
+                        <Tooltip content="Primary buyer profiles identified based on pain severity, willingness to pay, and urgency." />
                     </h3>
+
                     <div className="grid md:grid-cols-3 gap-4 text-center">
                         {[
                             { name: "First-time Founder", pain: "Uncertainty", solution: "Structure" },
@@ -118,7 +183,10 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
                     <Card className="p-6 bg-white text-slate-900 border-slate-100 shadow-xl overflow-hidden relative">
                         <div className="absolute top-0 right-0 p-8 transform translate-x-1/2 -translate-y-1/2 bg-indigo-500/10 rounded-full w-48 h-48"></div>
 
-                        <h3 className="text-xl font-bold mb-6 relative z-10">Roadmap Estimate</h3>
+                        <h3 className="text-xl font-bold mb-6 relative z-10 flex items-center gap-2">
+                            Roadmap Estimate
+                            <Tooltip content="High-level execution plan estimating capital, time, and sequencing to reach initial traction." />
+                        </h3>
 
                         <div className="space-y-6 relative z-10">
                             <div className="space-y-4">
@@ -158,18 +226,30 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
                                     ))}
                                 </div>
                             </div>
-
                             <Button
                                 fullWidth
                                 className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white border-transparent font-bold py-3"
-                                onClick={() => onNavigate(ScreenId.COMPANY_DASHBOARD)}
+                                onClick={async () => {
+                                    try {
+                                        const ws = AuthService.getWorkspace();
+                                        if (!ws?.id) throw new Error("Workspace not found");
+
+                                        await AuthService.setOnboarding(ws.id, 4);
+
+                                        onNavigate(ScreenId.INITIAL_READINESS);
+                                    } catch (err) {
+                                        console.error(err);
+                                        alert("Could not advance onboarding. Please try again.");
+                                    }
+                                }}
                             >
-                                Proceed to Dashboard <ArrowRight className="w-4 h-4 ml-2" />
+                                Proceed to Readiness Check <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                         </div>
                     </Card>
                 </aside>
             </div>
+
         </div>
     );
 };

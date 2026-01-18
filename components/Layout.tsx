@@ -120,6 +120,7 @@ export const Layout: React.FC = () => {
     const refreshData = async () => {
       const u = AuthService.getUser();
       const w = AuthService.getWorkspace();
+
       setUser(u);
       setWorkspace(w);
 
@@ -134,7 +135,6 @@ export const Layout: React.FC = () => {
 
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
-        // Simple mapping: Step 1 = 10%, Step 2 = 25%, Step 3 = 50%, Step 4 = 75%, Step 5+ = 100%
         const progressMap = [0, 10, 25, 50, 75, 90, 100];
         setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 6)]);
       }
@@ -142,6 +142,17 @@ export const Layout: React.FC = () => {
 
     refreshData();
     const interval = setInterval(refreshData, 300000); // every 5 mins
+
+    // Listen for workspace updates
+    const unsubscribe = AuthService.onWorkspaceChange((w) => {
+      setWorkspace(w);
+
+      // also update progress when workspace changes
+      if (w) {
+        const progressMap = [0, 10, 25, 50, 75, 90, 100];
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 6)]);
+      }
+    });
 
     // Outside click handler
     const handleClickOutside = (e: MouseEvent) => {
@@ -154,12 +165,13 @@ export const Layout: React.FC = () => {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+
     return () => {
       clearInterval(interval);
       document.removeEventListener('mousedown', handleClickOutside);
+      unsubscribe();
     };
   }, []);
-
 
   // Determine status of each screen based on onboarding step
   const getScreenStatus = (screenId: ScreenId, isActivationMode: boolean): ScreenStatus => {

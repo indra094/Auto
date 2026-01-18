@@ -19,8 +19,13 @@ export interface Workspace {
   geography?: string;
   type?: string;
   stage?: string;
-  onboardingStep: number;
-}
+
+  problem?: string;
+  solution?: string;
+  customer?: string;
+
+  onboardingStep?: number;
+};
 
 export interface MyRole {
   title: string;
@@ -37,6 +42,8 @@ export interface MyRole {
   lastUpdated: string;
   status: 'Active' | 'Advisory' | 'Inactive';
 }
+
+let workspaceChangeListeners: ((w: Workspace | null) => void)[] = [];
 
 export const AuthService = {
   getUser: (): User | null => {
@@ -188,9 +195,17 @@ export const AuthService = {
     if (!user) return null;
 
     const updated = await api.patch(`/auth/workspace?email=${user.email}`, data);
-    //console.log("in update workspace");
-    DB.setItem('workspace', updated);
+
+    DB.setItem('workspace', updated); // << IMPORTANT
     return updated;
+  },
+
+
+  setOnboarding: async (workspaceId: string, step: number) => {
+    const data = await api.post(`/auth/${workspaceId}/set-onboarding`, { step });
+
+    DB.setItem('workspace', data); // update local workspace
+    return data;
   },
 
   updateMyRole: async (data: Partial<MyRole>) => {
@@ -200,5 +215,17 @@ export const AuthService = {
     const updated = await api.patch(`/auth/myrole?email=${user.email}`, data);
     DB.setItem('myRole', updated);
     return updated;
+  },
+
+  onWorkspaceChange: (listener: (w: Workspace | null) => void) => {
+    workspaceChangeListeners.push(listener);
+    return () => {
+      workspaceChangeListeners = workspaceChangeListeners.filter(l => l !== listener);
+    };
+  },
+
+  setWorkspaceAndNotify: (w: Workspace | null) => {
+    DB.setItem('workspace', w);
+    workspaceChangeListeners.forEach(l => l(w));
   }
 };

@@ -252,7 +252,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     // --- Effects ---
 
     const handleCreate = async () => {
-        if (!formData.name || !formData.type) return;
+        if (!formData.name || !formData.type || !formData.problem || !formData.solution) return;
 
         setIsLoading(true);
         setError(null);
@@ -277,6 +277,23 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
         const timer = setInterval(() => setRetryCooldown(p => p - 1), 1000);
         return () => clearInterval(timer);
     }, [retryCooldown]);
+
+    useEffect(() => {
+        const ws = AuthService.getWorkspace();
+        if (!ws) return;
+
+        setFormData(prev => ({
+            ...prev,
+            name: ws.name ?? prev.name,
+            type: ws.type ?? prev.type,
+            problem: ws.problem ?? prev.problem,
+            solution: ws.solution ?? prev.solution,
+            industry: ws.industry ?? prev.industry,
+            geography: ws.geography ?? prev.geography,
+            stage: ws.stage ?? prev.stage,
+            customer: ws.customer ?? prev.customer,
+        }));
+    }, []);
 
     // --- Handlers ---
 

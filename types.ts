@@ -64,10 +64,17 @@ export interface User {
 export interface Workspace {
   id: string;
   name: string;
-  onboardingStep: number;
   industry?: string;
   geography?: string;
+  type?: string;
   stage?: string;
-}
+
+  // 🔥 NEW
+  problem?: string;
+  solution?: string;
+  customer?: string;
+
+  onboardingStep?: number;
+};
 
 export type ScreenStatus = 'accessible' | 'locked' | 'hidden';

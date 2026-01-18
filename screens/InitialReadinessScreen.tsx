@@ -24,6 +24,20 @@ export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     { label: "Financial Projections (Seed Ready)", status: "missing" },
   ];
 
+  const finalizeSetup = async () => {
+    try {
+      const ws = AuthService.getWorkspace();
+      if (!ws?.id) throw new Error("Workspace not found");
+
+      await AuthService.setOnboarding(ws.id, 5);
+
+      onNavigate(ScreenId.COMPANY_DASHBOARD);
+    } catch (err) {
+      console.error(err);
+      alert("Could not advance onboarding. Please try again.");
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
       <header className="mb-12 text-center">
@@ -57,19 +71,12 @@ export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         </Card>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <div className="flex justify-center">
         <Button
           className="h-16 px-8 text-lg rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-black shadow-lg shadow-indigo-200 flex items-center gap-3"
-          onClick={() => onNavigate(ScreenId.COMPANY_DASHBOARD)}
+          onClick={finalizeSetup}
         >
           Finalize Setup <ArrowRight className="w-5 h-5" />
-        </Button>
-        <Button
-          variant="secondary"
-          className="h-16 px-8 text-lg rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:bg-slate-50"
-          onClick={() => onNavigate(ScreenId.COMPANY_DASHBOARD)}
-        >
-          Skip for Now
         </Button>
       </div>
 
