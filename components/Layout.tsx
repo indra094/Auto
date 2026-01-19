@@ -38,13 +38,20 @@ const afterOnboardingNav: NavGroup[] = [
     label: "Dashboard & Information",
     screens: [
       { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" },
+      { id: ScreenId.ACCOUNT_CREATION, label: "Your Information" },
       { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" }
+    ]
+  },
+  {
+    label: "Founders",
+    screens: [
+      { id: ScreenId.FOUNDERS_LIST, label: "Founders" },
+      { id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founders & Alignment" },
     ]
   },
   {
     label: "Core Intelligence",
     screens: [
-      { id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founders & Alignment" },
       { id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
       { id: ScreenId.INVESTOR_READINESS, label: "Investor Readiness" }
       //{ id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
@@ -406,19 +413,18 @@ export const Layout: React.FC = () => {
 
           <div className="flex items-center gap-4">
             {/* Only show search after setup is well underway */}
-            {!isSetupMode && (
+            {/* {!isSetupMode && (
               <div className="relative hidden md:block">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
                 <input type="text" placeholder="Search anything..." className="pl-9 pr-4 py-2 border border-slate-200 rounded-full text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100 outline-none w-64 transition-all" />
               </div>
-            )}
+            )} */}
 
             {/* Notifications */}
-            <button className="relative p-2 text-slate-500 hover:bg-slate-50 rounded-full" onClick={() => setCurrentScreen(ScreenId.NOTIFICATIONS)}>
+            {/* <button className="relative p-2 text-slate-500 hover:bg-slate-50 rounded-full" onClick={() => setCurrentScreen(ScreenId.NOTIFICATIONS)}>
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-
+            </button> */}
             <div className="h-6 w-px bg-slate-200 mx-2 hidden md:block"></div>
 
             {/* User Profile */}
@@ -452,7 +458,7 @@ export const Layout: React.FC = () => {
                     className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
                     onClick={() => {
                       setProfileMenuOpen(false);
-                      setCurrentScreen(ScreenId.APP_SHELL); // Navigate to user info screen
+                      setCurrentScreen(ScreenId.ACCOUNT_CREATION); // Navigate to user info screen
                     }}
                   >
                     Change User Info

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ScreenId } from '../types';
 import { Button } from '../components/UI';
 import { User, Mail, Loader2, ArrowRight } from 'lucide-react';
@@ -11,11 +11,46 @@ interface ScreenProps {
 export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [fullName, setFullName] = useState(AuthService.getUser()?.fullName || '');
   const [email, setEmail] = useState(AuthService.getUser()?.email || '');
-  const [role, setRole] = useState(AuthService.getUser()?.role || '');
+  const [role, setRole] = useState<string | null>(null);
+  const [roleLoading, setRoleLoading] = useState(true);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryLocked, setRetryLocked] = useState(false);
   const [retryTimer, setRetryTimer] = useState(0);
+  const workspace = AuthService.getWorkspace();
+  const isOnboardingComplete = (workspace?.onboardingStep ?? 0) >= 3;
+  const hasLoaded = useRef(false);
+
+
+
+  useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
+    const hydrateRoleFromOrg = async () => {
+      const user = AuthService.getUser();
+      const ws = AuthService.getWorkspace();
+
+      if (!user || !ws) {
+        setRoleLoading(false);
+        return;
+      }
+
+      try {
+        const res = await AuthService.getUserOrgInfo(user.id, ws.id);
+        setRole(res?.role || null);
+        AuthService.updateUser({ role: res?.role });
+      } catch (err) {
+        console.error('Failed to load user org info', err);
+      } finally {
+        setRoleLoading(false);
+      }
+    };
+
+    hydrateRoleFromOrg();
+  }, []);
+
+
 
   const handleContinue = async () => {
     if (!fullName || !email || !role) return;
@@ -24,18 +59,23 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     setError(null);
 
     try {
-      await AuthService.updateUser({ fullName, email, role });
+      // Only now do we call RPCs
+      await AuthService.updateUser({ fullName, email });
 
       const ws = AuthService.getWorkspace();
-      if (ws) {
-        await AuthService.setOnboarding(ws.id, 2);
+      const user = AuthService.getUser();
+
+      if (ws && user) {
+        await AuthService.setUserOrgInfo(user.id, ws.id, { role });
       }
 
-      onNavigate(ScreenId.COMPANY_INFORMATION);
+      if (ws && !isOnboardingComplete) {
+        await AuthService.setOnboarding(ws.id, 2);
+        onNavigate(ScreenId.COMPANY_INFORMATION);
+      }
     } catch (err: any) {
       setError(err?.message || "Something went wrong");
 
-      // lock retry for 5 seconds
       setRetryLocked(true);
       setRetryTimer(5);
 
@@ -53,6 +93,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
       setIsLoading(false);
     }
   };
+
 
   const roles = ['Founder', 'Executive', 'Investor', 'Advisor'];
 
@@ -76,7 +117,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
               onChange={(e) => {
                 const val = e.target.value;
                 setFullName(val);
-                AuthService.updateUser({ fullName: val });
+
               }}
             />
           </div>
@@ -94,44 +135,47 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
               onChange={(e) => {
                 const val = e.target.value;
                 setEmail(val);
-                AuthService.updateUser({ email: val });
+
               }}
             />
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Primary Role</label>
-          <div className="grid grid-cols-2 gap-3">
-            {roles.map(r => (
-              <button
-                key={r}
-                onClick={() => {
-                  setRole(r);
-                  AuthService.updateUser({ role: r });
-                }}
-                className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all ${role === r
+        <div className="grid grid-cols-2 gap-3">
+          {roles.map(r => (
+            <button
+              key={r}
+              disabled={roleLoading}
+              onClick={() => {
+                setRole(r);
+
+              }}
+              className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all
+        ${role === r
                   ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
-                  : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'
-                  }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+                  : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'}
+        ${roleLoading ? 'opacity-50 cursor-not-allowed' : ''}
+      `}
+            >
+              {r}
+            </button>
+          ))}
         </div>
+
 
         <div className="pt-4">
           <Button
             fullWidth
             className="h-14 rounded-xl text-lg flex items-center justify-center gap-2"
             onClick={handleContinue}
-            disabled={!fullName || !email || !role || isLoading || retryLocked}
+            disabled={!fullName || !email || !role || isLoading || retryLocked || roleLoading}
           >
             {isLoading ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : retryLocked ? (
               <>Retry in {retryTimer}s</>
+            ) : isOnboardingComplete ? (
+              <>Save</>
             ) : (
               <>Save & Continue <ArrowRight className="w-6 h-6" /></>
             )}

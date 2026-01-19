@@ -131,21 +131,25 @@ export const AuthService = {
     return role;
   },
 
+  getUserOrgInfo: async (userId: string, orgId: string) => {
+    return api.get(`/auth/user-org-info?user_id=${userId}&org_id=${orgId}`);
+  },
+
   syncState: async (): Promise<void> => {
     const user = AuthService.getUser();
     if (!user) return;
 
     try {
-      // Sync Workspace
-      // Sync Workspace
+      // 1. Sync Workspaces
       const workspaces = await api.get(`/auth/workspaces?email=${user.email}`);
 
       let activeWorkspace: Workspace | null = null;
+
       if (user.current_org_id) {
-        activeWorkspace = workspaces.find((w: Workspace) => w.id === user.current_org_id) || null;
+        activeWorkspace =
+          workspaces.find((w: Workspace) => w.id === user.current_org_id) || null;
       }
 
-      // Fallback to first if no current org set or not found
       if (!activeWorkspace && workspaces && workspaces.length > 0) {
         activeWorkspace = workspaces[0];
       }
@@ -153,16 +157,26 @@ export const AuthService = {
       if (activeWorkspace) {
         DB.setItem('workspace', activeWorkspace);
       }
+
       console.log("in sync state", workspaces);
 
-      // Sync MyRole
-      const myRole = await api.get(`/auth/myrole?email=${user.email}`);
-      if (myRole) DB.setItem('myRole', myRole);
+      // 2. Sync Role from user-org-info (instead of myrole)
+      if (activeWorkspace) {
+        const orgInfo = await api.get(
+          `/auth/user-org-info?user_id=${user.id}&org_id=${activeWorkspace.id}`
+        );
+
+        if (orgInfo?.role) {
+          DB.setItem('myRole', orgInfo.role);
+        }
+      }
+
     } catch (e) {
       console.error("Failed to sync state from backend", e);
       // Don't throw here to allow UI to continue with cached data
     }
   },
+
 
   login: async (email: string): Promise<User> => {
     const user = await api.post('/auth/login', { email });
@@ -260,14 +274,15 @@ export const AuthService = {
     return data;
   },
 
-  updateMyRole: async (data: Partial<MyRole>) => {
-    const user = AuthService.getUser();
-    if (!user) return null;
-
-    const updated = await api.patch(`/auth/myrole?email=${user.email}`, data);
-    DB.setItem('myRole', updated);
-    return updated;
+  setUserOrgInfo: async (userId: string, orgId: string, data: { role?: string, equity?: number }) => {
+    return await api.post('/auth/set-user-org-info', {
+      user_id: userId,
+      org_id: orgId,
+      ...data
+    });
   },
+
+
 
   onWorkspaceChange: (listener: (w: Workspace | null) => void) => {
     workspaceChangeListeners.push(listener);
