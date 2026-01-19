@@ -23,31 +23,35 @@ const beforeOnboardingNav: NavGroup[] = [
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
       { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" }
     ]
-  },
+  }/*,
   {
     label: "System",
     screens: [
       { id: ScreenId.NOTIFICATIONS, label: "Notifications" },
     ]
-  }
+  }*/
 ];
 
 // AFTER ONBOARDING - Full operating system navigation
 const afterOnboardingNav: NavGroup[] = [
   {
-    label: "Dashboard",
+    label: "Dashboard & Information",
     screens: [
-      { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" }
+      { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" },
+      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" }
     ]
   },
   {
-    label: "Strategy",
+    label: "Core Intelligence",
     screens: [
+      { id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founders & Alignment" },
       { id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
-      { id: ScreenId.INITIAL_READINESS, label: "Initial Readiness" },
-      { id: ScreenId.STAGES_CAPITAL, label: "Stages & Capital" },
+      { id: ScreenId.INVESTOR_READINESS, label: "Investor Readiness" }
+      //{ id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
+      //      { id: ScreenId.FOUNDERS_ALIGNMENT, label: "Initial Readiness" },
+      //{ id: ScreenId.STAGES_CAPITAL, label: "Stages & Capital" },
     ]
-  },
+  }/*,
   {
     label: "Organization",
     screens: [
@@ -93,7 +97,7 @@ const afterOnboardingNav: NavGroup[] = [
       { id: ScreenId.NOTIFICATIONS, label: "Notifications" },
       { id: ScreenId.DOCUMENTS, label: "Documents" },
     ]
-  }
+  }*/
 ];
 
 

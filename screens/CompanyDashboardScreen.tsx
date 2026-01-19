@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge, ProgressBar } from '../components/UI';
+import { getOnboardingProgress } from '../utils/onboarding';
 import {
   Heart,
   CheckCircle,
@@ -26,10 +27,9 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
   const isActivationMode = (workspace?.onboardingStep || 0) < 3;
 
-  // Simple MVP readiness score
-  const readiness = useMemo(() => {
-    const step = workspace?.onboardingStep || 1;
-    return Math.min(step * 20, 100);
+  // Simple MVP progress score
+  const onboardingProgress = useMemo(() => {
+    return getOnboardingProgress(workspace?.onboardingStep);
   }, [workspace?.onboardingStep]);
 
   useEffect(() => {
@@ -106,18 +106,24 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
           </p>
         </header>
 
-        {/* Readiness */}
+        {/* Progress */}
         <Card className="mb-10 p-10 bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-3xl font-black mb-2">Foundry Readiness</h3>
+                <h3 className="text-3xl font-black mb-2">Setup Progress</h3>
                 <p className="text-indigo-100 text-sm">Your startup is taking shape</p>
               </div>
-              <div className="text-6xl font-black">{readiness}%</div>
+              <div className="text-6xl font-black">{onboardingProgress}%</div>
             </div>
-            <ProgressBar value={readiness} height="h-3" className="bg-white/20" color="bg-white" />
+
+            <ProgressBar
+              value={onboardingProgress}
+              height="h-3"
+              className="bg-white/20"
+              color="bg-white"
+            />
             <p className="text-indigo-100 text-sm mt-4">
               Complete onboarding to unlock full intelligence dashboard
             </p>

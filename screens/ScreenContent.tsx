@@ -9,6 +9,7 @@ import { NotificationsScreen } from './NotificationsScreen';
 import { AccountCreationScreen } from './AccountCreationScreen';
 import { CompanyCreationScreen } from './CompanyCreationScreen';
 import { InitialReadinessScreen } from './InitialReadinessScreen';
+import { InvestorReadinessScreen } from './InvestorReadinessScreen';
 
 // Founders
 import { FoundersListScreen } from './FoundersListScreen';
@@ -62,7 +63,7 @@ const scrollableScreens = new Set([
   ScreenId.NOTIFICATIONS,
   ScreenId.ACCOUNT_CREATION,
   ScreenId.COMPANY_INFORMATION,
-  ScreenId.INITIAL_READINESS,
+  ScreenId.FOUNDERS_ALIGNMENT,
   ScreenId.FOUNDERS_LIST,
   ScreenId.COFOUNDER_FINDING,
   ScreenId.ALIGNMENT_OVERVIEW,
@@ -87,7 +88,8 @@ const scrollableScreens = new Set([
   ScreenId.AI_IDEA_VALIDATION,
   ScreenId.INCORPORATION_READINESS,
   ScreenId.PROCEED_ANYWAY,
-  ScreenId.DOCUMENTS
+  ScreenId.DOCUMENTS,
+  ScreenId.INVESTOR_READINESS
 ]);
 
 export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNavigate }) => {
@@ -116,7 +118,7 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
         return <AccountCreationScreen onNavigate={onNavigate} />;
       case ScreenId.COMPANY_INFORMATION:
         return <CompanyCreationScreen onNavigate={onNavigate} active={true} />;
-      case ScreenId.INITIAL_READINESS:
+      case ScreenId.FOUNDERS_ALIGNMENT:
         return <InitialReadinessScreen onNavigate={onNavigate} />;
 
       // --- C. FOUNDERS & EQUITY ---
@@ -149,9 +151,12 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
       case ScreenId.AI_EMPLOYEE_DETAIL:
         return <AIEmployeeDetailScreen onNavigate={onNavigate} />;
 
+
       // --- E. COMPANY INTELLIGENCE ---
       case ScreenId.COMPANY_DASHBOARD:
         return <CompanyDashboardScreen onNavigate={onNavigate} />;
+      case ScreenId.INVESTOR_READINESS:
+        return <InvestorReadinessScreen onNavigate={onNavigate} />;
       case ScreenId.SUB_ORG_DETAIL:
         return <SubOrgDetailScreen onNavigate={onNavigate} />;
       case ScreenId.VALIDATION_CHECKLIST:

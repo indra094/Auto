@@ -398,7 +398,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
 
                                             await AuthService.setOnboarding(ws.id, 4);
 
-                                            onNavigate(ScreenId.INITIAL_READINESS);
+                                            onNavigate(ScreenId.FOUNDERS_ALIGNMENT);
                                         } catch (err) {
                                             console.error(err);
                                             alert("Could not advance onboarding. Please try again.");
