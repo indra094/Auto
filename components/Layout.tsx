@@ -228,9 +228,16 @@ export const Layout: React.FC = () => {
     setCurrentScreen(ScreenId.COMPANY_DASHBOARD);
   };
 
-  const handleCreateNewCompany = () => {
+  const handleCreateNewCompany = async () => {
     setSwitcherOpen(false);
-    setCurrentScreen(ScreenId.COMPANY_INFORMATION);
+    const w = await AuthService.createWorkspace(user?.email);
+    await AuthService.setCurrentWorkspace(w);
+    setWorkspace(w);
+    setCurrentScreen(ScreenId.COMPANY_DASHBOARD);
+
+    // Refresh list
+    const list = await AuthService.getWorkspaces();
+    setWorkspaces(list);
   };
 
   const companyName = workspace?.name || "New Startup";

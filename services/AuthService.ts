@@ -89,9 +89,23 @@ export const AuthService = {
   },
 
   setCurrentWorkspace: async (workspace: Workspace): Promise<void> => {
-    DB.setItem('workspace', workspace);
-    // After switching, we need to sync the role for this specific org
+    // 1. Persist change to user profile
+    await AuthService.updateUser({ current_org_id: workspace.id });
+
+    // 2. Update local workspace & Notify
+    AuthService.setWorkspaceAndNotify(workspace);
+
+    // 3. Sync roles for this new workspace
     await AuthService.syncState();
+  },
+
+  createWorkspace: async (email: string): Promise<Workspace> => {
+    // After switching, we need to sync the role for this specific org
+    const workspace = await api.post(`/auth/workspace`, { email: email });
+    if (workspace) {
+      DB.setItem('workspace', workspace);
+    }
+    return workspace;
   },
 
   getMyRole: (): MyRole => {
@@ -123,9 +137,21 @@ export const AuthService = {
 
     try {
       // Sync Workspace
+      // Sync Workspace
       const workspaces = await api.get(`/auth/workspaces?email=${user.email}`);
-      if (workspaces && workspaces.length > 0) {
-        DB.setItem('workspace', workspaces[0]);
+
+      let activeWorkspace: Workspace | null = null;
+      if (user.current_org_id) {
+        activeWorkspace = workspaces.find((w: Workspace) => w.id === user.current_org_id) || null;
+      }
+
+      // Fallback to first if no current org set or not found
+      if (!activeWorkspace && workspaces && workspaces.length > 0) {
+        activeWorkspace = workspaces[0];
+      }
+
+      if (activeWorkspace) {
+        DB.setItem('workspace', activeWorkspace);
       }
       console.log("in sync state", workspaces);
 
@@ -153,7 +179,10 @@ export const AuthService = {
     let user: User | null = null;
 
     try {
+
       user = await api.post("/auth/signup", { fullName, email });
+      const ws = await api.post("/auth/workspace", { email });
+      await AuthService.setCurrentWorkspace(ws);
     } catch (err: any) {
       onerror?.(err.message);
       throw err;
