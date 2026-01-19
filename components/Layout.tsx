@@ -46,7 +46,7 @@ const afterOnboardingNav: NavGroup[] = [
     label: "Founders",
     screens: [
       { id: ScreenId.FOUNDERS_LIST, label: "Founders" },
-      { id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founders & Alignment" },
+      { id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founder Alignment" },
     ]
   },
   {
