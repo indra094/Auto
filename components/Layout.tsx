@@ -21,9 +21,7 @@ const beforeOnboardingNav: NavGroup[] = [
     label: "Get Started",
     screens: [
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
-      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
-      { id: ScreenId.AI_IDEA_VALIDATION, label: "AI Idea Validation" },
-      { id: ScreenId.INITIAL_READINESS, label: "Initial Readiness" },
+      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" }
     ]
   },
   {
@@ -137,22 +135,24 @@ export const Layout: React.FC = () => {
 
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
-        const progressMap = [0, 10, 25, 50, 75, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 5)]);
+        const progressMap = [0, 10, 50, 100];
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 3)]);
       }
     };
 
     refreshData();
-    const interval = setInterval(refreshData, 300000); // every 5 mins
+    const interval = setInterval(refreshData, 3000); // every 5 mins
 
     // Listen for workspace updates
     const unsubscribe = AuthService.onWorkspaceChange((w) => {
+      console.log("[Layout] Workspace updated:", w);
+      console.log("[Layout] Onboarding Step:", w?.onboardingStep);
       setWorkspace(w);
 
       // also update progress when workspace changes
       if (w) {
-        const progressMap = [0, 10, 25, 50, 75, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 5)]);
+        const progressMap = [0, 10, 50, 100];
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 3)]);
       }
     });
 
@@ -189,8 +189,6 @@ export const Layout: React.FC = () => {
         { id: ScreenId.COMPANY_DASHBOARD, minStep: 0 },
         { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
         { id: ScreenId.COMPANY_INFORMATION, minStep: 2 },
-        { id: ScreenId.AI_IDEA_VALIDATION, minStep: 3 },
-        { id: ScreenId.INITIAL_READINESS, minStep: 4 },
       ];
 
       const onboardingStep = onboardingSteps.find(s => s.id === screenId);
@@ -244,7 +242,7 @@ export const Layout: React.FC = () => {
   const stage = workspace?.stage || "Onboarding";
 
   // Determine which navigation to show
-  const isActivationMode = (workspace?.onboardingStep || 0) < 5;
+  const isActivationMode = (workspace?.onboardingStep || 0) < 3;
   const currentNav = isActivationMode ? beforeOnboardingNav : afterOnboardingNav;
 
   // Hide search/notifications during early onboarding to minimize distraction

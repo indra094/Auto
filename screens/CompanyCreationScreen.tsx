@@ -262,7 +262,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                 onboardingStep: 3
             });
 
-            onNavigate(ScreenId.AI_IDEA_VALIDATION);
+            onNavigate(ScreenId.COMPANY_DASHBOARD);
         } catch (err: any) {
             setError(err?.message || "Something went wrong.");
             setRetryCooldown(5);
@@ -280,10 +280,10 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         try {
             await AuthService.updateWorkspace({
                 ...formData,
-                // DO NOT update onboarding step, just save
+                onboardingStep: 3
             });
 
-            alert("Saved successfully!");
+            onNavigate(ScreenId.COMPANY_DASHBOARD);
         } catch (err: any) {
             setError(err?.message || "Something went wrong.");
             setRetryCooldown(5);
@@ -529,7 +529,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                     )}
 
                     {/* Continue flow */}
-                    {onboardingStep !== 5 && (
+                    {onboardingStep !== 3 && (
                         <button
                             className="btn-primary"
                             onClick={handleCreate}
@@ -539,8 +539,8 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         </button>
                     )}
 
-                    {/* SAVE flow when onboardingStep === 5 */}
-                    {onboardingStep === 5 && (
+                    {/* SAVE flow when onboardingStep === 3 */}
+                    {onboardingStep === 3 && (
                         <button
                             className="btn-primary"
                             onClick={handleSave}
@@ -554,7 +554,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         <button
                             className="btn-primary btn-retry"
                             disabled={retryCooldown > 0}
-                            onClick={onboardingStep === 5 ? handleSave : handleCreate}
+                            onClick={onboardingStep === 3 ? handleSave : handleCreate}
                         >
                             {retryCooldown > 0
                                 ? `Retry available in ${retryCooldown}s`

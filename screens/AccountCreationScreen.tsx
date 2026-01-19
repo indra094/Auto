@@ -28,7 +28,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
       const ws = AuthService.getWorkspace();
       if (ws) {
-        await AuthService.updateWorkspace({ onboardingStep: 2 });
+        await AuthService.setOnboarding(ws.id, 2);
       }
 
       onNavigate(ScreenId.COMPANY_INFORMATION);

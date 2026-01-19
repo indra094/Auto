@@ -15,7 +15,7 @@ export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const hasBasics = ws?.industry && ws?.geography && ws?.stage;
   const baseScore = hasBasics ? 40 : 10;
   const readinessScore = baseScore + (ws?.onboardingStep ? ws.onboardingStep * 10 : 0);
-  const isActivationDone = (ws?.onboardingStep || 0) >= 5;
+  const isActivationDone = (ws?.onboardingStep || 0) >= 3;
 
   const checklist = [
     { label: "Company Mission & Vision", status: "complete" },
@@ -30,7 +30,7 @@ export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       const ws = AuthService.getWorkspace();
       if (!ws?.id) throw new Error("Workspace not found");
 
-      await AuthService.setOnboarding(ws.id, 5);
+      await AuthService.setOnboarding(ws.id, 3);
 
       onNavigate(ScreenId.COMPANY_DASHBOARD);
     } catch (err) {

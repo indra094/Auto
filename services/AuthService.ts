@@ -244,7 +244,9 @@ export const AuthService = {
 
     const updated = await api.patch(`/auth/${user.current_org_id}/workspace-and-insights`, data);
 
-    DB.setItem('workspace', updated); // << IMPORTANT
+    // Notify listeners so UI updates immediately
+    AuthService.setWorkspaceAndNotify(updated);
+
     return updated;
   },
 
@@ -252,7 +254,9 @@ export const AuthService = {
   setOnboarding: async (workspaceId: string, step: number) => {
     const data = await api.post(`/auth/${workspaceId}/set-onboarding`, { step });
 
-    DB.setItem('workspace', data); // update local workspace
+    // Notify listeners so UI updates immediately
+    AuthService.setWorkspaceAndNotify(data);
+
     return data;
   },
 
@@ -274,6 +278,7 @@ export const AuthService = {
 
   setWorkspaceAndNotify: (w: Workspace | null) => {
     DB.setItem('workspace', w);
+    console.log("🔥 Workspace set", w);
     workspaceChangeListeners.forEach(l => l(w));
   }
 };

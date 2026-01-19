@@ -24,7 +24,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const isActivationMode = (workspace?.onboardingStep || 0) < 5;
+  const isActivationMode = (workspace?.onboardingStep || 0) < 3;
 
   // Simple MVP readiness score
   const readiness = useMemo(() => {
@@ -39,6 +39,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     const load = async () => {
       setLoading(true);
       const w = AuthService.getWorkspace();
+      console.log("🔥 Workspace", w);
       setWorkspace(w);
 
       try {
@@ -88,20 +89,6 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       completed: (workspace?.onboardingStep || 0) >= 3,
       current: (workspace?.onboardingStep || 0) === 2,
       why: 'This affects how much money you need.',
-    },
-    {
-      id: ScreenId.AI_IDEA_VALIDATION,
-      label: 'AI Idea Validation',
-      completed: (workspace?.onboardingStep || 0) >= 4,
-      current: (workspace?.onboardingStep || 0) === 3,
-      why: 'This validates your market opportunity.',
-    },
-    {
-      id: ScreenId.INITIAL_READINESS,
-      label: 'Initial Readiness',
-      completed: (workspace?.onboardingStep || 0) >= 5,
-      current: (workspace?.onboardingStep || 0) === 4,
-      why: 'This unlocks AI-powered insights.',
     },
   ];
 
