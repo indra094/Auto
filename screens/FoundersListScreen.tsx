@@ -4,6 +4,7 @@ import { Button, Card, Badge } from '../components/UI';
 import { User, Plus, ShieldAlert, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { FounderService } from '../services/FounderService';
 import { AuthService } from '../services/AuthService';
+import ReactDOM from "react-dom";
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
@@ -67,9 +68,9 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
           </p>
         </div>
         <div className="flex gap-4">
-          <Button variant="secondary" onClick={() => setIsInviting(!isInviting)}>
+          {/*<Button variant="secondary" onClick={() => setIsInviting(!isInviting)}>
             {isInviting ? "Cancel" : "Invite Executive"}
-          </Button>
+          </Button>*/}
           <Button onClick={() => setShowAddFounder(true)}>
             <Plus className="w-4 h-4" /> Add Founder
           </Button>
@@ -126,66 +127,161 @@ export const AddFounderPanel = ({
   onClose: () => void;
   onSave: (data: any) => void;
 }) => {
+  if (!open) return null;
+
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [role, setRole] = React.useState("CEO");
+  const [team, setTeam] = React.useState("Product");
   const [hours, setHours] = React.useState(40);
   const [equity, setEquity] = React.useState(50);
 
-  if (!open) return null;
+  const summary = [
+    role,
+    team,
+    `${hours} hrs/wk`,
+    `${equity}% equity`,
+  ].filter(Boolean).join(" • ");
 
-  return (
+  return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <Card className="p-8 w-full max-w-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold">Add Founder</h3>
+      <Card className="w-full max-w-2xl max-h-[70vh] p-6 overflow-y-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h3 className="text-xl font-bold">Add User to Organization</h3>
+            <p className="text-slate-500 mt-1">
+              Invite a member and assign a role.
+            </p>
+          </div>
           <Button variant="secondary" onClick={onClose}>Close</Button>
         </div>
 
-        <div className="space-y-4">
-          <input
-            className="w-full p-4 rounded-xl border border-slate-200"
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            className="w-full p-4 rounded-xl border border-slate-200"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="w-full p-4 rounded-xl border border-slate-200"
-            placeholder="Role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          />
-          <div className="flex gap-4">
+        {/* Main Grid */}
+        <div className="grid grid-cols-12 gap-4">
+          {/* Left: Form */}
+          <div className="col-span-7 space-y-3">
             <input
-              className="w-1/2 p-4 rounded-xl border border-slate-200"
-              placeholder="Weekly Hours"
-              type="number"
-              value={hours}
-              onChange={(e) => setHours(Number(e.target.value))}
+              className="w-full p-3 rounded-xl border border-slate-200"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
+
             <input
-              className="w-1/2 p-4 rounded-xl border border-slate-200"
-              placeholder="Equity %"
-              type="number"
-              value={equity}
-              onChange={(e) => setEquity(Number(e.target.value))}
+              className="w-full p-3 rounded-xl border border-slate-200"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
+
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                className="p-3 rounded-xl border border-slate-200"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <option>CEO</option>
+                <option>CTO</option>
+                <option>Product</option>
+                <option>Designer</option>
+                <option>Marketing</option>
+              </select>
+
+              <select
+                className="p-3 rounded-xl border border-slate-200"
+                value={team}
+                onChange={(e) => setTeam(e.target.value)}
+              >
+                <option>Product</option>
+                <option>Engineering</option>
+                <option>Design</option>
+                <option>Marketing</option>
+                <option>Operations</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <input
+                  className="w-full p-3 rounded-xl border border-slate-200"
+                  type="number"
+                  placeholder="Weekly Hours"
+                  value={hours}
+                  onChange={(e) => setHours(Number(e.target.value))}
+                />
+                <div className="text-xs text-slate-500 mt-1">
+                  Weekly commitment in hours
+                </div>
+              </div>
+
+              <div>
+                <input
+                  className="w-full p-3 rounded-xl border border-slate-200"
+                  type="number"
+                  placeholder="Equity %"
+                  value={equity}
+                  onChange={(e) => setEquity(Number(e.target.value))}
+                />
+                <div className="text-xs text-slate-500 mt-1">
+                  Equity share in percentage
+                </div>
+              </div>
+            </div>
           </div>
 
-          <Button
-            fullWidth
-            onClick={() => onSave({ name, email, role, hours, equity })}
-          >
-            Add Founder
-          </Button>
+          {/* Right: Preview */}
+          <div className="col-span-5 space-y-3">
+            <Card className="p-6 bg-white border-slate-100">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-lg">Invite Preview</h4>
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700">
+                  Pending
+                </span>
+              </div>
+
+              <div className="mt-5 space-y-4 text-sm text-slate-600">
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-800">Invitee</span>
+                  <span>{name || "—"}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-800">Email</span>
+                  <span>{email || "—"}</span>
+                </div>
+              </div>
+
+              {/* --- SPACED SUMMARY BOX --- */}
+              <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="space-y-2">
+                  <div className="font-medium text-slate-800">Summary</div>
+
+                  <div className="text-slate-500">
+                    <div>{role} • {team}</div>
+                    <div className="mt-1">• {hours} hrs/wk</div>
+                    <div className="mt-1">• {equity}% equity</div>
+                  </div>
+
+                  <div className="text-xs text-slate-500 mt-2">
+                    This includes role, team, weekly hours, and equity share.
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                fullWidth
+                className="mt-5"
+                onClick={() => onSave({ name, email, role, team, hours, equity })}
+              >
+                Send Invite
+              </Button>
+            </Card>
+
+          </div>
         </div>
       </Card>
-    </div>
+    </div>,
+    document.body
   );
 };
