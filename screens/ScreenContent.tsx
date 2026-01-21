@@ -20,7 +20,7 @@ import { ScenarioSimulatorScreen } from './ScenarioSimulatorScreen';
 import { LockAlignmentScreen } from './LockAlignmentScreen';
 import { AlignmentHistoryScreen } from './AlignmentHistoryScreen';
 import { CoFounderFindingScreen } from './CoFounderFindingScreen';
-import { MyRoleScreen } from './MyRoleScreen';
+import { UserOrgInfoScreen } from './MyRoleScreen';
 
 // AI
 import { AIAdvisorsHomeScreen } from './AIAdvisorsHomeScreen';
@@ -139,7 +139,7 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
       case ScreenId.ALIGNMENT_HISTORY:
         return <AlignmentHistoryScreen onNavigate={onNavigate} />;
       case ScreenId.MY_ROLE:
-        return <MyRoleScreen onNavigate={onNavigate} />;
+        return <UserOrgInfoScreen onNavigate={onNavigate} />;
 
       // --- D. AI & TEAM ---
       case ScreenId.AI_ADVISORS_HOME:

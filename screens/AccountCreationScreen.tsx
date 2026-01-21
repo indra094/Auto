@@ -55,7 +55,6 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
       try {
         const res = await AuthService.getUserOrgInfo(user.id, ws.id);
         setRole(res?.role || null);
-        AuthService.updateUser({ role: res?.role });
       } catch (err) {
         console.error('Failed to load user org info', err);
       } finally {
@@ -80,7 +79,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
 
       const user = AuthService.getUser();
-      const ws = AuthService.getWorkspace(user?.current_org_id);
+      const ws = await AuthService.getWorkspace(user?.current_org_id);
       if (ws && user) {
         await AuthService.setUserOrgInfo(user.id, ws.id, { role });
       }

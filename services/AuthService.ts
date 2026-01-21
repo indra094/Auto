@@ -13,6 +13,8 @@ export interface User {
   current_org_id: string;
 }
 
+
+
 export interface Workspace {
   id: string;
   name: string;
@@ -28,7 +30,7 @@ export interface Workspace {
   onboardingStep?: number;
 };
 
-export interface MyRole {
+export interface UserOrgRole {
   title: string;
   responsibility: string;
   authority: string[]; // ['hiring', 'product', 'fundraising', 'financial']
@@ -42,6 +44,8 @@ export interface MyRole {
   expectations: string[];
   lastUpdated: string;
   status: 'Active' | 'Advisory' | 'Inactive';
+  permission_level: string;
+  role: string;
 }
 
 let workspaceChangeListeners: ((w: Workspace | null) => void)[] = [];
@@ -113,31 +117,9 @@ export const AuthService = {
     return users || [];
   },
 
-  getMyRole: (): MyRole => {
-    const role = DB.getItem<MyRole | null>('myRole', null);
-    if (!role) {
-      // Return default empty role instead of throwing error to allow app to load
-      return {
-        title: '',
-        responsibility: '',
-        authority: [],
-        commitment: 0,
-        startDate: '',
-        plannedChange: 'none',
-        salary: 0,
-        bonus: '',
-        equity: 0,
-        vesting: '',
-        expectations: [],
-        lastUpdated: new Date().toISOString().split('T')[0],
-        status: 'Active'
-      };
-    }
-    return role;
-  },
 
   getUserOrgInfo: async (userId: string, orgId: string) => {
-    return api.get(`/auth/user-org-info?user_id=${userId}&org_id=${orgId}`);
+    return await (api.get(`/auth/user-org-info?user_id=${userId}&org_id=${orgId}`));
   },
 
   syncState: async (): Promise<void> => {
@@ -161,14 +143,14 @@ export const AuthService = {
 
       console.log("in sync state", activeWorkspace);
 
-      // 2. Sync Role from user-org-info (instead of myrole)
+      // 2. Sync Role from user-org-info (instead of UserOrgInfo)
       if (activeWorkspace) {
         const orgInfo = await api.get(
           `/auth/user-org-info?user_id=${user.id}&org_id=${activeWorkspace.id}`
         );
 
         if (orgInfo?.role) {
-          DB.setItem('myRole', orgInfo.role);
+          DB.setItem('UserOrgInfo', orgInfo.role);
         }
       }
 
@@ -196,11 +178,11 @@ export const AuthService = {
     return user;
   },
 
-  createUserForOrg: async (fullName: string, email: string, orgID: string, role: string): Promise<User> => {
+  createUserForOrg: async (fullName: string, email: string, orgID: string, status: string, role: string): Promise<User> => {
     let user;
 
     try {
-      user = await api.post('/auth/user', { fullName, email, org_id: orgID });
+      user = await api.post('/auth/user', { fullName, email, org_id: orgID, status: status });
     } catch (err: any) {
       console.log("err:", err);
       const detail = err?.message || "";
@@ -218,7 +200,8 @@ export const AuthService = {
     return await api.post('/auth/set-user-org-info', {
       user_id: user.id,
       org_id: orgID,
-      role
+      role,
+      permission_level: role === "Founder" ? "ADMIN" : "READ"
     });
   },
 
@@ -226,8 +209,7 @@ export const AuthService = {
     let user: User | null = null;
 
     try {
-
-      user = await api.post("/auth/signup", { fullName, email });
+      user = await api.post("/auth/signup", { fullName, email, status: "Active" });
       const ws = await api.post("/auth/workspace", { email });
       await AuthService.setCurrentWorkspace(ws);
     } catch (err: any) {
@@ -259,7 +241,7 @@ export const AuthService = {
   logout: () => {
     localStorage.removeItem('user');
     localStorage.removeItem('workspace');
-    localStorage.removeItem('myRole');
+    localStorage.removeItem('UserOrgInfo');
     localStorage.removeItem('lastActivity');
   },
 
@@ -311,7 +293,8 @@ export const AuthService = {
     return await api.post('/auth/set-user-org-info', {
       user_id: userId,
       org_id: orgId,
-      ...data
+      ...data,
+      permission_level: data.role === "Founder" ? "ADMIN" : "READ"
     });
   },
 

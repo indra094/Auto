@@ -18,11 +18,32 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [inviteEmail, setInviteEmail] = React.useState('');
   const [inviteName, setInviteName] = React.useState('');
   const [showAddFounder, setShowAddFounder] = useState(false);
+  const currentUser = AuthService.getUser();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+
+
+  const loadPermission = async () => {
+    if (!currentUser?.id || !currentUser?.current_org_id) return;
+
+    try {
+      const info = await AuthService.getUserOrgInfo(
+        currentUser.id,
+        currentUser.current_org_id
+      );
+      setIsAdmin(info?.permission_level === "ADMIN");
+    } catch (err) {
+      console.error("Failed to load user permission", err);
+    }
+  };
+
+
   const loadUsers = async () => {
     const user = AuthService.getUser();
     if (!user) return;
 
     try {
+      console.log("founders list screen user" + user);
       // NEW: load all users in this org
       const orgUsers = await AuthService.getUsersForOrg(user.current_org_id);
       setUsers(orgUsers || []);
@@ -33,9 +54,30 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
       setIsLoading(false);
     }
   };
+
   React.useEffect(() => {
+    loadPermission();
     loadUsers();
   }, []);
+
+
+  const handleRemoveUser = async (userId: string) => {
+    if (!currentUser) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this user from the organization?"
+    );
+    if (!confirmed) return;
+
+    try {
+      // await AuthService.removeUserFromOrg(userId, currentUser.current_org_id);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to remove user");
+    }
+  };
+
 
   const handleInvite = async () => {
     if (!inviteEmail || !inviteName) return;
@@ -113,18 +155,50 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
               <div className="text-slate-500">No users found in this organization.</div>
             ) : (
               users.map((u) => (
-                <div key={u.id} className="flex justify-between items-center border border-slate-100 rounded-xl p-3">
+                <div
+                  key={u.id}
+                  className="flex justify-between items-center border border-slate-100 rounded-xl p-3"
+                >
+                  {/* Left */}
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-slate-600" />
                     <div>
                       <div className="font-bold text-slate-900">{u.fullName}</div>
                       <div className="text-xs text-slate-500">{u.email}</div>
+
+                      {/* Status */}
+                      <div className="text-xs mt-1">
+                        <span
+                          className={`px-2 py-0.5 rounded-full font-medium ${u.status === "Active"
+                            ? "bg-green-50 text-green-700"
+                            : "bg-yellow-50 text-yellow-700"
+                            }`}
+                        >
+                          {u.status || "Pending"}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <Badge color="indigo">{u.role || "Member"}</Badge>
+                  {/* Right */}
+                  <div className="flex items-center gap-3">
+                    <Badge color={u.permission_level === "ADMIN" ? "indigo" : "slate"}>
+                      {u.permission_level || "Member"}
+                    </Badge>
+
+                    {/* Remove action (ADMIN only, not self) */}
+                    {isAdmin && u.id !== currentUser?.id && (
+                      <button
+                        onClick={() => handleRemoveUser(u.id)}
+                        className="text-xs text-red-600 hover:text-red-700 font-semibold"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))
+
             )}
           </div>
         )}
@@ -189,6 +263,7 @@ export const AddFounderPanel = ({
         name,
         email,
         orgID,
+        "Pending",
         role
       );
 

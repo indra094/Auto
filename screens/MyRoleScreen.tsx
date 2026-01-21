@@ -5,20 +5,21 @@ import {
     Briefcase, Clock, DollarSign, Target, AlertTriangle,
     History, Shield, CheckCircle2, Save, Sparkles, ChevronRight
 } from 'lucide-react';
-import { AuthService, MyRole } from '../services/AuthService';
+import { AuthService, UserOrgInfo } from '../services/AuthService';
 
 interface ScreenProps {
     onNavigate: (id: ScreenId) => void;
 }
 
-export const MyRoleScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-    const [role, setRole] = useState<MyRole>(AuthService.getMyRole());
+export const UserOrgInfoScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
+    const user = AuthService.getUser();
+    const [role, setRole] = useState<UserOrgInfo>(AuthService.getUserOrgInfo(user.id, user.current_org_id));
     const [isSaving, setIsSaving] = useState(false);
-    const workspace = AuthService.getWorkspace();
+    const workspace = AuthService.getWorkspace(user.current_org_id);
 
-    const handleSave = async (updates: Partial<MyRole>) => {
+    const handleSave = async (updates: Partial<UserOrgInfo>) => {
         setIsSaving(true);
-        const updated = await AuthService.updateMyRole(updates);
+        const updated = await AuthService.setUserOrgInfo(user.id, user.current_org_id, updates);
         setRole(updated);
         setIsSaving(false);
     };

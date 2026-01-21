@@ -131,6 +131,7 @@ export const Layout: React.FC = () => {
   useEffect(() => {
     const refreshData = async () => {
       const u = AuthService.getUser();
+      console.log("layout user" + u);
       const user = AuthService.getUserByEmail(u.email);
       const w = await AuthService.getWorkspace((await user).current_org_id);
 
