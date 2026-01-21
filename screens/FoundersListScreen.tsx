@@ -12,27 +12,29 @@ interface ScreenProps {
 
 export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [founders, setFounders] = React.useState<any[]>([]);
+  const [users, setUsers] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isInviting, setIsInviting] = React.useState(false);
   const [inviteEmail, setInviteEmail] = React.useState('');
   const [inviteName, setInviteName] = React.useState('');
   const [showAddFounder, setShowAddFounder] = useState(false);
-
-  React.useEffect(() => {
+  const loadUsers = async () => {
     const user = AuthService.getUser();
     if (!user) return;
 
-    const load = async () => {
-      try {
-        const data = await FounderService.getFounders(user.email);
-        setFounders(data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    load();
+    try {
+      // NEW: load all users in this org
+      const orgUsers = await AuthService.getUsersForOrg(user.current_org_id);
+      setUsers(orgUsers || []);
+      setFounders(orgUsers || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  React.useEffect(() => {
+    loadUsers();
   }, []);
 
   const handleInvite = async () => {
@@ -42,8 +44,6 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
     setIsInviting(true);
     try {
-      // Using the TeamService we just updated
-      // (Invite executive logic is mocked in TeamService to return success)
       alert(`Invite sent to ${inviteName} (${inviteEmail})! Transitions to 'Alignment' pending.`);
       setIsInviting(false);
       setInviteEmail('');
@@ -68,9 +68,6 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
           </p>
         </div>
         <div className="flex gap-4">
-          {/*<Button variant="secondary" onClick={() => setIsInviting(!isInviting)}>
-            {isInviting ? "Cancel" : "Invite Executive"}
-          </Button>*/}
           <Button onClick={() => setShowAddFounder(true)}>
             <Plus className="w-4 h-4" /> Add Founder
           </Button>
@@ -101,19 +98,52 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         </Button>
       </Card>
 
+      {/* NEW: Users list */}
+      <Card className="p-6 bg-white border-slate-100 shadow-sm">
+        <h3 className="text-lg font-bold mb-4">Users in this Organization</h3>
+
+        {isLoading ? (
+          <div className="flex items-center gap-2 text-slate-500">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading users...
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {users.length === 0 ? (
+              <div className="text-slate-500">No users found in this organization.</div>
+            ) : (
+              users.map((u) => (
+                <div key={u.id} className="flex justify-between items-center border border-slate-100 rounded-xl p-3">
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-slate-600" />
+                    <div>
+                      <div className="font-bold text-slate-900">{u.fullName}</div>
+                      <div className="text-xs text-slate-500">{u.email}</div>
+                    </div>
+                  </div>
+
+                  <Badge color="indigo">{u.role || "Member"}</Badge>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </Card>
+
       {showAddFounder && (
         <AddFounderPanel
           open={showAddFounder}
-          onClose={() => setShowAddFounder(false)}
+          onClose={async () => {
+            setShowAddFounder(false);
+            await loadUsers();   // 🔥 refresh users list
+          }}
           onSave={(data) => {
             setFounders([data, ...founders]);
             setShowAddFounder(false);
           }}
         />
+
       )}
-
-
-      {/* rest of your founder list */}
     </div>
   );
 };
@@ -136,12 +166,51 @@ export const AddFounderPanel = ({
   const [hours, setHours] = React.useState(40);
   const [equity, setEquity] = React.useState(50);
 
+  const [isSending, setIsSending] = React.useState(false);
+
   const summary = [
     role,
     team,
     `${hours} hrs/wk`,
     `${equity}% equity`,
   ].filter(Boolean).join(" • ");
+
+  const isValid = name.trim().length > 0 && email.trim().length > 0;
+
+  const handleSendInvite = async () => {
+    if (!isValid) return;
+
+    setIsSending(true);
+    const user = AuthService.getUser();
+    try {
+      const orgID = (await AuthService.getWorkspace(user.current_org_id))?.id ?? "";
+
+      const created = await AuthService.createUserForOrg(
+        name,
+        email,
+        orgID,
+        role
+      );
+
+      // Notify parent component
+      onSave({
+        id: created.id,
+        fullName: name,
+        email,
+        role,
+        team,
+        hours,
+        equity,
+      });
+
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send invite. Please try again.");
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -252,19 +321,14 @@ export const AddFounderPanel = ({
                 </div>
               </div>
 
-              {/* --- SPACED SUMMARY BOX --- */}
+              {/* Summary Box */}
               <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <div className="space-y-2">
                   <div className="font-medium text-slate-800">Summary</div>
-
                   <div className="text-slate-500">
-                    <div>{role} • {team}</div>
+                    <div>{summary}</div>
                     <div className="mt-1">• {hours} hrs/wk</div>
                     <div className="mt-1">• {equity}% equity</div>
-                  </div>
-
-                  <div className="text-xs text-slate-500 mt-2">
-                    This includes role, team, weekly hours, and equity share.
                   </div>
                 </div>
               </div>
@@ -272,9 +336,10 @@ export const AddFounderPanel = ({
               <Button
                 fullWidth
                 className="mt-5"
-                onClick={() => onSave({ name, email, role, team, hours, equity })}
+                disabled={!isValid || isSending}
+                onClick={handleSendInvite}
               >
-                Send Invite
+                {isSending ? "Sending..." : "Send Invite"}
               </Button>
             </Card>
 
@@ -285,3 +350,4 @@ export const AddFounderPanel = ({
     document.body
   );
 };
+

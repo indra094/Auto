@@ -8,6 +8,7 @@ import {
 import { ScreenContent } from '../screens/ScreenContent';
 import { AuthService } from '../services/AuthService';
 import { ProgressBar } from './UI';
+import type { User, Workspace } from '../services/AuthService';
 
 // BEFORE ONBOARDING - Minimal, completion-focused navigation
 const beforeOnboardingNav: NavGroup[] = [
@@ -111,7 +112,7 @@ const afterOnboardingNav: NavGroup[] = [
 type ScreenStatus = 'locked' | 'partial' | 'accessible';
 
 export const Layout: React.FC = () => {
-  const [workspace, setWorkspace] = useState(AuthService.getWorkspace());
+  const [workspace, setWorkspace] = useState(AuthService.getWorkspace(AuthService.getUser()?.current_org_id));
 
   const initialScreen = ScreenId.COMPANY_DASHBOARD;
 
@@ -130,20 +131,21 @@ export const Layout: React.FC = () => {
   useEffect(() => {
     const refreshData = async () => {
       const u = AuthService.getUser();
-      const w = AuthService.getWorkspace();
+      const user = AuthService.getUserByEmail(u.email);
+      const w = await AuthService.getWorkspace((await user).current_org_id);
 
-      setUser(u);
+      //setUser(user);
       setWorkspace(w);
 
       if (u) {
         try {
-          const list = await AuthService.getWorkspaces();
+          const list = await AuthService.getWorkspaces(u.email);
           setWorkspaces(list);
         } catch (e) {
           console.error("Layout: Error fetching workspaces", e);
         }
       }
-
+      console.log("here layout" + w);
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
         const progressMap = [0, 10, 50, 100];
@@ -152,7 +154,7 @@ export const Layout: React.FC = () => {
     };
 
     refreshData();
-    const interval = setInterval(refreshData, 3000); // every 5 mins
+    const interval = setInterval(refreshData, 3000); // every 5 seconds
 
     // Listen for workspace updates
     const unsubscribe = AuthService.onWorkspaceChange((w) => {

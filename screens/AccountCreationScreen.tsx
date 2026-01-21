@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ScreenId } from '../types';
 import { Button } from '../components/UI';
-import { User, Mail, Loader2, ArrowRight } from 'lucide-react';
+import { UserIcon, Mail, Loader2, ArrowRight } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
+import type { User, Workspace } from '../services/AuthService';
+
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
@@ -18,18 +20,32 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
   const [error, setError] = useState<string | null>(null);
   const [retryLocked, setRetryLocked] = useState(false);
   const [retryTimer, setRetryTimer] = useState(0);
-  const workspace = AuthService.getWorkspace();
-  const isOnboardingComplete = (workspace?.onboardingStep ?? 0) >= 3;
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
+  let currentUser: User | null = null;
+  let currentWorkspace: Workspace | null = null;
+
   const hasLoaded = useRef(false);
 
+  useEffect(() => {
+    const loadWorkspace = async () => {
+      const user = AuthService.getUser();
+      if (!user?.current_org_id) return;
 
+      const ws = await AuthService.getWorkspace(user.current_org_id);
+      setWorkspace(ws);
+      setIsOnboardingComplete((ws?.onboardingStep ?? 0) >= 3);
+    };
+
+    loadWorkspace();
+  }, []);
 
   useEffect(() => {
     if (hasLoaded.current) return;
     hasLoaded.current = true;
     const hydrateRoleFromOrg = async () => {
       const user = AuthService.getUser();
-      const ws = AuthService.getWorkspace();
+      const ws = AuthService.getWorkspace(user?.current_org_id);
 
       if (!user || !ws) {
         setRoleLoading(false);
@@ -62,9 +78,9 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
       // Only now do we call RPCs
       await AuthService.updateUser({ fullName, email });
 
-      const ws = AuthService.getWorkspace();
-      const user = AuthService.getUser();
 
+      const user = AuthService.getUser();
+      const ws = AuthService.getWorkspace(user?.current_org_id);
       if (ws && user) {
         await AuthService.setUserOrgInfo(user.id, ws.id, { role });
       }
@@ -108,7 +124,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
         <div>
           <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
           <div className="relative">
-            <User className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+            <UserIcon className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
             <input
               type="text"
               className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"

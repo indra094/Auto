@@ -55,6 +55,9 @@ export const AuthService = {
     return DB.getItem<User | null>('user', null);
   },
 
+  getCachedWorkspace: (): Workspace | null => {
+    return DB.getItem<Workspace | null>('workspace', null);
+  },
 
   fetchWorkspaceFromServer: async (workspaceId: string) => {
     const workspace = await api.get(`/auth/workspace/${workspaceId}`);
@@ -73,18 +76,15 @@ export const AuthService = {
     return analysis;
   },
 
-  getWorkspace: (): Workspace | null => {
-    if (!AuthService.isSessionValid()) {
-      return null;
-    }
-    return DB.getItem<Workspace | null>('workspace', null);
+  getWorkspace: async (orgId: string): Promise<Workspace | null> => {
+    // Handle potential null response if API fails
+    const res = await api.get(`/auth/workspace/${orgId}`);
+    return res || null;
   },
 
-  getWorkspaces: async (): Promise<Workspace[]> => {
-    const user = AuthService.getUser();
-    if (!user) return [];
+  getWorkspaces: async (email: string): Promise<Workspace[]> => {
     // Handle potential null response if API fails
-    const res = await api.get(`/auth/workspaces?email=${user.email}`);
+    const res = await api.get(`/auth/workspaces?email=${email}`);
     return res || [];
   },
 
@@ -106,6 +106,11 @@ export const AuthService = {
       DB.setItem('workspace', workspace);
     }
     return workspace;
+  },
+
+  getUsersForOrg: async (orgId: string): Promise<User[]> => {
+    const users = await api.get(`/auth/${orgId}/users`);
+    return users || [];
   },
 
   getMyRole: (): MyRole => {
@@ -150,15 +155,11 @@ export const AuthService = {
           workspaces.find((w: Workspace) => w.id === user.current_org_id) || null;
       }
 
-      if (!activeWorkspace && workspaces && workspaces.length > 0) {
-        activeWorkspace = workspaces[0];
-      }
-
       if (activeWorkspace) {
         DB.setItem('workspace', activeWorkspace);
       }
 
-      console.log("in sync state", workspaces);
+      console.log("in sync state", activeWorkspace);
 
       // 2. Sync Role from user-org-info (instead of myrole)
       if (activeWorkspace) {
@@ -187,6 +188,38 @@ export const AuthService = {
     await AuthService.syncState();
 
     return user;
+  },
+
+  getUserByEmail: async (email: string): Promise<User | null> => {
+    const user = await api.get(`/auth/user-by-email/${email}`);
+    DB.setItem('user', user);
+    return user;
+  },
+
+  createUserForOrg: async (fullName: string, email: string, orgID: string, role: string): Promise<User> => {
+    let user;
+
+    try {
+      user = await api.post('/auth/user', { fullName, email, org_id: orgID });
+    } catch (err: any) {
+      console.log("err:", err);
+      const detail = err?.message || "";
+
+      if (detail === "Email already registered") {
+        // If email already exists, continue with the next call
+        // fetch the existing user (you need an endpoint for this, or you can keep the returned id)
+        user = await api.get(`/auth/user-by-email/${email}`);
+      } else {
+        console.log("in here again", err)
+        throw err;
+      }
+    }
+
+    return await api.post('/auth/set-user-org-info', {
+      user_id: user.id,
+      org_id: orgID,
+      role
+    });
   },
 
   signup: async (fullName: string, email: string): Promise<User> => {
