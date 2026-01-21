@@ -110,9 +110,11 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
           </p>
         </div>
         <div className="flex gap-4">
-          <Button onClick={() => setShowAddFounder(true)}>
-            <Plus className="w-4 h-4" /> Add Founder
-          </Button>
+          {isAdmin && (
+            <Button onClick={() => setShowAddFounder(true)}>
+              <Plus className="w-4 h-4" /> Add Founder
+            </Button>
+          )}
         </div>
       </header>
 
