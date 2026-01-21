@@ -45,7 +45,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     hasLoaded.current = true;
     const hydrateRoleFromOrg = async () => {
       const user = AuthService.getUser();
-      const ws = AuthService.getWorkspace(user?.current_org_id);
+      const ws = await AuthService.getWorkspace(user?.current_org_id);
 
       if (!user || !ws) {
         setRoleLoading(false);

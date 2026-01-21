@@ -303,7 +303,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         if (!active) return;
         // Always fetch latest workspace info when screen is opened
         const fetchWorkspace = async () => {
-            const ws1 = await AuthService.getWorkspace();
+            const ws1 = AuthService.getCachedWorkspace();
             if (!ws1) return;
             console.log("here")
             const ws = await AuthService.fetchWorkspaceFromServer(ws1.id);

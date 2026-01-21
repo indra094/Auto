@@ -144,9 +144,9 @@ export const AuthService = {
       console.log("in sync state", activeWorkspace);
 
       // 2. Sync Role from user-org-info (instead of UserOrgInfo)
-      if (activeWorkspace) {
+      if (user) {
         const orgInfo = await api.get(
-          `/auth/user-org-info?user_id=${user.id}&org_id=${activeWorkspace.id}`
+          `/auth/user-org-info?user_id=${user.id}&org_id=${user.current_org_id}`
         );
 
         if (orgInfo?.role) {
