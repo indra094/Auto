@@ -12,7 +12,6 @@ interface ScreenProps {
 
 export const TeamEmployeesScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [founders, setFounders] = useState<Founder[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
@@ -26,7 +25,7 @@ export const TeamEmployeesScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         const eData = await TeamService.getEmployees(user.email);
         const fData = await FounderService.getFounders(user.email);
         setEmployees(eData);
-        setFounders(fData);
+
       } catch (err) {
         console.error(err);
       } finally {

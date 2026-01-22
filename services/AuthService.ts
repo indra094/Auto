@@ -11,6 +11,16 @@ export interface User {
   role?: string;
   avatarUrl?: string;
   current_org_id: string;
+
+  title: string;
+  commitment: number;
+  equity: number;
+  vesting: string;
+  status: 'Active' | 'Pending Activation' | 'Inactive';
+  plannedChange: 'none' | 'reduce' | 'exit' | 'advisory';
+  startDate: string;
+  lastUpdated: string;
+  permission_level: 'ADMIN' | 'VIEWER';
 }
 
 
@@ -30,23 +40,20 @@ export interface Workspace {
   onboardingStep?: number;
 };
 
-export interface UserOrgRole {
+export interface UserOrgInfo {
+  user_id: string;
   title: string;
-  responsibility: string;
-  authority: string[]; // ['hiring', 'product', 'fundraising', 'financial']
-  commitment: number; // hrs/week
-  startDate: string;
-  plannedChange: string; // 'none' | 'reduce' | 'exit' | 'advisory'
-  salary: number;
-  bonus: string;
+  role: string;
+  commitment: number;
   equity: number;
   vesting: string;
-  expectations: string[];
+  status: 'Active' | 'Pending Activation' | 'Inactive';
+  plannedChange: 'none' | 'reduce' | 'exit' | 'advisory';
+  startDate: string;
   lastUpdated: string;
-  status: 'Active' | 'Advisory' | 'Inactive';
-  permission_level: string;
-  role: string;
+  permission_level: 'ADMIN' | 'VIEWER';
 }
+
 
 let workspaceChangeListeners: ((w: Workspace | null) => void)[] = [];
 
@@ -78,12 +85,6 @@ export const AuthService = {
       DB.setItem('ideaAnalysis', analysis);
     }
     return analysis;
-  },
-
-  getWorkspace: async (orgId: string): Promise<Workspace | null> => {
-    // Handle potential null response if API fails
-    const res = await api.get(`/auth/workspace/${orgId}`);
-    return res || null;
   },
 
   getWorkspaces: async (email: string): Promise<Workspace[]> => {
@@ -178,7 +179,7 @@ export const AuthService = {
     return user;
   },
 
-  createUserForOrg: async (fullName: string, email: string, orgID: string, status: string, role: string): Promise<User> => {
+  createUserForOrg: async (fullName: string, email: string, orgID: string, status: string, role: string, permission_level: string, equity: number, vesting: string, commitment: number): Promise<User> => {
     let user;
 
     try {
@@ -200,8 +201,11 @@ export const AuthService = {
     return await api.post('/auth/set-user-org-info', {
       user_id: user.id,
       org_id: orgID,
-      role,
-      permission_level: role === "Founder" ? "ADMIN" : "READ"
+      role: role,
+      permission_level: permission_level,
+      equity: equity,
+      vesting: vesting,
+      commitment: commitment
     });
   },
 
@@ -289,12 +293,15 @@ export const AuthService = {
     return data;
   },
 
-  setUserOrgInfo: async (userId: string, orgId: string, data: { role?: string, equity?: number }) => {
+  setUserOrgInfo: async (userId: string, orgId: string, role: string, permission_level: string, equity: number, vesting: string, commitment: number) => {
     return await api.post('/auth/set-user-org-info', {
       user_id: userId,
       org_id: orgId,
-      ...data,
-      permission_level: data.role === "Founder" ? "ADMIN" : "READ"
+      role: role,
+      permission_level: permission_level,
+      equity: equity,
+      vesting: vesting,
+      commitment: commitment
     });
   },
 

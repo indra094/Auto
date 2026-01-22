@@ -32,7 +32,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
       const user = AuthService.getUser();
       if (!user?.current_org_id) return;
 
-      const ws = await AuthService.getWorkspace(user.current_org_id);
+      const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
       setWorkspace(ws);
       setIsOnboardingComplete((ws?.onboardingStep ?? 0) >= 3);
     };
@@ -45,7 +45,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     hasLoaded.current = true;
     const hydrateRoleFromOrg = async () => {
       const user = AuthService.getUser();
-      const ws = await AuthService.getWorkspace(user?.current_org_id);
+      const ws = await AuthService.fetchWorkspaceFromServer(user?.current_org_id);
 
       if (!user || !ws) {
         setRoleLoading(false);
@@ -79,9 +79,9 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
 
       const user = AuthService.getUser();
-      const ws = await AuthService.getWorkspace(user?.current_org_id);
+      const ws = await AuthService.fetchWorkspaceFromServer(user?.current_org_id);
       if (ws && user) {
-        await AuthService.setUserOrgInfo(user.id, ws.id, { role });
+        await AuthService.setUserOrgInfo(user.id, ws.id, role, "ADMIN", 100, "", 60);
       }
 
       if (ws && !isOnboardingComplete) {

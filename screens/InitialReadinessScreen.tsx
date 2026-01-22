@@ -9,7 +9,7 @@ interface ScreenProps {
 }
 
 export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const ws = AuthService.getWorkspace();
+  const ws = AuthService.fetchWorkspaceFromServer();
 
   // Compute score based on actual data presence
   const hasBasics = ws?.industry && ws?.geography && ws?.stage;
@@ -27,7 +27,7 @@ export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
   const finalizeSetup = async () => {
     try {
-      const ws = AuthService.getWorkspace();
+      const ws = AuthService.fetchWorkspaceFromServer();
       if (!ws?.id) throw new Error("Workspace not found");
 
       await AuthService.setOnboarding(ws.id, 3);

@@ -38,7 +38,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
     const load = async () => {
       setLoading(true);
-      const w = await AuthService.getWorkspace(user.current_org_id);
+      const w = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
       console.log("🔥 Workspace", w);
       setWorkspace(w);
 

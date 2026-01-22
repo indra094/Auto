@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { User, Plus, ShieldAlert, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
-import { FounderService } from '../services/FounderService';
+import { User, Plus, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
+//import { FounderService } from '../services/FounderService';
 import { AuthService } from '../services/AuthService';
 import ReactDOM from "react-dom";
 
@@ -11,7 +11,7 @@ interface ScreenProps {
 }
 
 export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const [founders, setFounders] = React.useState<any[]>([]);
+
   const [users, setUsers] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isInviting, setIsInviting] = React.useState(false);
@@ -22,7 +22,6 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
 
-
   const loadPermission = async () => {
     if (!currentUser?.id || !currentUser?.current_org_id) return;
 
@@ -31,7 +30,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         currentUser.id,
         currentUser.current_org_id
       );
-      setIsAdmin(info?.permission_level === "ADMIN");
+      setIsAdmin(info?.permissionLevel === "ADMIN");
     } catch (err) {
       console.error("Failed to load user permission", err);
     }
@@ -47,7 +46,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
       // NEW: load all users in this org
       const orgUsers = await AuthService.getUsersForOrg(user.current_org_id);
       setUsers(orgUsers || []);
-      setFounders(orgUsers || []);
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -146,6 +145,11 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
       <Card className="p-6 bg-white border-slate-100 shadow-sm">
         <h3 className="text-lg font-bold mb-4">Users in this Organization</h3>
 
+        {/* READ-ONLY EXPLANATION */}
+        <p className="text-xs text-slate-400 mb-4">
+          Equity and commitments reflect the current active agreement.
+        </p>
+
         {isLoading ? (
           <div className="flex items-center gap-2 text-slate-500">
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -153,74 +157,140 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
           </div>
         ) : (
           <div className="space-y-3">
-            {users.length === 0 ? (
-              <div className="text-slate-500">No users found in this organization.</div>
-            ) : (
-              users.map((u) => (
-                <div
-                  key={u.id}
-                  className="flex justify-between items-center border border-slate-100 rounded-xl p-3"
-                >
-                  {/* Left */}
-                  <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-slate-600" />
-                    <div>
-                      <div className="font-bold text-slate-900">{u.fullName}</div>
-                      <div className="text-xs text-slate-500">{u.email}</div>
-
-                      {/* Status */}
-                      <div className="text-xs mt-1">
-                        <span
-                          className={`px-2 py-0.5 rounded-full font-medium ${u.status === "Active"
-                            ? "bg-green-50 text-green-700"
-                            : "bg-yellow-50 text-yellow-700"
-                            }`}
-                        >
-                          {u.status || "Pending"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right */}
-                  <div className="flex items-center gap-3">
-                    <Badge color={u.permission_level === "ADMIN" ? "indigo" : "slate"}>
-                      {u.permission_level || "Member"}
-                    </Badge>
-
-                    {/* Remove action (ADMIN only, not self) */}
-                    {isAdmin && u.id !== currentUser?.id && (
-                      <button
-                        onClick={() => handleRemoveUser(u.id)}
-                        className="text-xs text-red-600 hover:text-red-700 font-semibold"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
+            {
+              users.length === 0 ? (
+                <div className="text-slate-500">
+                  No users found. {isAdmin ? "Use Add Founder to invite new users." : "Contact your admin to add users."}
                 </div>
-              ))
+              ) : (
+                users.map((u) => {
+                  const isSelf = u.id === currentUser?.id;
 
-            )}
-          </div>
-        )}
-      </Card>
+                  return (
+                    <div
+                      key={u.id}
+                      className="border border-slate-100 rounded-xl p-6 space-y-4 bg-white"
+                    >
+                      {/* Row 1: Identity */}
+                      <div className="flex justify-between items-start gap-4">
+                        <div>
+                          <div className="font-bold text-slate-900 flex items-center gap-2">
+                            <span>{u.fullName}</span>
 
-      {showAddFounder && (
+                            <span className="text-slate-400 font-normal">· {u.role}</span>
+
+                            <Badge
+                              color={u.permission_level === "ADMIN" ? "purple" : "slate"}
+                              title={
+                                u.permission_level === "ADMIN"
+                                  ? "ADMIN: Can update equity, remove founders, and edit permissions."
+                                  : "MEMBER: Can only view details."
+                              }
+                            >
+                              {u.permissionLevel}
+                            </Badge>
+                          </div>
+
+                          <div className="text-xs text-slate-500">
+                            Joined on {u.startDate || "—"}
+                          </div>
+                        </div>
+
+                        <Badge
+                          color={
+                            u.status === "Active"
+                              ? "green"
+                              : u.status === "Pending Activation"
+                                ? "yellow"
+                                : "slate"
+                          }
+                        >
+                          {u.status}
+                        </Badge>
+                      </div>
+
+                      {/* Row 2: Commitment */}
+                      {/* Row 2: Time Commitment */}
+                      <div className="flex justify-between items-center text-sm">
+                        <div className="text-xs text-slate-500">
+                          Time Commitment
+                        </div>
+
+                        <div className="font-semibold text-slate-900">
+                          {u.commitment} hrs / week
+                        </div>
+                      </div>
+
+
+                      {/* Row 3: Equity + Vesting */}
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <div>
+                            <div className="text-xs text-slate-500 mb-1">
+                              Equity
+                            </div>
+                            <div className="font-medium text-slate-900">
+                              {u.equity}%
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="text-xs text-slate-500 mb-1">Vesting</div>
+                          <div className="font-medium text-slate-900">
+                            {u.vesting && u.vesting.trim() !== "" ? u.vesting : (
+                              <span className="italic text-slate-500">Not set</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row 4:  Audit */}
+
+                      <div className="flex justify-between items-center text-xs text-slate-500">
+
+
+                        <div className="flex items-center gap-6">
+                          <span>Last updated: {u.lastUpdated}</span>
+
+                          {isAdmin && !isSelf && (
+                            <button
+                              title="Remove user from organization (Admin only)"
+                              onClick={() => handleRemoveUser(u.id)}
+                              className="text-red-500 hover:underline font-medium"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  );
+                })
+              )}
+          </div >
+        )
+        }
+      </Card >
+
+      {isAdmin && showAddFounder && (
         <AddFounderPanel
           open={showAddFounder}
+          isAdmin={isAdmin}
           onClose={async () => {
             setShowAddFounder(false);
-            await loadUsers();   // 🔥 refresh users list
+            await loadUsers();
           }}
-          onSave={(data) => {
-            setFounders([data, ...founders]);
+          onSave={() => {
             setShowAddFounder(false);
           }}
         />
-
       )}
-    </div>
+
+    </div >
   );
 };
 
@@ -228,56 +298,63 @@ export const AddFounderPanel = ({
   open,
   onClose,
   onSave,
+  isAdmin
 }: {
   open: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  isAdmin: boolean;
 }) => {
   if (!open) return null;
 
-  const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [role, setRole] = React.useState("CEO");
-  const [team, setTeam] = React.useState("Product");
-  const [hours, setHours] = React.useState(40);
-  const [equity, setEquity] = React.useState(50);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("Founder");
+  const [commitment, setCommitment] = useState(40);
+  const [equity, setEquity] = useState(0);
+  const [vesting, setVesting] = useState("4y / 1y cliff");
+  const [permissionLevel, setPermissionLevel] = useState("MEMBER");
+  const [isSending, setIsSending] = useState(false);
 
-  const [isSending, setIsSending] = React.useState(false);
+  const user = AuthService.getUser();
+
+  const isValid = name.trim().length > 0 && email.trim().length > 0;
 
   const summary = [
     role,
-    team,
-    `${hours} hrs/wk`,
+    `${commitment} hrs/wk`,
     `${equity}% equity`,
-  ].filter(Boolean).join(" • ");
-
-  const isValid = name.trim().length > 0 && email.trim().length > 0;
+  ].join(" • ");
 
   const handleSendInvite = async () => {
     if (!isValid) return;
 
     setIsSending(true);
-    const user = AuthService.getUser();
     try {
-      const orgID = (await AuthService.getWorkspace(user.current_org_id))?.id ?? "";
+      const orgID =
+        (await AuthService.fetchWorkspaceFromServer(user.current_org_id))?.id ?? "";
 
       const created = await AuthService.createUserForOrg(
         name,
         email,
         orgID,
-        "Pending",
-        role
+        "Pending Activation",
+        role,
+        permissionLevel,
+        equity,
+        vesting,
+        commitment,
       );
 
-      // Notify parent component
       onSave({
         id: created.id,
         fullName: name,
         email,
         role,
-        team,
-        hours,
+        commitment,
         equity,
+        vesting,
+        permissionLevel: permissionLevel,
       });
 
       onClose();
@@ -288,10 +365,10 @@ export const AddFounderPanel = ({
       setIsSending(false);
     }
   };
-
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <Card className="w-full max-w-2xl max-h-[70vh] p-6 overflow-y-auto">
+
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div>
@@ -300,93 +377,148 @@ export const AddFounderPanel = ({
               Invite a member and assign a role.
             </p>
           </div>
-          <Button variant="secondary" onClick={onClose}>Close</Button>
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
         </div>
 
-        {/* Main Grid */}
         <div className="grid grid-cols-12 gap-4">
+
           {/* Left: Form */}
-          <div className="col-span-7 space-y-3">
-            <input
-              className="w-full p-3 rounded-xl border border-slate-200"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+          <div className="col-span-7 space-y-4">
 
-            <input
-              className="w-full p-3 rounded-xl border border-slate-200"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            {/* Full Name */}
+            <div>
+              <input
+                className="w-full p-3 rounded-xl border border-slate-200"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <div className="text-[10px] text-slate-400 mt-1">
+                The full name of the person you’re inviting.
+              </div>
+            </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            {/* Email */}
+            <div>
+              <input
+                className="w-full p-3 rounded-xl border border-slate-200"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <div className="text-[10px] text-slate-400 mt-1">
+                The email address of the user you’re inviting.
+              </div>
+            </div>
+
+            {/* Role */}
+            <div>
               <select
-                className="p-3 rounded-xl border border-slate-200"
+                className="w-full p-3 rounded-xl border border-slate-200"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
+                <option>Founder</option>
                 <option>CEO</option>
                 <option>CTO</option>
-                <option>Product</option>
-                <option>Designer</option>
-                <option>Marketing</option>
+                <option>CPO</option>
+                <option>Advisor</option>
               </select>
-
-              <select
-                className="p-3 rounded-xl border border-slate-200"
-                value={team}
-                onChange={(e) => setTeam(e.target.value)}
-              >
-                <option>Product</option>
-                <option>Engineering</option>
-                <option>Design</option>
-                <option>Marketing</option>
-                <option>Operations</option>
-              </select>
+              <div className="text-[10px] text-slate-400 mt-1">
+                Select the role they will hold in the organization.
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <input
-                  className="w-full p-3 rounded-xl border border-slate-200"
-                  type="number"
-                  placeholder="Weekly Hours"
-                  value={hours}
-                  onChange={(e) => setHours(Number(e.target.value))}
-                />
-                <div className="text-xs text-slate-500 mt-1">
-                  Weekly commitment in hours
-                </div>
+            {/* Permission Level */}
+            <div>
+              <select
+                className="w-full p-3 rounded-xl border border-slate-200"
+                value={permissionLevel}
+                onChange={(e) => setPermissionLevel(e.target.value)}
+              >
+                <option value="ADMIN">ADMIN</option>
+                <option value="VIEWER">VIEWER</option>
+              </select>
+              <div className="text-[10px] text-slate-400 mt-1">
+                Permission level determines access and control in the org.
               </div>
+            </div>
 
-              <div>
-                <input
-                  className="w-full p-3 rounded-xl border border-slate-200"
-                  type="number"
-                  placeholder="Equity %"
-                  value={equity}
-                  onChange={(e) => setEquity(Number(e.target.value))}
-                />
-                <div className="text-xs text-slate-500 mt-1">
-                  Equity share in percentage
+            {/* Commitment slider (ADMIN only movable) */}
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">
+                Weekly Commitment ({commitment} hrs)
+              </label>
+              <input
+                type="range"
+                min={0}
+                max={80}
+                step={1}
+                value={commitment}
+                disabled={!isAdmin}
+                onChange={(e) =>
+                  isAdmin && setCommitment(Number(e.target.value))
+                }
+                className="w-full disabled:opacity-50"
+              />
+              {!isAdmin && (
+                <div className="text-[10px] text-slate-400 mt-1">
+                  Only ADMIN can set commitment during invite
                 </div>
+              )}
+            </div>
+
+            {/* Equity (ADMIN only) */}
+            <div>
+              <input
+                className="w-full p-3 rounded-xl border border-slate-200 disabled:bg-slate-100"
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                placeholder="Equity %"
+                value={equity}
+                disabled={!isAdmin}
+                onChange={(e) => setEquity(Number(e.target.value))}
+              />
+              {!isAdmin && (
+                <div className="text-[10px] text-slate-400 mt-1">
+                  Equity can only be assigned by ADMIN
+                </div>
+              )}
+              {/* Add this helper text */}
+              <div className="text-[10px] text-slate-400 mt-1">
+                Percentage of company ownership granted.
+              </div>
+            </div>
+
+            {/* Vesting */}
+            <div>
+              <input
+                className="w-full p-3 rounded-xl border border-slate-200"
+                placeholder="Vesting (e.g. 4y / 1y cliff)"
+                value={vesting}
+                onChange={(e) => setVesting(e.target.value)}
+              />
+              <div className="text-[10px] text-slate-400 mt-1">
+                Vesting schedule for the equity granted.
               </div>
             </div>
           </div>
 
           {/* Right: Preview */}
-          <div className="col-span-5 space-y-3">
+          <div className="col-span-5">
             <Card className="p-6 bg-white border-slate-100">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-lg">Invite Preview</h4>
                 <span className="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700">
-                  Pending
+                  Pending Activation
                 </span>
               </div>
 
-              <div className="mt-5 space-y-4 text-sm text-slate-600">
+              <div className="mt-5 space-y-3 text-sm text-slate-600">
                 <div className="flex justify-between">
                   <span className="font-medium text-slate-800">Invitee</span>
                   <span>{name || "—"}</span>
@@ -396,18 +528,16 @@ export const AddFounderPanel = ({
                   <span className="font-medium text-slate-800">Email</span>
                   <span>{email || "—"}</span>
                 </div>
+
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-800">Authority</span>
+                  <span>{permissionLevel}</span>
+                </div>
               </div>
 
-              {/* Summary Box */}
               <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="space-y-2">
-                  <div className="font-medium text-slate-800">Summary</div>
-                  <div className="text-slate-500">
-                    <div>{summary}</div>
-                    <div className="mt-1">• {hours} hrs/wk</div>
-                    <div className="mt-1">• {equity}% equity</div>
-                  </div>
-                </div>
+                <div className="font-medium text-slate-800 mb-2">Summary</div>
+                <div className="text-slate-500 text-sm">{summary}</div>
               </div>
 
               <Button
@@ -419,12 +549,12 @@ export const AddFounderPanel = ({
                 {isSending ? "Sending..." : "Send Invite"}
               </Button>
             </Card>
-
           </div>
         </div>
       </Card>
     </div>,
     document.body
   );
+
 };
 

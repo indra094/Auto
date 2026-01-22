@@ -15,11 +15,11 @@ export const UserOrgInfoScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     const user = AuthService.getUser();
     const [role, setRole] = useState<UserOrgInfo>(AuthService.getUserOrgInfo(user.id, user.current_org_id));
     const [isSaving, setIsSaving] = useState(false);
-    const workspace = AuthService.getWorkspace(user.current_org_id);
+    const workspace = AuthService.fetchWorkspaceFromServer(user.current_org_id);
 
     const handleSave = async (updates: Partial<UserOrgInfo>) => {
         setIsSaving(true);
-        const updated = await AuthService.setUserOrgInfo(user.id, user.current_org_id, updates);
+        const updated = await AuthService.setUserOrgInfo(user.id, user.current_org_id, role.role, role.permission_level, role.equity, role.vesting, role.commitment);
         setRole(updated);
         setIsSaving(false);
     };

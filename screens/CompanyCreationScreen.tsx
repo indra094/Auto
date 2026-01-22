@@ -359,7 +359,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
     useEffect(() => {
         if (!active) return;
         const fetchStep = async () => {
-            const ws = await AuthService.getWorkspace();
+            const ws = await AuthService.fetchWorkspaceFromServer();
             setOnboardingStep(ws?.onboardingStep || 0);
         };
         fetchStep();

@@ -112,7 +112,7 @@ const afterOnboardingNav: NavGroup[] = [
 type ScreenStatus = 'locked' | 'partial' | 'accessible';
 
 export const Layout: React.FC = () => {
-  const [workspace, setWorkspace] = useState(AuthService.getWorkspace(AuthService.getUser()?.current_org_id));
+  const [workspace, setWorkspace] = useState(AuthService.fetchWorkspaceFromServer(AuthService.getUser()?.current_org_id));
 
   const initialScreen = ScreenId.COMPANY_DASHBOARD;
 
@@ -133,7 +133,7 @@ export const Layout: React.FC = () => {
       const u = AuthService.getUser();
       console.log("layout user" + u);
       const user = AuthService.getUserByEmail(u.email);
-      const w = await AuthService.getWorkspace((await user).current_org_id);
+      const w = await AuthService.fetchWorkspaceFromServer((await user).current_org_id);
 
       //setUser(user);
       setWorkspace(w);

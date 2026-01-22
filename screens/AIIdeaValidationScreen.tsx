@@ -140,7 +140,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
     const fetchAnalysis = async () => {
         setIsLoading(true);
 
-        const ws = await AuthService.getWorkspace();
+        const ws = await AuthService.fetchWorkspaceFromServer();
         if (!ws) return;
 
         const analysis = await AuthService.fetchIdeaAnalysisFromServer(ws.id);
@@ -393,7 +393,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                                     className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white border-transparent font-bold py-3"
                                     onClick={async () => {
                                         try {
-                                            const ws = AuthService.getWorkspace();
+                                            const ws = AuthService.fetchWorkspaceFromServer();
                                             if (!ws?.id) throw new Error("Workspace not found");
 
                                             await AuthService.setOnboarding(ws.id, 4);
