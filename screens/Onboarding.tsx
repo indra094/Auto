@@ -33,7 +33,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
   </div>
 );
 
-export const InitialReadinessScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
+export const FoundersAlignmentScreen: React.FC<ScreenProps> = ({ onNavigate }) => (
   <div className="max-w-2xl mx-auto mt-8">
     <Card className="p-8 text-center">
       <div className="mb-6 flex justify-center">

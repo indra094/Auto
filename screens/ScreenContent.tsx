@@ -8,7 +8,7 @@ import { NotificationsScreen } from './NotificationsScreen';
 // Onboarding
 import { AccountCreationScreen } from './AccountCreationScreen';
 import { CompanyCreationScreen } from './CompanyCreationScreen';
-import { InitialReadinessScreen } from './InitialReadinessScreen';
+import { FoundersAlignmentScreen } from './FoundersAlignmentScreen';
 import { InvestorReadinessScreen } from './InvestorReadinessScreen';
 
 // Founders
@@ -119,7 +119,7 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
       case ScreenId.COMPANY_INFORMATION:
         return <CompanyCreationScreen onNavigate={onNavigate} active={true} />;
       case ScreenId.FOUNDERS_ALIGNMENT:
-        return <InitialReadinessScreen onNavigate={onNavigate} />;
+        return <FoundersAlignmentScreen onNavigate={onNavigate} />;
 
       // --- C. FOUNDERS & EQUITY ---
       case ScreenId.FOUNDERS_LIST:

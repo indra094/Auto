@@ -56,7 +56,7 @@ const afterOnboardingNav: NavGroup[] = [
       { id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
       { id: ScreenId.INVESTOR_READINESS, label: "Investor Readiness" }
       //{ id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
-      //      { id: ScreenId.FOUNDERS_ALIGNMENT, label: "Initial Readiness" },
+      //{ id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founder Alignment" },
       //{ id: ScreenId.STAGES_CAPITAL, label: "Stages & Capital" },
     ]
   }/*,
@@ -131,7 +131,7 @@ export const Layout: React.FC = () => {
   useEffect(() => {
     const refreshData = async () => {
       const u = AuthService.getUser();
-      console.log("layout user" + u);
+      console.log("layout user" + u.current_org_id);
       const user = AuthService.getUserByEmail(u.email);
       const w = await AuthService.fetchWorkspaceFromServer((await user).current_org_id);
 
@@ -146,7 +146,7 @@ export const Layout: React.FC = () => {
           console.error("Layout: Error fetching workspaces", e);
         }
       }
-      console.log("here layout" + w);
+      console.log("here layout" + u.current_org_id);
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
         const progressMap = [0, 10, 50, 100];

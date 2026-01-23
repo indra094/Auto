@@ -205,7 +205,8 @@ export const AuthService = {
       permission_level: permission_level,
       equity: equity,
       vesting: vesting,
-      commitment: commitment
+      commitment: commitment,
+      status: status
     });
   },
 
@@ -301,7 +302,8 @@ export const AuthService = {
       permission_level: permission_level,
       equity: equity,
       vesting: vesting,
-      commitment: commitment
+      commitment: commitment,
+      status: "Active"
     });
   },
 
