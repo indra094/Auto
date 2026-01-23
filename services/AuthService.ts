@@ -54,48 +54,6 @@ export interface UserOrgInfo {
   permission_level: 'ADMIN' | 'VIEWER';
 }
 
-export interface OrgFounderAlignment {
-  orgId: string;
-
-  // --- Overall ---
-  score: number;                // 0–100
-  riskLevel: "Low" | "Moderate" | "High";
-
-  // --- Factor breakdown ---
-  factors: {
-    timeCommitment: AlignmentMetric;
-    equityBalance: AlignmentMetric;
-    roleClarity: AlignmentMetric;
-    decisionAuthority: AlignmentMetric;
-  };
-
-  // --- Founder-level view ---
-  founders: {
-    userId: string;
-    name: string;
-    role: string;
-
-    commitmentHours: number;
-    equityPercent: number;
-    authority: "Final" | "Shared";
-
-    flags: AlignmentFlag[];
-  }[];
-
-  // --- Insight ---
-  primaryRisk:
-  | "TIME_IMBALANCE"
-  | "EQUITY_MISMATCH"
-  | "UNCLEAR_OWNERSHIP";
-
-  insight: string;
-
-  // --- Meta ---
-  generatedAt: string;
-  modelVersion: "v1";
-}
-
-
 let workspaceChangeListeners: ((w: Workspace | null) => void)[] = [];
 
 export const AuthService = {
@@ -202,6 +160,13 @@ export const AuthService = {
     }
   },
 
+  createOrUpdateFounderAlignment: (orgId: string) => {
+    return api.post(`/auth/${orgId}/founder-alignment`, {});
+  },
+
+  getFounderAlignment: (orgId: string) => {
+    return api.get(`/auth/${orgId}/founder-alignment`);
+  },
 
   login: async (email: string): Promise<User> => {
     const user = await api.post('/auth/login', { email });
