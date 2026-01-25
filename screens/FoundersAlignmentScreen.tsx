@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { NavGroup, ScreenId } from '../types';
 import {
   AlertTriangle,
   Brain,
@@ -16,7 +17,19 @@ interface FounderAlignment {
   insight: string;
 }
 
-export const FoundersAlignmentScreen: React.FC = () => {
+const factorTitles: Record<string, string> = {
+  commitment_alignment: "Commitment Alignment",
+  role_clarity: "Role Clarity",
+  authority_balance: "Authority Balance",
+  time_commitment_balance: "Time Commitment Balance",
+  equity_and_incentives: "Equity & Incentives",
+  risk_tolerance_alignment: "Risk Tolerance Alignment",
+  governance_and_decision_making: "Governance & Decision Making",
+};
+
+export const FoundersAlignmentScreen: React.FC = ({
+  onNavigate,
+}) => {
   const [alignment, setAlignment] = useState<FounderAlignment | null>(null);
   const [founders, setFounders] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,8 +46,10 @@ export const FoundersAlignmentScreen: React.FC = () => {
     const fetchAlignment = async () => {
       const data = await AuthService.getFounderAlignment(orgId);
 
-      if (data) {
+      if (data && data.alignment) {
         setAlignment(data.alignment);
+        //console.log("responsesize" + data.size)
+
         setQueueSize(data.size);   // queue size from response
         setUpdating(false);
         return true;
@@ -51,7 +66,7 @@ export const FoundersAlignmentScreen: React.FC = () => {
 
       // first call immediately
       const hasAlignment = await fetchAlignment();
-
+      //console.log("fetched")
       // set updating state based on availability
       if (!hasAlignment) setUpdating(true);
 
@@ -60,8 +75,11 @@ export const FoundersAlignmentScreen: React.FC = () => {
         const ready = await fetchAlignment();
 
         if (!ready) {
+
+
           // if alignment not ready and queue is empty, trigger background job
           if (queueSize === 0) {
+            //console.log("gonna update")
             AuthService.createOrUpdateFounderAlignment(orgId);
           }
           setUpdating(true);
@@ -218,28 +236,21 @@ export const FoundersAlignmentScreen: React.FC = () => {
         <>
           {/* Factor Breakdown */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {alignment?.factors.map((f) => (
-              <Card key={f.label} className="p-6">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-slate-700">
-                    {f.label}
-                  </span>
-                  {f.warn && (
-                    <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  )}
-                </div>
-                <div className="text-2xl font-black text-slate-900 mb-2">
-                  {f.score}
-                </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${f.warn ? "bg-amber-400" : "bg-emerald-400"}`}
-                    style={{ width: `${f.score}%` }}
-                  />
-                </div>
-              </Card>
-            ))}
+            {alignment &&
+              Object.entries(alignment.factors).map(([key, value]) => (
+                <Card key={key} className="p-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-semibold text-slate-700">
+                      {factorTitles[key] || key}
+                    </span>
+                  </div>
+                  <div className="text-sm text-slate-600">
+                    {value}
+                  </div>
+                </Card>
+              ))}
           </div>
+
 
           {/* Visual Model + Founder Table */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -289,7 +300,7 @@ export const FoundersAlignmentScreen: React.FC = () => {
                       <td>{f.role || "Founder"}</td>
                       <td>{f.commitment}h</td>
                       <td>{f.equity}%</td>
-                      <td>{f.title}</td>
+                      <td>{f.permissionLevel}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -302,12 +313,23 @@ export const FoundersAlignmentScreen: React.FC = () => {
             <h3 className="font-bold text-slate-800 mb-2">
               Alignment Risks Identified
             </h3>
-            <ul className="text-sm text-slate-600 space-y-1 list-disc list-inside">
-              {alignment?.risks.map((r, idx) => (
-                <li key={idx}>{r}</li>
+
+            <ul className="text-sm text-slate-600 space-y-4 list-none">
+              {alignment?.risks?.map((r, idx) => (
+                <li key={idx} className="border rounded p-3 bg-white shadow-sm">
+                  <div className="font-semibold">{r.risk}</div>
+                  <div className="text-xs text-red-600 font-medium">
+                    Severity: {r.severity}
+                  </div>
+                  <div className="mt-1">{r.description}</div>
+                  <div className="mt-2 text-xs text-slate-500">
+                    Affected roles: {r.affected_roles.join(", ")}
+                  </div>
+                </li>
               ))}
             </ul>
           </Card>
+
 
           {/* AI Insight */}
           <Card className="p-6 bg-slate-50">
@@ -332,13 +354,16 @@ export const FoundersAlignmentScreen: React.FC = () => {
             <ol className="space-y-2 text-sm text-slate-700 list-decimal list-inside">
               {alignment?.actions.map((a, idx) => (
                 <li key={idx}>
-                  {a.text} <Badge>{a.impact} Impact</Badge>
+                  {a.action} <Badge>{a.priority} Impact</Badge>
                 </li>
               ))}
             </ol>
 
             <div className="mt-6">
-              <Button className="flex items-center gap-2">
+              <Button
+                className="flex items-center gap-2"
+                onClick={() => onNavigate(ScreenId.FOUNDERS_LIST)}
+              >
                 Simulate Changes <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
