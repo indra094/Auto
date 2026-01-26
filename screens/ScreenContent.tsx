@@ -36,6 +36,7 @@ import { StagesCapitalScreen } from './StagesCapitalScreen';
 import { ValidationChecklistScreen } from './ValidationChecklistScreen';
 import { BuildStatusScreen } from './BuildStatusScreen';
 import { FinancialDashboardScreen } from './FinancialDashboardScreen';
+import { FinancialsScreen } from './FinancialsScreen';
 
 // External
 import { InvestorsListScreen } from './InvestorsListScreen';
@@ -89,7 +90,8 @@ const scrollableScreens = new Set([
   ScreenId.INCORPORATION_READINESS,
   ScreenId.PROCEED_ANYWAY,
   ScreenId.DOCUMENTS,
-  ScreenId.INVESTOR_READINESS
+  ScreenId.INVESTOR_READINESS,
+  ScreenId.FINANCIALS_ONBOARDING
 ]);
 
 export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNavigate }) => {
@@ -118,6 +120,8 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
         return <AccountCreationScreen onNavigate={onNavigate} />;
       case ScreenId.COMPANY_INFORMATION:
         return <CompanyCreationScreen onNavigate={onNavigate} active={true} />;
+      case ScreenId.FINANCIALS_ONBOARDING:
+        return <FinancialsScreen onNavigate={onNavigate} />;
       case ScreenId.FOUNDERS_ALIGNMENT:
         return <FoundersAlignmentScreen onNavigate={onNavigate} />;
 

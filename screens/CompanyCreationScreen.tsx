@@ -357,9 +357,11 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
     // Always get latest onboardingStep from workspace
     const [onboardingStep, setOnboardingStep] = useState(0);
     useEffect(() => {
+        const ws1 = AuthService.getCachedWorkspace();
+        if (!ws1) return;
         if (!active) return;
         const fetchStep = async () => {
-            const ws = await AuthService.fetchWorkspaceFromServer();
+            const ws = await AuthService.fetchWorkspaceFromServer(ws1.id);
             setOnboardingStep(ws?.onboardingStep || 0);
         };
         fetchStep();
@@ -529,7 +531,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                     )}
 
                     {/* Continue flow */}
-                    {onboardingStep !== 3 && (
+                    {onboardingStep !== 4 && (
                         <button
                             className="btn-primary"
                             onClick={handleCreate}
@@ -539,8 +541,8 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         </button>
                     )}
 
-                    {/* SAVE flow when onboardingStep === 3 */}
-                    {onboardingStep === 3 && (
+                    {/* SAVE flow when onboardingStep === 4 */}
+                    {onboardingStep === 4 && (
                         <button
                             className="btn-primary"
                             onClick={handleSave}
@@ -554,7 +556,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         <button
                             className="btn-primary btn-retry"
                             disabled={retryCooldown > 0}
-                            onClick={onboardingStep === 3 ? handleSave : handleCreate}
+                            onClick={onboardingStep === 4 ? handleSave : handleCreate}
                         >
                             {retryCooldown > 0
                                 ? `Retry available in ${retryCooldown}s`

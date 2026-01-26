@@ -49,6 +49,7 @@ export enum ScreenId {
   INCORPORATION_READINESS = 'INCORPORATION_READINESS',
   PROCEED_ANYWAY = 'PROCEED_ANYWAY',
   DOCUMENTS = 'DOCUMENTS',
+  FINANCIALS_ONBOARDING = 'FINANCIALS_ONBOARDING',
 }
 
 export interface NavGroup {
@@ -77,5 +78,20 @@ export interface Workspace {
 
   onboardingStep?: number;
 };
+
+export interface Financials {
+  org_id: string;
+  monthly_revenue?: number;
+  revenue_trend?: string;
+  revenue_stage?: string;
+  cash_in_bank?: number;
+  monthly_burn?: number;
+  cost_structure?: string;
+  pricing_model?: string;
+  price_per_customer?: number;
+  customers_in_pipeline?: number;
+  data_confidence?: string;
+  last_updated?: string;
+}
 
 export type ScreenStatus = 'accessible' | 'locked' | 'hidden';

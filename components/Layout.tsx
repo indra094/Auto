@@ -22,7 +22,8 @@ const beforeOnboardingNav: NavGroup[] = [
     label: "Get Started",
     screens: [
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
-      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" }
+      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
+      { id: ScreenId.FINANCIALS_ONBOARDING, label: "Financials" }
     ]
   }/*,
   {
@@ -36,11 +37,12 @@ const beforeOnboardingNav: NavGroup[] = [
 // AFTER ONBOARDING - Full operating system navigation
 const afterOnboardingNav: NavGroup[] = [
   {
-    label: "Dashboard & Information",
+    label: "Dashboard & Setup",
     screens: [
       { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" },
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Information" },
-      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" }
+      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
+      { id: ScreenId.FINANCIALS_ONBOARDING, label: "Financials" }
     ]
   },
   {
@@ -149,8 +151,8 @@ export const Layout: React.FC = () => {
       console.log("here layout" + u.current_org_id);
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
-        const progressMap = [0, 10, 50, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 3)]);
+        const progressMap = [0, 10, 50, 75, 100];
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 4)]);
       }
     };
 
@@ -165,8 +167,8 @@ export const Layout: React.FC = () => {
 
       // also update progress when workspace changes
       if (w) {
-        const progressMap = [0, 10, 50, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 3)]);
+        const progressMap = [0, 10, 50, 75, 100];
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 4)]);
       }
     });
 
@@ -203,6 +205,7 @@ export const Layout: React.FC = () => {
         { id: ScreenId.COMPANY_DASHBOARD, minStep: 0 },
         { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
         { id: ScreenId.COMPANY_INFORMATION, minStep: 2 },
+        { id: ScreenId.FINANCIALS_ONBOARDING, minStep: 3 },
       ];
 
       const onboardingStep = onboardingSteps.find(s => s.id === screenId);
@@ -256,11 +259,11 @@ export const Layout: React.FC = () => {
   const stage = workspace?.stage || "Onboarding";
 
   // Determine which navigation to show
-  const isActivationMode = (workspace?.onboardingStep || 0) < 3;
+  const isActivationMode = (workspace?.onboardingStep || 0) < 4;
   const currentNav = isActivationMode ? beforeOnboardingNav : afterOnboardingNav;
 
   // Hide search/notifications during early onboarding to minimize distraction
-  const isSetupMode = (workspace?.onboardingStep || 0) < 3;
+  const isSetupMode = (workspace?.onboardingStep || 0) < 4;
 
   return (
     <div className="flex h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">

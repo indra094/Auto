@@ -25,7 +25,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const isActivationMode = (workspace?.onboardingStep || 0) < 3;
+  const isActivationMode = (workspace?.onboardingStep || 0) < 4;
 
   // Simple MVP progress score
   const onboardingProgress = useMemo(() => {
@@ -89,6 +89,13 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       completed: (workspace?.onboardingStep || 0) >= 3,
       current: (workspace?.onboardingStep || 0) === 2,
       why: 'This affects how much money you need.',
+    },
+    {
+      id: ScreenId.FINANCIALS_ONBOARDING,
+      label: 'Financials',
+      completed: (workspace?.onboardingStep || 0) >= 4,
+      current: (workspace?.onboardingStep || 0) === 3,
+      why: 'This is information about your company\'s financials.',
     },
   ];
 

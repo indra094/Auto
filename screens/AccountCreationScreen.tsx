@@ -34,7 +34,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
       const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
       setWorkspace(ws);
-      setIsOnboardingComplete((ws?.onboardingStep ?? 0) >= 3);
+      setIsOnboardingComplete((ws?.onboardingStep ?? 0) >= 4);
     };
 
     loadWorkspace();

@@ -1,6 +1,7 @@
 
 import { DB } from './db';
 import { api } from './api';
+import { Financials } from '../types';
 
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
@@ -314,6 +315,14 @@ export const AuthService = {
   },
 
 
+
+  getFinancials: async (orgId: string): Promise<Financials | null> => {
+    return await api.get(`/auth/${orgId}/financials`);
+  },
+
+  updateFinancials: async (orgId: string, data: Financials): Promise<Financials> => {
+    return await api.put(`/auth/${orgId}/financials`, data);
+  },
 
   onWorkspaceChange: (listener: (w: Workspace | null) => void) => {
     workspaceChangeListeners.push(listener);
