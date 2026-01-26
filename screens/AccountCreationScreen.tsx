@@ -24,6 +24,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
   let currentUser: User | null = null;
   let currentWorkspace: Workspace | null = null;
+  const [industryExperience, setIndustryExperience] = useState<number | null>(null);
 
   const hasLoaded = useRef(false);
 
@@ -75,7 +76,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
     try {
       // Only now do we call RPCs
-      await AuthService.updateUser({ fullName, email });
+      await AuthService.updateUser({ fullName, email, industryExperience });
 
 
       const user = AuthService.getUser();
@@ -111,7 +112,6 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
 
   const roles = ['Founder', 'Executive', 'Investor', 'Advisor'];
-
   return (
     <div className="max-w-md mx-auto py-12 px-6">
       <header className="text-center mb-10">
@@ -129,11 +129,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
               className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
               placeholder="Full Name"
               value={fullName}
-              onChange={(e) => {
-                const val = e.target.value;
-                setFullName(val);
-
-              }}
+              onChange={(e) => setFullName(e.target.value)}
             />
           </div>
         </div>
@@ -147,10 +143,31 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
               className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
               placeholder="email@example.com"
               value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* NEW: Industry Experience */}
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+            Industry Experience (years) <span className="text-slate-400 font-normal">(optional)</span>
+          </label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+            <input
+              type="number"
+              min={0}
+              step={1}
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
+              placeholder="e.g. 3"
+              value={industryExperience ?? ''}
               onChange={(e) => {
                 const val = e.target.value;
-                setEmail(val);
-
+                const num = val === '' ? null : parseInt(val);
+                if (num === null || (Number.isInteger(num) && num >= 0)) {
+                  setIndustryExperience(num);
+                }
               }}
             />
           </div>
@@ -161,22 +178,18 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
             <button
               key={r}
               disabled={roleLoading}
-              onClick={() => {
-                setRole(r);
-
-              }}
+              onClick={() => setRole(r)}
               className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all
-        ${role === r
+              ${role === r
                   ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
                   : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'}
-        ${roleLoading ? 'opacity-50 cursor-not-allowed' : ''}
-      `}
+              ${roleLoading ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
             >
               {r}
             </button>
           ))}
         </div>
-
 
         <div className="pt-4">
           <Button
@@ -195,6 +208,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
               <>Save & Continue <ArrowRight className="w-6 h-6" /></>
             )}
           </Button>
+
           {error && (
             <p className="mt-3 text-sm text-red-500 text-center">
               {error}
@@ -202,6 +216,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
           )}
         </div>
       </div>
-    </div >
+    </div>
   );
+
 };

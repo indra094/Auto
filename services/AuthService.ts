@@ -22,6 +22,7 @@ export interface User {
   startDate: string;
   lastUpdated: string;
   permission_level: 'ADMIN' | 'VIEWER';
+  industryExperience: number;
 }
 
 
@@ -68,6 +69,10 @@ export const AuthService = {
 
   getCachedWorkspace: (): Workspace | null => {
     return DB.getItem<Workspace | null>('workspace', null);
+  },
+
+  getCachedUser: (): User | null => {
+    return DB.getItem<User | null>('user', null);
   },
 
   fetchWorkspaceFromServer: async (workspaceId: string) => {
@@ -163,6 +168,10 @@ export const AuthService = {
 
   createOrUpdateFounderAlignment: (orgId: string) => {
     return api.post(`/auth/${orgId}/founder-alignment`, {});
+  },
+
+  createOrUpdateAnalysis: (orgId: string) => {
+    return api.post(`/auth/${orgId}/idea-analysis`, {});
   },
 
   getFounderAlignment: (orgId: string) => {

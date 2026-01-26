@@ -36,7 +36,7 @@ export const FoundersAlignmentScreen: React.FC = ({
   const [updating, setUpdating] = useState(false);
   const [queueSize, setQueueSize] = useState<number>(0);  // <-- ADD THIS
 
-  const orgId = AuthService.getCachedWorkspace()?.id;
+  const orgId = AuthService.getCachedUser()?.current_org_id;
 
   useEffect(() => {
     if (!orgId) return;

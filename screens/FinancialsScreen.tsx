@@ -270,14 +270,13 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     useEffect(() => {
         const load = async () => {
             try {
-                const ws = AuthService.getCachedWorkspace();
-                if (!ws) return;
-                setWorkspace(ws);
-                const fetched = await AuthService.getFinancials(ws.id);
+                const orgId = AuthService.getCachedUser()?.current_org_id;
+                if (!orgId) return;
+                const fetched = await AuthService.getFinancials(orgId);
                 if (fetched) {
-                    setData(prev => ({ ...prev, ...fetched, org_id: ws.id }));
+                    setData(prev => ({ ...prev, ...fetched, org_id: orgId }));
                 } else {
-                    setData(prev => ({ ...prev, org_id: ws.id }));
+                    setData(prev => ({ ...prev, org_id: orgId }));
                 }
             } catch (e) {
                 console.error("Failed to load financials", e);
@@ -338,6 +337,12 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 100 }}><Loader2 className="animate-spin" /></div>;
 
+    const isFormValid =
+        data.monthly_revenue &&
+        data.revenue_trend &&
+        data.revenue_stage &&
+        data.monthly_burn &&
+        data.cash_in_bank;
     return (
         <>
             <style>{styles}</style>
@@ -531,7 +536,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     <button
                         className="btn-primary"
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={saving || !isFormValid}
                     >
                         {saving ? <Loader2 className="animate-spin" /> : (isOnboarding ? <>Save & Continue <ArrowRight size={20} /></> : 'Save Changes')}
                     </button>

@@ -232,7 +232,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         solution: '',
         industry: '',
         geography: '',
-        stage: 'Idea',
+        stage: '',
         customer: ''
     });
 
@@ -303,10 +303,10 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         if (!active) return;
         // Always fetch latest workspace info when screen is opened
         const fetchWorkspace = async () => {
-            const ws1 = AuthService.getCachedWorkspace();
-            if (!ws1) return;
+            const orgId = AuthService.getCachedUser()?.current_org_id;
+            if (!orgId) return;
             console.log("here")
-            const ws = await AuthService.fetchWorkspaceFromServer(ws1.id);
+            const ws = await AuthService.fetchWorkspaceFromServer(orgId);
             setFormData(prev => ({
                 ...prev,
                 name: ws.name ?? prev.name,
@@ -357,11 +357,11 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
     // Always get latest onboardingStep from workspace
     const [onboardingStep, setOnboardingStep] = useState(0);
     useEffect(() => {
-        const ws1 = AuthService.getCachedWorkspace();
-        if (!ws1) return;
+        const orgId = AuthService.getCachedUser()?.current_org_id;
+        if (!orgId) return;
         if (!active) return;
         const fetchStep = async () => {
-            const ws = await AuthService.fetchWorkspaceFromServer(ws1.id);
+            const ws = await AuthService.fetchWorkspaceFromServer(orgId);
             setOnboardingStep(ws?.onboardingStep || 0);
         };
         fetchStep();
