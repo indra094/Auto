@@ -53,10 +53,10 @@ const afterOnboardingNav: NavGroup[] = [
     ]
   },
   {
-    label: "Core Intelligence",
+    label: "Startup Insights",
     screens: [
-      { id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
-      { id: ScreenId.INVESTOR_READINESS, label: "Investor Readiness" }
+      { id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Insights" },
+      { id: ScreenId.INVESTOR_READINESS, label: "Investor Insights" }
       //{ id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
       //{ id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founder Alignment" },
       //{ id: ScreenId.STAGES_CAPITAL, label: "Stages & Capital" },

@@ -174,6 +174,14 @@ export const AuthService = {
     return api.post(`/auth/${orgId}/idea-analysis`, {});
   },
 
+  createOrUpdateInvestorReadiness: (orgId: string) => {
+    return api.post(`/auth/${orgId}/investor-readiness`, {});
+  },
+
+  getInvestorReadiness: (orgId: string) => {
+    return api.get(`/auth/${orgId}/investor-readiness`);
+  },
+
   getFounderAlignment: (orgId: string) => {
     return api.get(`/auth/${orgId}/founder-alignment`);
   },

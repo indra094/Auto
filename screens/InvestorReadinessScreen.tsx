@@ -1,45 +1,313 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ScreenId } from '../types';
+import { Button, Card, Badge } from '../components/UI';
 import {
     TrendingUp, AlertTriangle, CheckCircle, XCircle,
     Target, Users, DollarSign, Brain, ArrowRight,
     Shield, Briefcase, FileText, ChevronRight
 } from 'lucide-react';
+import { AuthService } from '@/services/AuthService';
+import { format } from 'date-fns';
 
 interface InvestorReadinessScreenProps {
+    orgId: string;
     onNavigate: (id: ScreenId) => void;
 }
 
+// types/investorReadiness.ts
+export interface InvestorReadinessData {
+    readiness_score: number;
+
+    pushbacks: {
+        title: string;
+        points: string[];
+    }[];
+
+    fixes: string[];
+
+    demands: {
+        label: string;
+        value: string;
+        icon: "equity" | "control" | "milestones" | "governance";
+    }[];
+
+    simulated_reaction: {
+        label: "Reject" | "Soft Interest" | "Fund";
+        value: number;
+    }[];
+
+    investor_type: {
+        primary: string;
+        sectorFit: string;
+        stageFit: string;
+        mismatchFlags: string[];
+    };
+
+    recommendation: {
+        verdict: "Delay Fundraising" | "Proceed" | "Conditional";
+        reason: string;
+    };
+
+    last_updated: string;
+    summary_insight: string;
+
+    investor_mindset_quotes: string[];
+
+    demand_warning: string;
+
+    next_action: {
+        label: string;
+        targetScreen: ScreenId;
+    };
+}
+
+
+const InvestorReadinessSkeleton = () => {
+    return (
+        <div className="p-6 md:p-10 space-y-8 max-w-7xl mx-auto pb-20">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-3">
+                    <div className="h-5 w-48 bg-slate-200 rounded animate-pulse" />
+                    <div className="h-10 w-72 bg-slate-200 rounded animate-pulse" />
+                    <div className="h-4 w-96 bg-slate-200 rounded animate-pulse" />
+                </div>
+
+                <div className="flex gap-3">
+                    <div className="h-10 w-40 bg-slate-200 rounded animate-pulse" />
+                    <div className="h-10 w-48 bg-slate-200 rounded animate-pulse" />
+                </div>
+
+            </div>
+            <div className="flex items-center gap-3 text-sm text-slate-500">
+                <span className="h-3 w-3 rounded-full bg-slate-300 animate-pulse" />
+                <span>
+                    Insights are being generated. This can take a few seconds.
+                </span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* LEFT COLUMN */}
+                <div className="lg:col-span-4 space-y-6">
+                    {/* Score Card */}
+                    <Card className="p-6 md:p-8 border-slate-200 shadow-xl">
+                        <div className="h-5 w-32 bg-slate-200 rounded animate-pulse mb-6" />
+                        <div className="h-20 w-full bg-slate-200 rounded animate-pulse mb-4" />
+                        <div className="h-4 w-48 bg-slate-200 rounded animate-pulse mb-4" />
+                        <div className="h-4 w-full bg-slate-200 rounded animate-pulse" />
+                    </Card>
+
+                    {/* Recommendation - Light Theme Skeleton */}
+                    <Card className="p-6 md:p-8 border-slate-200 bg-white text-slate-900 shadow-xl">
+                        <div className="h-5 w-40 bg-slate-200 rounded animate-pulse mb-6" />
+                        <div className="h-8 w-56 bg-slate-200 rounded animate-pulse mb-4" />
+                        <div className="h-4 w-full bg-slate-200 rounded animate-pulse mb-6" />
+                        <div className="h-10 w-full bg-slate-300 rounded animate-pulse" />
+                    </Card>
+
+
+                    {/* Top Fixes */}
+                    <Card className="p-6 border-slate-200 shadow-sm">
+                        <div className="h-6 w-60 bg-slate-200 rounded mb-4 animate-pulse" />
+                        <div className="space-y-3">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <div className="h-5 w-5 rounded-full bg-slate-200 animate-pulse" />
+                                    <div className="h-4 w-3/4 bg-slate-200 rounded animate-pulse" />
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+                </div>
+
+                {/* RIGHT COLUMN */}
+                <div className="lg:col-span-8 space-y-6">
+                    {/* Investor Type + Mindset */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card className="p-6 border-slate-200">
+                            <div className="h-5 w-40 bg-slate-200 rounded animate-pulse mb-6" />
+                            <div className="h-6 w-60 bg-slate-200 rounded animate-pulse mb-4" />
+                            <div className="space-y-3">
+                                <div className="h-4 w-full bg-slate-200 rounded animate-pulse" />
+                                <div className="h-4 w-3/4 bg-slate-200 rounded animate-pulse" />
+                            </div>
+                            <div className="mt-6 pt-4 border-t border-slate-100">
+                                <div className="h-4 w-48 bg-slate-200 rounded animate-pulse mb-2" />
+                                <div className="h-4 w-64 bg-slate-200 rounded animate-pulse" />
+                            </div>
+                        </Card>
+
+                        <Card className="p-6 border-slate-200 bg-indigo-50/50">
+                            <div className="h-5 w-44 bg-slate-200 rounded animate-pulse mb-6" />
+                            <div className="space-y-4">
+                                <div className="h-4 w-full bg-slate-200 rounded animate-pulse" />
+                                <div className="h-4 w-5/6 bg-slate-200 rounded animate-pulse" />
+                            </div>
+                        </Card>
+                    </div>
+
+                    {/* Simulated Reaction */}
+                    <Card className="p-6 border-slate-200">
+                        <div className="h-5 w-52 bg-slate-200 rounded animate-pulse mb-6" />
+                        <div className="space-y-4">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="flex items-center gap-4">
+                                    <div className="h-4 w-28 bg-slate-200 rounded animate-pulse" />
+                                    <div className="h-3 flex-1 bg-slate-200 rounded animate-pulse" />
+                                    <div className="h-4 w-10 bg-slate-200 rounded animate-pulse" />
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+
+                    {/* Pushbacks + Demands */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card className="p-6 border-slate-200">
+                            <div className="h-5 w-48 bg-slate-200 rounded animate-pulse mb-6" />
+                            <div className="space-y-6">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i}>
+                                        <div className="h-4 w-3/4 bg-slate-200 rounded animate-pulse mb-2" />
+                                        <div className="space-y-2">
+                                            <div className="h-3 w-full bg-slate-200 rounded animate-pulse" />
+                                            <div className="h-3 w-5/6 bg-slate-200 rounded animate-pulse" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="h-10 w-full bg-slate-200 rounded mt-6 animate-pulse" />
+                        </Card>
+
+                        <Card className="p-6 border-slate-200 bg-slate-50">
+                            <div className="h-5 w-56 bg-slate-200 rounded animate-pulse mb-6" />
+                            <div className="space-y-4">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="flex items-start gap-3">
+                                        <div className="h-4 w-4 bg-slate-200 rounded animate-pulse mt-1" />
+                                        <div>
+                                            <div className="h-4 w-28 bg-slate-200 rounded animate-pulse mb-2" />
+                                            <div className="h-3 w-40 bg-slate-200 rounded animate-pulse" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-6 p-3 bg-amber-50 border border-amber-100 rounded-lg">
+                                <div className="h-4 w-72 bg-slate-200 rounded animate-pulse" />
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+
 export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = ({ onNavigate }) => {
 
-    // Mock Data based on User Request
-    const readinessScore = 0.48;
+    const [data, setData] = useState<InvestorReadinessData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const [updating, setUpdating] = useState(false);
+    const [queueSize, setQueueSize] = useState<number>(0);  // <-- ADD THIS
+
+    const orgId = AuthService.getCachedUser()?.current_org_id;
+    const queueSizeRef = useRef(queueSize);
+
+    useEffect(() => {
+        if (!orgId) return;
+
+        let interval: NodeJS.Timeout | null = null;
+
+        const fetchAnalysis = async () => {
+            const data = await AuthService.getInvestorReadiness(orgId);
+
+            if (data && data.investor_readiness) {
+                setData(data.investor_readiness);
+                data.last_updated = new Date(data.investor_readiness.last_updated).toLocaleString();
+                //console.log("responsesize" + data.size)
+
+                setQueueSize(data.size);   // queue size from response
+                setUpdating(false);
+                return true;
+            }
+
+            return false;
+        };
+
+        const init = async () => {
+            setLoading(true);
+            // console.log("orgId", orgId)
+
+            // first call immediately
+            const hasAnalysis = await fetchAnalysis();
+            // set updating state based on availability
+            if (!hasAnalysis) setUpdating(true);
+
+            // start polling every 5 seconds
+            interval = setInterval(async () => {
+                const ready = await fetchAnalysis();
+
+                if (!ready) {
+
+                    queueSizeRef.current = queueSize;
+                    // if alignment not ready and queue is empty, trigger background job
+                    if (queueSizeRef.current === 0) {
+                        //console.log("gonna update")
+                        AuthService.createOrUpdateInvestorReadiness(orgId);
+                    }
+                    setUpdating(true);
+                } else {
+                    setUpdating(false);
+                }
+            }, 5000);
+
+            setLoading(false);
+        };
+        init();
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [orgId, queueSize]);
+
+
+    if (loading || !data) {
+        return <InvestorReadinessSkeleton />;
+    }
+
+
+    const readinessScore = data.readiness_score;
     const isReady = readinessScore >= 0.7;
+    // Map API data to UI
+    const pushbacks = data.pushbacks;
+    const fixes = data.fixes;
+    const demands = data.demands.map((d) => ({
+        ...d,
+        icon:
+            d.icon === "equity" ? <DollarSign className="w-4 h-4" /> :
+                d.icon === "control" ? <Users className="w-4 h-4" /> :
+                    d.icon === "milestones" ? <Target className="w-4 h-4" /> :
+                        <FileText className="w-4 h-4" />
+    }));
+    const verdictIconMap = {
+        high: <XCircle className="w-6 h-6" />,
+        medium: <AlertTriangle className="w-6 h-6" />,
+        low: <CheckCircle className="w-6 h-6" />
+    };
 
-    const pushbacks = [
-        { title: "Why this team?", points: ["CEO commitment is only 10 hrs/week", "CTO owns 65% equity"] },
-        { title: "Who owns execution?", points: ["No clear ownership of product delivery"] },
-        { title: "Why hasn't this been done?", points: ["No customer validation yet"] }
-    ];
-
-    const fixes = [
-        "Fix founder alignment (equity + commitment)",
-        "Validate customer problem with 20 interviews",
-        "Build MVP + early revenue proof"
-    ];
-
-    const demands = [
-        { label: "Equity", value: "25–35% (dilution-heavy)", icon: <DollarSign className="w-4 h-4" /> },
-        { label: "Control", value: "Board seat / Observer rights", icon: <Users className="w-4 h-4" /> },
-        { label: "Milestones", value: "MVP + 50 paying customers", icon: <Target className="w-4 h-4" /> },
-        { label: "Governance", value: "Monthly reporting + vesting cliffs", icon: <FileText className="w-4 h-4" /> }
-    ];
-
-    const simulatedReaction = [
-        { label: "Reject", value: 60, color: "bg-red-500", icon: <XCircle className="w-4 h-4 text-red-500" /> },
-        { label: "Soft Interest", value: 30, color: "bg-amber-400", icon: <Briefcase className="w-4 h-4 text-amber-500" /> },
-        { label: "Fund", value: 10, color: "bg-emerald-500", icon: <DollarSign className="w-4 h-4 text-emerald-500" /> }
-    ];
+    const simulatedReaction = data.simulated_reaction.map((item) => ({
+        ...item,
+        color:
+            item.label === "Reject" ? "bg-red-500" :
+                item.label === "Soft Interest" ? "bg-amber-400" :
+                    "bg-emerald-500",
+        icon:
+            item.label === "Reject" ? verdictIconMap[data.recommendation.severity] :
+                item.label === "Soft Interest" ? <Briefcase className="w-4 h-4 text-amber-500" /> :
+                    <DollarSign className="w-4 h-4 text-emerald-500" />
+    }));
 
     return (
         <div className="p-6 md:p-10 space-y-8 max-w-7xl mx-auto pb-20">
@@ -47,29 +315,15 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase tracking-wider">
-                            Core Intelligence
-                        </span>
-                        <span className="text-slate-400 text-xs">• Last run: 3m ago</span>
-                    </div>
+
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">Investor Readiness</h1>
                     <p className="text-slate-500 font-medium mt-1">AI-driven analysis of your fundraising potential</p>
-                </div>
-                <div className="flex gap-3">
-                    <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-sm rounded-lg shadow-sm hover:bg-slate-50 transition-colors">
-                        Export Summary
-                    </button>
-                    <button className="px-5 py-2 bg-indigo-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4" />
-                        Re-run Analysis
-                    </button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                {/* LEFT COLUMN - Score & Recommendation */}
+                {/* LEFT COLUMN */}
                 <div className="lg:col-span-4 space-y-6">
 
                     {/* Readiness Score Card */}
@@ -82,41 +336,36 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                             </div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100 text-red-700 text-xs font-bold uppercase mb-6">
                                 <AlertTriangle className="w-3 h-3" />
-                                Not Ready
+                                {isReady ? "Ready" : "Not Ready"}
                             </div>
                             <p className="text-sm text-slate-600 italic leading-relaxed">
-                                “If you pitched tomorrow, you’d likely get a soft reject or a request for major changes.”
+                                {data.summary_insight}
                             </p>
+
                         </div>
                     </div>
 
-                    {/* Clear Recommendation */}
-                    <div className="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 p-6 md:p-8 text-white relative overflow-hidden group">
-                        <div className="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/30 transition-all"></div>
+                    {/* Recommendation - Light Theme */}
+                    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 md:p-8 text-slate-900 relative overflow-hidden group">
+                        <div className="absolute -right-10 -top-10 w-40 h-40 bg-indigo-200/20 rounded-full blur-3xl group-hover:bg-indigo-200/30 transition-all"></div>
 
-                        <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-4">Recommendation</h3>
+                        <h3 className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-4">Recommendation</h3>
 
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 border border-red-500/50">
-                                <XCircle className="w-6 h-6" />
+                            <div className="w-10 h-10 rounded-full bg-emerald-100/50 flex items-center justify-center text-emerald-600 border border-emerald-200">
+                                <CheckCircle className="w-6 h-6" />
                             </div>
-                            <span className="text-xl font-bold">Delay Fundraising</span>
+                            <span className="text-xl font-bold">{data.recommendation.verdict}</span>
                         </div>
 
-                        <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                            “Fix founder alignment and customer validation first. Then revisit fundraising with a stronger narrative.”
+                        <p className="text-slate-700 text-sm leading-relaxed mb-6">
+                            {data.recommendation.reason}
                         </p>
 
-                        <button
-                            onClick={() => onNavigate(ScreenId.FOUNDERS_ALIGNMENT)} // Assuming this leads to fixes
-                            className="w-full py-3 bg-white text-slate-900 font-bold text-sm rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
-                        >
-                            Next Action: Fix Alignment
-                            <ArrowRight className="w-4 h-4" />
-                        </button>
                     </div>
 
-                    {/* Top 3 Fixes */}
+
+                    {/* Fixes */}
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                         <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
                             <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -134,13 +383,11 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
 
                 </div>
 
-                {/* CENTER/RIGHT COLUMN - Details */}
+                {/* CENTER/RIGHT COLUMN */}
                 <div className="lg:col-span-8 space-y-6">
 
-                    {/* Top Row: Investor Type & Mindset */}
+                    {/* Investor Type */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                        {/* Likely Investor Type */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Likely Investor Type</h3>
@@ -148,29 +395,28 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                             </div>
 
                             <div className="text-lg font-bold text-slate-900 mb-4">
-                                🎯 Most likely: Angel / Micro-VC
+                                🎯 Most likely: {data.investor_type.primary}
                             </div>
 
                             <div className="space-y-3 text-sm border-t border-slate-100 pt-4">
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">Sector Fit</span>
-                                    <span className="font-bold text-emerald-600">Fintech (High)</span>
+                                    <span className="font-bold text-emerald-600">{data.investor_type.sectorFit}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">Stage Fit</span>
-                                    <span className="font-bold text-amber-500">Pre-Seed (Low)</span>
+                                    <span className="font-bold text-amber-500">{data.investor_type.stageFit}</span>
                                 </div>
                             </div>
 
                             <div className="mt-4 pt-4 border-t border-slate-100">
                                 <span className="text-xs font-bold text-slate-400 uppercase block mb-2">Mismatch Flags</span>
                                 <ul className="space-y-1">
-                                    <li className="text-xs text-red-600 font-medium flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Product not proven yet
-                                    </li>
-                                    <li className="text-xs text-red-600 font-medium flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Team execution risk
-                                    </li>
+                                    {data.investor_type.mismatchFlags.map((flag, i) => (
+                                        <li key={i} className="text-xs text-red-600 font-medium flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> {flag}
+                                        </li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -180,18 +426,20 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                             <Brain className="absolute top-6 right-6 w-12 h-12 text-indigo-200 opacity-50" />
                             <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-4">Investor Mindset</h3>
                             <div className="space-y-4 relative z-10">
-                                <blockquote className="border-l-4 border-indigo-200 pl-4 py-1 italic text-slate-700 text-sm">
-                                    “This is a team risk, not a market risk.”
-                                </blockquote>
-                                <blockquote className="border-l-4 border-indigo-200 pl-4 py-1 italic text-slate-700 text-sm">
-                                    “We’d need governance + milestones before committing.”
-                                </blockquote>
+                                {data.investor_mindset_quotes.map((quote, i) => (
+                                    <blockquote
+                                        key={i}
+                                        className="border-l-4 border-indigo-200 pl-4 py-1 italic text-slate-700 text-sm"
+                                    >
+                                        “{quote}”
+                                    </blockquote>
+                                ))}
+
                             </div>
                         </div>
-
                     </div>
 
-                    {/* Pitch Reaction Simulated */}
+                    {/* Simulated Reaction */}
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Pitch Reaction (Simulated)</h3>
                         <div className="space-y-4">
@@ -210,10 +458,10 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                         </div>
                     </div>
 
-                    {/* Bottom Row: Pushbacks & Demands */}
+                    {/* Pushbacks & Demands */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        {/* Expected Pushback */}
+                        {/* Pushbacks */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-full">
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-sm font-bold text-slate-800">Expected Pushback</h3>
@@ -238,12 +486,27 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                                 ))}
                             </div>
 
-                            <button className="w-full mt-6 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                            <button
+                                className="w-full mt-6 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                                onClick={() => {
+                                    const textToCopy = pushbacks
+                                        .map(
+                                            (pb, i) =>
+                                                `${i + 1}. ${pb.title}\n${pb.points.map((pt) => `- ${pt}`).join("\n")}`
+                                        )
+                                        .join("\n\n");
+
+                                    navigator.clipboard.writeText(textToCopy)
+                                        .then(() => alert("Copied to clipboard!"))
+                                        .catch(() => alert("Failed to copy."));
+                                }}
+                            >
                                 Copy to Pitch Notes
                             </button>
+
                         </div>
 
-                        {/* Investor Demands */}
+                        {/* Demands */}
                         <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6 h-full">
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-sm font-bold text-slate-800">What Investors Will Demand</h3>
@@ -263,8 +526,9 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                             </div>
 
                             <div className="mt-6 p-3 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-800 font-medium italic">
-                                “Expect dilution-heavy terms due to execution risk.”
+                                “{data.demand_warning}”
                             </div>
+
                         </div>
 
                     </div>
