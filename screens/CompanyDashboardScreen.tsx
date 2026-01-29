@@ -20,6 +20,10 @@ interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
+interface Dashboard {
+
+}
+
 export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [stats, setStats] = useState<any>(null);

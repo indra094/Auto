@@ -11,7 +11,7 @@ import { AuthService, User } from "../services/AuthService";
 interface FounderAlignment {
   score: number;
   risk_level: string;
-  factors: Array<{ label: string; score: number; warn: boolean }>;
+  factors: Record<string, string>;
   risks: string[];
   actions: Array<{ text: string; impact: "High" | "Medium" | "Low" }>;
   insight: string;
@@ -190,9 +190,7 @@ export const FoundersAlignmentScreen: React.FC = ({
           </p>
         </div>
 
-        <div className="text-xs text-slate-400">
-          {updating ? "Updating data… • Powered by Foundry AI" : "Last updated: Today • Powered by Foundry AI"}
-        </div>
+
       </header>
 
       {/* Alignment Score */}
@@ -297,7 +295,7 @@ export const FoundersAlignmentScreen: React.FC = ({
                       <td className="py-3 font-medium text-slate-800">
                         {f.fullName}
                       </td>
-                      <td>{f.role || "Founder"}</td>
+                      <td>{f.role ?? "-"}</td>
                       <td>{f.commitment}h</td>
                       <td>{f.equity}%</td>
                       <td>{f.permissionLevel}</td>

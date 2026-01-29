@@ -348,6 +348,14 @@ export const AuthService = {
     };
   },
 
+  getDashboard: async (orgId: string): Promise<Dashboard | null> => {
+    return await api.get(`/auth/${orgId}/dashboard`);
+  },
+
+  updateDashboard: async (orgId: string, data: Dashboard): Promise<Dashboard> => {
+    return await api.put(`/auth/${orgId}/dashboard`, data);
+  },
+
   setWorkspaceAndNotify: (w: Workspace | null) => {
     DB.setItem('workspace', w);
     console.log("🔥 Workspace set", w);

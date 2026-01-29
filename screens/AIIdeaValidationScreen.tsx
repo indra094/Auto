@@ -241,11 +241,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
 
                 if (!ready) {
 
-                    const queueSizeRef = useRef(queueSize);
-                    queueSizeRef.current = queueSize;
-                    // if alignment not ready and queue is empty, trigger background job
-                    if (queueSizeRef.current === 0) {
-                        //console.log("gonna update")
+                    if (queueSize === 0) {
                         AuthService.createOrUpdateAnalysis(orgId);
                     }
                     setUpdating(true);
@@ -335,12 +331,19 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                             <Tooltip content="Core competitive advantages that improve defensibility, scalability, or execution speed." />
                         </h3>
                         <ul className="space-y-3">
-                            {(analysis?.strengths?.length ? analysis.strengths : [""]).map((s, i) => (
+                            {analysis?.strengths?.map((s, i) => (
                                 <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                                    <Badge color="emerald" className="mt-0.5 whitespace-nowrap">Strength</Badge>
-                                    {showOrFallback(s)}
+                                    <Badge color="emerald" className="mt-0.5 whitespace-nowrap">
+                                        Strength
+                                    </Badge>
+                                    {s}
                                 </li>
                             ))}
+                            {!analysis?.strengths?.length && (
+                                <p className="text-sm text-slate-400">
+                                    No strengths identified by the analysis.
+                                </p>
+                            )}
                         </ul>
 
                     </Card>
@@ -488,21 +491,20 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                             </div>
 
                             <div className="space-y-4">
-                                {(analysis?.roadmap?.milestones?.length
-                                    ? analysis.roadmap.milestones
-                                    : [{ label: "", duration_days: 0, is_active: false }]
-                                ).map((m, i) => (
-                                    <div
-                                        key={i}
-                                        className={`flex items-center gap-x-6 text-sm text-slate-900`}
-                                    >
-                                        <span className="flex-1 text-left">{showOrFallback(m.label)}</span>
-                                        <span className="font-mono text-xs font-bold text-right">
-                                            {showOrFallback(m.duration_days, "N/A")} days
+                                {analysis?.roadmap?.milestones?.map((m, i) => (
+                                    <div key={i} className="flex items-center gap-x-6 text-sm">
+                                        <span className="flex-1">{m.label}</span>
+                                        <span className="font-mono text-xs font-bold">
+                                            {m.duration_days} days
                                         </span>
                                     </div>
-
                                 ))}
+
+                                {!analysis?.roadmap?.milestones?.length && (
+                                    <p className="text-sm text-slate-400">
+                                        No roadmap milestones returned by analysis.
+                                    </p>
+                                )}
                             </div>
 
                         </div>
