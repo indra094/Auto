@@ -352,8 +352,8 @@ export const AuthService = {
     return await api.get(`/auth/${orgId}/dashboard`);
   },
 
-  updateDashboard: async (orgId: string, data: Dashboard): Promise<Dashboard> => {
-    return await api.put(`/auth/${orgId}/dashboard`, data);
+  updateDashboard: async (orgId: string): Promise<Dashboard> => {
+    return await api.post(`/auth/${orgId}/dashboard`);
   },
 
   setWorkspaceAndNotify: (w: Workspace | null) => {

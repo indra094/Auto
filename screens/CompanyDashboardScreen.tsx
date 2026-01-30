@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge, ProgressBar } from '../components/UI';
 import { getOnboardingProgress } from '../utils/onboarding';
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { AuthService, Workspace } from '../services/AuthService';
 import { IntelligenceService } from '../services/IntelligenceService';
+import { Info } from "lucide-react";
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
@@ -48,26 +49,51 @@ export interface Dashboard {
   thesis: string;
 
   // --- Killer Insight ---
-  killerInsight: string;
-  killerInsightRisk?: KillerInsightRisk;
-  killerInsightConfidence?: number; // 0.0 – 1.0
+  killer_insight: string;
+  killer_insight_risk?: KillerInsightRisk;
+  killer_insight_confidence?: number; // 0.0 – 1.0
 
   // --- Capital & Runway ---
-  runwayMonths?: number;
-  burnRate?: number;
+  runway_months?: number;
+  burn_rate?: number;
 
-  capitalRecommendation?: string;
+  capital_recommendation?: string;
 
   // --- Action Items ---
-  topActions: DashboardAction[];
+  top_actions: DashboardAction[];
 
   // --- Metadata ---
-  dataSources?: string[];
+  data_sources?: string[];
 
-  lastComputedAt?: string; // ISO date string
-  modelVersion?: string;
+  last_computed_at?: string; // ISO date string
+  model_version?: string;
 }
 
+interface InfoTooltipProps {
+  content: string;
+}
+
+export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="ml-1 text-slate-400 hover:text-slate-600 focus:outline-none"
+      >
+        <Info className="w-4 h-4" />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 top-6 left-1/2 -translate-x-1/2 w-64 rounded-lg border border-slate-200 bg-white shadow-xl p-3 text-xs text-slate-600">
+          {content}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -81,41 +107,70 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     return getOnboardingProgress(workspace?.onboardingStep);
   }, [workspace?.onboardingStep]);
 
+  const [data, setData] = useState<Dashboard | null>(null);
+
+  const [updating, setUpdating] = useState(false);
+  const [queueSize, setQueueSize] = useState<number>(0);  // <-- ADD THIS
+
+  const orgId = AuthService.getCachedUser()?.current_org_id;
+  const queueSizeRef = useRef(queueSize);
+
   useEffect(() => {
-    const user = AuthService.getUser();
-    if (!user) return;
+    if (!orgId) return;
 
-    const load = async () => {
-      setLoading(true);
-      const w = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
-      console.log("🔥 Workspace", w);
-      setWorkspace(w);
+    let interval: NodeJS.Timeout | null = null;
 
-      try {
-        // Here we could pass w.id if getDashboardStats supported it, 
-        // but it currently takes email and likely infers org from backend user state.
-        // Since we updated backend state in setCurrentWorkspace, this should return correct stats.
-        const s = await IntelligenceService.getDashboardStats(user.email);
-        setStats(s);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+    const fetchDashboard = async () => {
+      const data = await AuthService.getDashboard(orgId);
+
+      if (data && data.dashboard) {
+        setData(data.dashboard);
+        data.last_updated = new Date(data.dashboard.last_updated).toLocaleString();
+        //console.log("responsesize" + data.size)
+
+        setQueueSize(data.size);   // queue size from response
+        setUpdating(false);
+        return true;
       }
+
+      return false;
     };
 
-    load();
+    const init = async () => {
+      setLoading(true);
+      // console.log("orgId", orgId)
 
-    // Subscribe to workspace changes
-    const unsubscribe = AuthService.onWorkspaceChange((w) => {
-      // Re-run load when workspace changes
-      load();
-    });
+      // first call immediately
+      const hasDashboard = await fetchDashboard();
+      // set updating state based on availability
+      if (!hasDashboard) setUpdating(true);
+
+      // start polling every 5 seconds
+      interval = setInterval(async () => {
+        const ready = await fetchDashboard();
+
+        if (!ready) {
+
+          queueSizeRef.current = queueSize;
+          // if alignment not ready and queue is empty, trigger background job
+          if (queueSizeRef.current === 0) {
+            //console.log("gonna update")
+            AuthService.updateDashboard(orgId);
+          }
+          setUpdating(true);
+        } else {
+          setUpdating(false);
+        }
+      }, 5000);
+
+      setLoading(false);
+    };
+    init();
 
     return () => {
-      unsubscribe();
+      if (interval) clearInterval(interval);
     };
-  }, []);
+  }, [orgId, queueSize]);
 
   if (loading)
     return (
