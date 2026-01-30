@@ -9,6 +9,9 @@ import {
 import { AuthService } from '@/services/AuthService';
 import { format } from 'date-fns';
 
+import { Info } from "lucide-react";
+
+
 interface InvestorReadinessScreenProps {
     orgId: string;
     onNavigate: (id: ScreenId) => void;
@@ -202,6 +205,31 @@ const InvestorReadinessSkeleton = () => {
     );
 };
 
+interface InfoTooltipProps {
+    content: string;
+}
+
+export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content }) => {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <div className="relative inline-flex">
+            <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                className="ml-1 text-slate-400 hover:text-slate-600 focus:outline-none"
+            >
+                <Info className="w-4 h-4" />
+            </button>
+
+            {open && (
+                <div className="absolute z-50 top-6 left-1/2 -translate-x-1/2 w-64 rounded-lg border border-slate-200 bg-white shadow-xl p-3 text-xs text-slate-600">
+                    {content}
+                </div>
+            )}
+        </div>
+    );
+};
 
 
 export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = ({ onNavigate }) => {

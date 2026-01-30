@@ -20,9 +20,54 @@ interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
-interface Dashboard {
+// src/types/dashboard.ts
 
+export type KillerInsightRisk =
+  | "Founder Risk"
+  | "Capital Risk"
+  | "Market Risk"
+  | "Execution Risk"
+  | string;
+
+export interface DashboardAction {
+  title: string;
+  why: string;
+  risk: string;
+  screenId:
+  | "ALIGNMENT_OVERVIEW"
+  | "FINANCIAL_DASHBOARD"
+  | "VALIDATION_CHECKLIST"
+  | string;
 }
+
+export interface Dashboard {
+  id: number;
+
+  // --- Executive Summary ---
+  verdict: string;
+  thesis: string;
+
+  // --- Killer Insight ---
+  killerInsight: string;
+  killerInsightRisk?: KillerInsightRisk;
+  killerInsightConfidence?: number; // 0.0 – 1.0
+
+  // --- Capital & Runway ---
+  runwayMonths?: number;
+  burnRate?: number;
+
+  capitalRecommendation?: string;
+
+  // --- Action Items ---
+  topActions: DashboardAction[];
+
+  // --- Metadata ---
+  dataSources?: string[];
+
+  lastComputedAt?: string; // ISO date string
+  modelVersion?: string;
+}
+
 
 export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
