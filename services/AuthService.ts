@@ -208,7 +208,7 @@ export const AuthService = {
     let user;
 
     try {
-      user = await api.post('/auth/user', { fullName, email, org_id: orgID, status: status });
+      user = await api.post('/auth/user', { fullName, email, org_id: orgID, status: status, role: role, permission_level: permission_level, equity: equity, vesting: vesting, commitment: commitment });
     } catch (err: any) {
       console.log("err:", err);
       const detail = err?.message || "";
