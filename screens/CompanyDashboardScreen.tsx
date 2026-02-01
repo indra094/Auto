@@ -95,6 +95,85 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content }) => {
   );
 };
 
+const CompanyDashboardSkeleton = () => {
+  return (
+    <div className="p-8 max-w-6xl mx-auto space-y-10">
+      {/* Header Skeleton */}
+      <header className="flex justify-between items-center mb-10">
+        <div className="space-y-3">
+          <span className="block h-10 w-64 bg-slate-200 rounded animate-pulse" />
+          <span className="block h-5 w-96 bg-slate-200 rounded animate-pulse" />
+        </div>
+        <span className="block h-8 w-32 bg-slate-200 rounded animate-pulse" />
+      </header>
+
+      <div className="flex items-center gap-3 text-sm text-slate-500">
+        <span className="h-3 w-3 rounded-full bg-slate-300 animate-pulse" />
+        <span>
+          Dashboard is being generated. This can take a few seconds.
+        </span>
+      </div>
+
+      {/* Executive Summary Skeleton */}
+      <section className="space-y-3 mb-10">
+        <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse mb-3" />
+        <span className="block h-16 w-full bg-slate-200 rounded animate-pulse mb-2" />
+        <span className="block h-4 w-80 bg-slate-200 rounded animate-pulse" />
+      </section>
+
+      {/* Killer Insight Skeleton */}
+      <section className="space-y-3 mb-10">
+        <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse mb-3" />
+        <span className="block h-12 w-full bg-slate-200 rounded animate-pulse mb-2" />
+        <span className="block h-4 w-32 bg-slate-200 rounded animate-pulse" />
+      </section>
+
+      {/* What Needs Attention Skeleton */}
+      <section className="space-y-3 mb-10">
+        <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse mb-3" />
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="space-y-2">
+            <span className="block h-5 w-64 bg-slate-200 rounded animate-pulse" />
+            <span className="block h-4 w-80 bg-slate-200 rounded animate-pulse" />
+            <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse" />
+          </div>
+        ))}
+      </section>
+
+      {/* Readiness Tracker Skeleton */}
+      <section className="space-y-3 mb-10">
+        <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse mb-3" />
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <span className="block w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
+              <div className="space-y-1">
+                <span className="block h-4 w-32 bg-slate-200 rounded animate-pulse" />
+                <span className="block h-3 w-48 bg-slate-200 rounded animate-pulse" />
+              </div>
+            </div>
+            <span className="block h-8 w-24 bg-slate-200 rounded animate-pulse" />
+          </div>
+        ))}
+      </section>
+
+      {/* Capital & Runway Skeleton */}
+      <section className="space-y-3">
+        <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse mb-3" />
+        <div className="grid md:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <span className="block h-3 w-32 bg-slate-200 rounded animate-pulse" />
+              <span className="block h-8 w-40 bg-slate-200 rounded animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+
 export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
@@ -109,10 +188,11 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const [data, setData] = useState<Dashboard | null>(null);
 
   const [updating, setUpdating] = useState(false);
-  const [queueSize, setQueueSize] = useState<number>(0);  // <-- ADD THIS
-
-  const orgId = AuthService.getCachedUser()?.current_org_id;
+  const [queueSize, setQueueSize] = useState<number>(0);
   const queueSizeRef = useRef(queueSize);
+  let size = 0;
+  const orgId = AuthService.getCachedUser()?.current_org_id;
+
 
   useEffect(() => {
     if (!orgId) return;
@@ -122,14 +202,17 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     const fetchDashboard = async () => {
       const data = await AuthService.getDashboard(orgId);
 
-      if (data && data.dashboard) {
-        setData(data.dashboard);
-        data.last_computed_at = new Date(data.dashboard.last_computed_at).toLocaleString();
-        //console.log("responsesize" + data.size)
+      if (data) {
+        console.log("responsesize" + data.size)
+        setQueueSize(data.size);       // update state
+        queueSizeRef.current = data.size;  // update ref immediately for interval
+        if (data.dashboard) {
+          setData(data.dashboard);
+          data.last_computed_at = new Date(data.dashboard.last_computed_at).toLocaleString();
 
-        setQueueSize(data.size);   // queue size from response
-        setUpdating(false);
-        return true;
+          setUpdating(false);
+          return true;
+        }
       }
 
       return false;
@@ -137,30 +220,31 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
     const init = async () => {
       setLoading(true);
+      const ws = await AuthService.fetchWorkspaceFromServer(
+        AuthService.getUser()?.current_org_id
+      );
+      setWorkspace(ws);
+      setLoading(false);
       // console.log("orgId", orgId)
 
       // first call immediately
       const hasDashboard = await fetchDashboard();
       // set updating state based on availability
       if (!hasDashboard) setUpdating(true);
-
-      // start polling every 5 seconds
       interval = setInterval(async () => {
         const ready = await fetchDashboard();
+        let current = queueSizeRef.current;
+        console.log("queue size", current); // always latest value
 
-        if (!ready) {
+        if (!ready && current === 0) {
+          AuthService.updateDashboard(orgId);
 
-          queueSizeRef.current = queueSize;
-          // if alignment not ready and queue is empty, trigger background job
-          if (queueSizeRef.current === 0) {
-            //console.log("gonna update")
-            AuthService.updateDashboard(orgId);
-          }
           setUpdating(true);
         } else {
           setUpdating(false);
         }
       }, 5000);
+
 
       setLoading(false);
     };
@@ -169,7 +253,8 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [orgId, queueSize]);
+  }, [orgId]);
+
 
   if (loading)
     return (
@@ -329,7 +414,11 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     );
   }
 
-  if (!data) { }
+  if (!data && !isActivationMode) {
+    return (
+      <CompanyDashboardSkeleton />
+    )
+  }
 
   // ======================
   // OPERATING MODE (MVP)
@@ -340,11 +429,11 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const thesis = data?.thesis || 'Insufficient information to generate this.';
 
   // MVP: Top 3 actions (AI-driven)
-  const actions = data?.topActions
+  const actions = data?.top_actions
   // MVP: Capital & runway (simple numbers)
-  const runwayMonths = data?.runwayMonths;
-  const burnRate = data?.burnRate;
-  const recommendedAction = data?.capitalRecommendation || 'Insufficient information to generate this.';
+  const runwayMonths = data?.runway_months;
+  const burnRate = data?.burn_rate;
+  const recommendedAction = data?.capital_recommendation || 'Insufficient information to generate this.';
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -389,16 +478,16 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
         <Card className="p-6 border-l-4 border-l-red-500 bg-red-50/50">
           <p className="font-medium text-slate-800">
-            {data.killerInsight}
+            {data.killer_insight}
           </p>
 
           <div className="flex items-center gap-4 mt-3">
-            {data.killerInsightRisk && (
-              <Badge color="red">{data.killerInsightRisk}</Badge>
+            {data.killer_insight_risk && (
+              <Badge color="red">{data.killer_insight_risk}</Badge>
             )}
-            {data.killerInsightConfidence !== undefined && (
+            {data.killer_insight_confidence !== undefined && (
               <span className="text-xs text-slate-500">
-                Confidence {(data.killerInsightConfidence * 100).toFixed(0)}%
+                Confidence {(data.killer_insight_confidence * 100).toFixed(0)}%
               </span>
             )}
           </div>
@@ -412,7 +501,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
           <Zap className="w-4 h-4 text-yellow-500" /> What Needs Attention Now
         </h3>
 
-        {data.topActions.length === 0 ? (
+        {data?.top_actions?.length === 0 ? (
           <Card className="p-6 bg-emerald-50 border-emerald-200">
             <p className="text-sm text-emerald-800 font-medium">
               No critical risks detected at this time.
@@ -420,11 +509,11 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
           </Card>
         ) : (
           <div className="space-y-3">
-            {data.topActions.slice(0, 3).map((action, i) => (
+            {data.top_actions.slice(0, 3).map((action, i) => (
               <Card
                 key={i}
                 className="p-5 border-l-4 border-l-red-500 bg-red-50/50 cursor-pointer"
-                onClick={() => onNavigate(action.screenId)}
+                onClick={() => onNavigate(action.screen_id)}
               >
                 <p className="font-medium">{action.title}</p>
                 <p className="text-xs text-slate-600 mt-1">
@@ -476,7 +565,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         </div>
       </section>
 
-      {(data.runwayMonths || data.burnRate) && (
+      {(data.runway_months || data.burn_rate) && (
         <section>
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
@@ -484,24 +573,24 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
           <Card className="p-6 border-2 border-slate-200">
             <div className="grid md:grid-cols-3 gap-6">
-              {data.runwayMonths && (
+              {data.runway_months && (
                 <div>
                   <p className="text-xs text-slate-500">Runway</p>
-                  <p className="text-2xl font-black">{data.runwayMonths} months</p>
+                  <p className="text-2xl font-black">{data.runway_months} months</p>
                 </div>
               )}
 
-              {data.burnRate && (
+              {data.burn_rate && (
                 <div>
                   <p className="text-xs text-slate-500">Burn Rate</p>
-                  <p className="text-2xl font-black">${data.burnRate}/mo</p>
+                  <p className="text-2xl font-black">${data.burn_rate}/mo</p>
                 </div>
               )}
 
-              {data.capitalRecommendation && (
+              {data.capital_recommendation && (
                 <div>
                   <p className="text-xs text-slate-500">Recommendation</p>
-                  <Badge color="indigo">{data.capitalRecommendation}</Badge>
+                  <Badge color="indigo">{data.capital_recommendation}</Badge>
                 </div>
               )}
             </div>
