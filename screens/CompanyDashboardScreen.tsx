@@ -97,7 +97,6 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content }) => {
 
 export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
-  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const isActivationMode = (workspace?.onboardingStep || 0) < 4;
@@ -125,7 +124,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
       if (data && data.dashboard) {
         setData(data.dashboard);
-        data.last_updated = new Date(data.dashboard.last_updated).toLocaleString();
+        data.last_computed_at = new Date(data.dashboard.last_computed_at).toLocaleString();
         //console.log("responsesize" + data.size)
 
         setQueueSize(data.size);   // queue size from response
@@ -207,7 +206,6 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   // ACTIVATION MODE (Onboarding)
   // ======================
   if (isActivationMode) {
-    console.log("here")
     return (
       <div className="p-8 max-w-5xl mx-auto">
         <header className="mb-12 text-center">
@@ -331,40 +329,22 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     );
   }
 
+  if (!data) { }
+
   // ======================
   // OPERATING MODE (MVP)
   // ======================
 
   // MVP: Executive summary (AI verdict)
-  const verdict = stats?.verdict || 'On track';
-  const thesis = stats?.thesis || 'Your startup thesis goes here.';
+  const verdict = data?.verdict || 'Insufficient information to generate this.';
+  const thesis = data?.thesis || 'Insufficient information to generate this.';
 
   // MVP: Top 3 actions (AI-driven)
-  const actions = stats?.topActions || [
-    {
-      title: 'Founder equity misalignment',
-      why: 'Founder time commitment differs after 6 months',
-      risk: 'Equity disputes & loss of focus',
-      screenId: ScreenId.ALIGNMENT_OVERVIEW,
-    },
-    {
-      title: 'Runway < 6 months',
-      why: 'Cash burn exceeds planned revenue',
-      risk: 'You must raise or reduce burn',
-      screenId: ScreenId.FINANCIAL_DASHBOARD,
-    },
-    {
-      title: 'Customer validation missing',
-      why: 'Market risk is unknown',
-      risk: 'Building something nobody wants',
-      screenId: ScreenId.VALIDATION_CHECKLIST,
-    },
-  ];
-
+  const actions = data?.topActions
   // MVP: Capital & runway (simple numbers)
-  const runwayMonths = stats?.runwayMonths ?? 6;
-  const burnRate = stats?.burnRate ?? 12000;
-  const recommendedAction = stats?.capitalRecommendation || 'Raise in 3 months';
+  const runwayMonths = data?.runwayMonths;
+  const burnRate = data?.burnRate;
+  const recommendedAction = data?.capitalRecommendation || 'Insufficient information to generate this.';
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -376,8 +356,17 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
             AI-powered operating system for {workspace?.name || 'your startup'}
           </p>
         </div>
-        <Badge color="indigo" className="px-4 py-2 text-sm font-bold">
-          {workspace?.stage || 'Pre-Seed'}
+        <Badge
+          color={
+            data.verdict === 'Execution Stable'
+              ? 'emerald'
+              : data.verdict === 'Execution Risk'
+                ? 'red'
+                : 'amber'
+          }
+          className="px-4 py-2 text-sm font-bold"
+        >
+          {data.verdict}
         </Badge>
       </header>
 
@@ -388,28 +377,34 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         </h3>
 
         <Card className="p-6 border-2 border-slate-200">
-          <div className="flex justify-between items-start gap-6">
-            <div>
-              <h3 className="text-xl font-black">{workspace?.name || 'Your Company'}</h3>
-              <p className="text-sm text-slate-500 mt-1">{thesis}</p>
-            </div>
-            <Badge
-              color={
-                verdict === 'On track'
-                  ? 'emerald'
-                  : verdict === 'At risk'
-                    ? 'red'
-                    : verdict === 'Capital constrained'
-                      ? 'amber'
-                      : 'indigo'
-              }
-              className="px-4 py-2 text-sm font-bold"
-            >
-              {verdict}
-            </Badge>
+          <h3 className="text-xl font-black">{workspace?.name}</h3>
+          <p className="text-sm text-slate-500 mt-1">{data.thesis}</p>
+        </Card>
+      </section>
+
+      <section className="mb-10">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-500" /> Killer Insight
+        </h3>
+
+        <Card className="p-6 border-l-4 border-l-red-500 bg-red-50/50">
+          <p className="font-medium text-slate-800">
+            {data.killerInsight}
+          </p>
+
+          <div className="flex items-center gap-4 mt-3">
+            {data.killerInsightRisk && (
+              <Badge color="red">{data.killerInsightRisk}</Badge>
+            )}
+            {data.killerInsightConfidence !== undefined && (
+              <span className="text-xs text-slate-500">
+                Confidence {(data.killerInsightConfidence * 100).toFixed(0)}%
+              </span>
+            )}
           </div>
         </Card>
       </section>
+
 
       {/* 2) What Needs Attention Now */}
       <section className="mb-10">
@@ -417,34 +412,33 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
           <Zap className="w-4 h-4 text-yellow-500" /> What Needs Attention Now
         </h3>
 
-        <div className="space-y-3">
-          {actions.slice(0, 3).map((action, i) => (
-            <Card
-              key={i}
-              className="p-5 border-l-4 border-l-red-500 bg-red-50/50 hover:shadow-lg transition-all cursor-pointer"
-              onClick={() => action.screenId && onNavigate(action.screenId)}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-black text-white bg-red-500">
-                    {i + 1}
-                  </div>
-                  <div>
-                    <p className="text-slate-800 font-medium">{action.title}</p>
-                    <p className="text-xs text-slate-600 mt-1">
-                      <strong>Why:</strong> {action.why}
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      <strong>Risk if ignored:</strong> {action.risk}
-                    </p>
-                  </div>
-                </div>
-                {action.screenId && <ArrowRight className="w-5 h-5 text-slate-400" />}
-              </div>
-            </Card>
-          ))}
-        </div>
+        {data.topActions.length === 0 ? (
+          <Card className="p-6 bg-emerald-50 border-emerald-200">
+            <p className="text-sm text-emerald-800 font-medium">
+              No critical risks detected at this time.
+            </p>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {data.topActions.slice(0, 3).map((action, i) => (
+              <Card
+                key={i}
+                className="p-5 border-l-4 border-l-red-500 bg-red-50/50 cursor-pointer"
+                onClick={() => onNavigate(action.screenId)}
+              >
+                <p className="font-medium">{action.title}</p>
+                <p className="text-xs text-slate-600 mt-1">
+                  <strong>Why:</strong> {action.why}
+                </p>
+                <p className="text-xs text-slate-600">
+                  <strong>Risk:</strong> {action.risk}
+                </p>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
+
 
       {/* 3) Readiness Tracker */}
       <section className="mb-10">
@@ -482,41 +476,39 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         </div>
       </section>
 
-      {/* 4) Capital & Runway */}
-      <section>
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
-        </h3>
+      {(data.runwayMonths || data.burnRate) && (
+        <section>
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
+          </h3>
 
-        <Card className="p-6 border-2 border-slate-200">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div>
-              <p className="text-xs text-slate-500">Runway</p>
-              <p className="text-2xl font-black">{runwayMonths} months</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-500">Burn Rate</p>
-              <p className="text-2xl font-black">${burnRate}/mo</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-500">Recommendation</p>
-              <Badge color="indigo" className="px-4 py-2 text-sm font-bold">
-                {recommendedAction}
-              </Badge>
-            </div>
-          </div>
+          <Card className="p-6 border-2 border-slate-200">
+            <div className="grid md:grid-cols-3 gap-6">
+              {data.runwayMonths && (
+                <div>
+                  <p className="text-xs text-slate-500">Runway</p>
+                  <p className="text-2xl font-black">{data.runwayMonths} months</p>
+                </div>
+              )}
 
-          <div className="mt-6">
-            <Button
-              variant="secondary"
-              className="bg-indigo-600 hover:bg-indigo-700 font-bold"
-              onClick={() => onNavigate(ScreenId.FINANCIAL_DASHBOARD)}
-            >
-              Open Financial Dashboard →
-            </Button>
-          </div>
-        </Card>
-      </section>
+              {data.burnRate && (
+                <div>
+                  <p className="text-xs text-slate-500">Burn Rate</p>
+                  <p className="text-2xl font-black">${data.burnRate}/mo</p>
+                </div>
+              )}
+
+              {data.capitalRecommendation && (
+                <div>
+                  <p className="text-xs text-slate-500">Recommendation</p>
+                  <Badge color="indigo">{data.capitalRecommendation}</Badge>
+                </div>
+              )}
+            </div>
+          </Card>
+        </section>
+      )}
+
     </div>
   );
 };
