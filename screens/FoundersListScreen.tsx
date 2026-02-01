@@ -30,7 +30,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         currentUser.id,
         currentUser.current_org_id
       );
-      setIsAdmin(info?.permissionLevel === "ADMIN");
+      setIsAdmin(info?.permission_level === "ADMIN");
     } catch (err) {
       console.error("Failed to load user permission", err);
     }
@@ -117,30 +117,6 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         </div>
       </header>
 
-      {/* alignment card (light themed) */}
-      <Card className="p-8 bg-white border-slate-100 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-3">
-            <ShieldAlert className="w-6 h-6 text-red-500" />
-            <h3 className="text-xl font-bold text-slate-900">Alignment Status</h3>
-          </div>
-          <Badge color="red" className="px-4 py-1">Broken</Badge>
-        </div>
-
-        <p className="text-slate-500 mb-6 leading-relaxed">
-          Issues detected in <strong>Vision Match</strong> and <strong>Equity Agreement</strong>.
-          Estimated risk of fallout is <span className="text-red-500 font-bold">35%</span>.
-        </p>
-
-        <Button
-          fullWidth
-          onClick={() => onNavigate(ScreenId.ALIGNMENT_OVERVIEW)}
-          className="h-16 bg-indigo-600 text-white hover:bg-indigo-700 font-black flex items-center justify-center gap-3 text-lg"
-        >
-          Resolve Alignment Issues <ArrowRight className="w-5 h-5" />
-        </Button>
-      </Card>
-
       {/* NEW: Users list */}
       <Card className="p-6 bg-white border-slate-100 shadow-sm">
         <h3 className="text-lg font-bold mb-4">Users in this Organization</h3>
@@ -187,7 +163,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                                   : "MEMBER: Can only view details."
                               }
                             >
-                              {u.permissionLevel}
+                              {u.permission_level}
                             </Badge>
                           </div>
 

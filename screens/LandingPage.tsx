@@ -65,6 +65,7 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
         // Login existing user, retrieve workspace data
         await AuthService.login(email);
       }
+
       onEnterApp();
     } catch (error: any) {
       console.error("Auth failed", error);

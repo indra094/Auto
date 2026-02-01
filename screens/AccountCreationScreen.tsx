@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ScreenId } from '../types';
 import { Button } from '../components/UI';
-import { UserIcon, Mail, Loader2, ArrowRight } from 'lucide-react';
+import { UserIcon, Mail, Loader2, ArrowRight, Calendar } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 import type { User, Workspace } from '../services/AuthService';
 

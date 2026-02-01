@@ -188,6 +188,7 @@ export const AuthService = {
 
   login: async (email: string): Promise<User> => {
     const user = await api.post('/auth/login', { email });
+    console.log("in login", user)
     DB.setItem('user', user);
     AuthService.refreshSession();
 
@@ -236,17 +237,30 @@ export const AuthService = {
 
   signup: async (fullName: string, email: string): Promise<User> => {
     let user: User | null = null;
-
+    let userOrgInfo: UserOrgInfo | null = null;
     try {
       user = await api.post("/auth/signup", { fullName, email, status: "Active" });
+      if (!user) throw new Error("Signup failed");
+
       const ws = await api.post("/auth/workspace", { email });
       await AuthService.setCurrentWorkspace(ws);
+
+      userOrgInfo = await AuthService.getUserOrgInfo(user.id, ws.id);
+      user.permission_level = userOrgInfo.permission_level;
+      user.role = userOrgInfo.role;
+      user.equity = userOrgInfo.equity;
+      user.vesting = userOrgInfo.vesting;
+      user.commitment = userOrgInfo.commitment;
+      user.status = userOrgInfo.status;
+      user.current_org_id = ws.id;
+
     } catch (err: any) {
       onerror?.(err.message);
       throw err;
     }
 
-    if (!user) throw new Error("Signup failed");
+
+
 
     DB.setItem('user', user);
     AuthService.refreshSession();

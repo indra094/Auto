@@ -298,7 +298,7 @@ export const FoundersAlignmentScreen: React.FC = ({
                       <td>{f.role ?? "-"}</td>
                       <td>{f.commitment}h</td>
                       <td>{f.equity}%</td>
-                      <td>{f.permissionLevel}</td>
+                      <td>{f.permission_level}</td>
                     </tr>
                   ))}
                 </tbody>

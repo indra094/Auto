@@ -37,42 +37,43 @@ const beforeOnboardingNav: NavGroup[] = [
 // AFTER ONBOARDING - Full operating system navigation
 const afterOnboardingNav: NavGroup[] = [
   {
-    label: "Dashboard & Setup",
+    label: "Dashboard & Account Setup",
     screens: [
       { id: ScreenId.COMPANY_DASHBOARD, label: "Dashboard" },
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Information" },
-      { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
-      { id: ScreenId.FINANCIALS_ONBOARDING, label: "Financials" }
     ]
   },
   {
-    label: "Founders",
+    label: "Founders and Alignment insights",
     screens: [
       { id: ScreenId.FOUNDERS_LIST, label: "Founders" },
       { id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founder Alignment" },
     ]
   },
   {
-    label: "Startup Insights",
+    label: "Organization and Idea Insights",
     screens: [
+      { id: ScreenId.COMPANY_INFORMATION, label: "Organization Information" },
       { id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Insights" },
-      { id: ScreenId.INVESTOR_READINESS, label: "Investor Insights" }
       //{ id: ScreenId.AI_IDEA_VALIDATION, label: "Idea Validation" },
       //{ id: ScreenId.FOUNDERS_ALIGNMENT, label: "Founder Alignment" },
       //{ id: ScreenId.STAGES_CAPITAL, label: "Stages & Capital" },
     ]
-  }/*,
+  },
   {
-    label: "Organization",
+    label: "Financials and Investment Insights",
     screens: [
-      { id: ScreenId.FOUNDERS_LIST, label: "Founders" },
+      { id: ScreenId.FINANCIALS_ONBOARDING, label: "Financials" },
+      { id: ScreenId.INVESTOR_READINESS, label: "Investor Insights" }
+      /*{ id: ScreenId.FOUNDERS_LIST, label: "Founders" },
       { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
       { id: ScreenId.MY_ROLE, label: "My Role" },
       { id: ScreenId.TEAM_EMPLOYEES, label: "Team & Employees" },
       { id: ScreenId.EQUITY_MODELING, label: "Equity Modeling" },
-      { id: ScreenId.ALIGNMENT_OVERVIEW, label: "Founder Alignment" },
+      { id: ScreenId.ALIGNMENT_OVERVIEW, label: "Founder Alignment" },*/
     ]
   },
+  /*
   {
     label: "Customers",
     screens: [
@@ -107,7 +108,7 @@ const afterOnboardingNav: NavGroup[] = [
       { id: ScreenId.NOTIFICATIONS, label: "Notifications" },
       { id: ScreenId.DOCUMENTS, label: "Documents" },
     ]
-  }*/
+  } */
 ];
 
 
