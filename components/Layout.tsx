@@ -132,6 +132,14 @@ export const Layout: React.FC = () => {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const unsubscribe = AuthService.onUserChange((updatedUser) => {
+      setUser(updatedUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const refreshData = async () => {
       const u = AuthService.getUser();
       console.log("layout user" + u.current_org_id);

@@ -278,12 +278,15 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         setError(null);
 
         try {
+            const workspace = AuthService.getCachedWorkspace();
             await AuthService.updateWorkspace({
                 ...formData,
-                onboardingStep: 3
+                onboardingStep: Math.max(workspace.onboardingStep, 3)
             });
 
-            onNavigate(ScreenId.COMPANY_DASHBOARD);
+            if (workspace.onboardingStep < 4) {
+                onNavigate(ScreenId.FINANCIALS_ONBOARDING);
+            }
         } catch (err: any) {
             setError(err?.message || "Something went wrong.");
             setRetryCooldown(5);
@@ -423,12 +426,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         {isError('type') && <div className="error-msg">Please select a type</div>}
                     </div>
 
-                    <div className="input-group">
-                        <label className="label">Your Role</label>
-                        <div style={{ padding: '12px 16px', background: '#f1f5f9', borderRadius: '12px', color: '#64748b', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <CheckCircle2 size={16} color="var(--primary)" /> Founder
-                        </div>
-                    </div>
+
                 </div>
 
                 {/* --- Section 2: Strategy Basics --- */}
@@ -537,7 +535,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                             onClick={handleCreate}
                             disabled={isLoading || !isFormValid}
                         >
-                            {isLoading ? <Loader2 className="animate-spin" /> : <>Company Information <ArrowRight size={20} /></>}
+                            {isLoading ? <Loader2 className="animate-spin" /> : <>Save <ArrowRight size={20} /></>}
                         </button>
                     )}
 

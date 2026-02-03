@@ -57,6 +57,7 @@ export interface UserOrgInfo {
 }
 
 let workspaceChangeListeners: ((w: Workspace | null) => void)[] = [];
+let userListeners: ((user: User | null) => void)[] = [];
 
 export const AuthService = {
   getUser: (): User | null => {
@@ -301,20 +302,27 @@ export const AuthService = {
     return timeSinceLastActivity < SESSION_TIMEOUT;
   },
 
-  updateUser: async (data: Partial<User>) => {
+
+  async updateUser(data: Partial<User>) {
     const current = AuthService.getUser();
     if (!current) return null;
 
-    const updated = await api.patch(`/auth/user?email=${current.email}`, data);
-    DB.setItem('user', updated);
-    return updated;
+    const updatedUser = await api.patch(`/auth/user?email=${current.email}`, data);
+
+    // 🔥 update local cache
+    DB.setItem('user', updatedUser);
+
+    // 🔔 notify listeners
+    AuthService.notifyUserChange(updatedUser);
+
+    return updatedUser;
   },
 
   updateWorkspace: async (data: Partial<Workspace>) => {
     const user = AuthService.getUser();
     if (!user) return null;
 
-    const updated = await api.patch(`/auth/${user.current_org_id}/workspace-and-insights`, data);
+    const updated = await api.patch(`/auth/${user.current_org_id}/workspace`, data);
 
     // Notify listeners so UI updates immediately
     AuthService.setWorkspaceAndNotify(updated);
@@ -330,6 +338,17 @@ export const AuthService = {
     AuthService.setWorkspaceAndNotify(data);
 
     return data;
+  },
+
+  onUserChange(cb: (user: User | null) => void) {
+    userListeners.push(cb);
+    return () => {
+      userListeners = userListeners.filter(l => l !== cb);
+    };
+  },
+
+  notifyUserChange(user: User | null) {
+    userListeners.forEach(cb => cb(user));
   },
 
   setUserOrgInfo: async (userId: string, orgId: string, role: string, permission_level: string, equity: number, vesting: string, commitment: number) => {
@@ -367,7 +386,7 @@ export const AuthService = {
   },
 
   updateDashboard: async (orgId: string): Promise<Dashboard> => {
-    return await api.post(`/auth/${orgId}/dashboard`);
+    return await api.post(`/auth/${orgId}/dashboard`, {});
   },
 
   setWorkspaceAndNotify: (w: Workspace | null) => {

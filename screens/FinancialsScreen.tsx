@@ -297,13 +297,17 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
         setSaving(true);
         try {
+            let workspace = AuthService.getCachedWorkspace();
             await AuthService.updateFinancials(data.org_id, data);
 
-            // If onboarding, move to next step (Dashboard - step 4)
-            if (workspace?.onboardingStep && workspace.onboardingStep < 4) {
-                await AuthService.setOnboarding(workspace.id, 4);
+            if (!workspace || (workspace?.onboardingStep && workspace.onboardingStep <= 4)) {
+                await AuthService.setOnboarding(data.org_id, 4);
+            }
+
+            if (workspace.onboardingStep < 4) {
                 onNavigate(ScreenId.COMPANY_DASHBOARD);
             }
+
         } catch (e) {
             console.error(e);
             alert("Failed to save.");
@@ -312,7 +316,9 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         }
     };
 
+
     const handleSkip = async () => {
+        let workspace = AuthService.getCachedWorkspace();
         if (!workspace) return;
         setSaving(true);
         try {
@@ -328,7 +334,14 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
     // Derived
     const calculateRunway = () => {
-        if (!data.cash_in_bank || !data.monthly_burn || data.monthly_burn <= 0) return null;
+        if (
+            data.cash_in_bank === undefined ||
+            data.monthly_burn === undefined ||
+            data.monthly_burn <= 0
+        ) {
+            return null;
+        }
+
         return (data.cash_in_bank / data.monthly_burn).toFixed(1);
     };
 
@@ -336,13 +349,12 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     const isOnboarding = workspace?.onboardingStep < 4;
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 100 }}><Loader2 className="animate-spin" /></div>;
-
     const isFormValid =
-        data.monthly_revenue &&
-        data.revenue_trend &&
-        data.revenue_stage &&
-        data.monthly_burn &&
-        data.cash_in_bank;
+        data.revenue_stage !== undefined &&
+        data.revenue_trend !== undefined &&
+        data.monthly_revenue !== undefined &&
+        data.monthly_burn !== undefined &&
+        data.cash_in_bank !== undefined;
     return (
         <>
             <style>{styles}</style>
@@ -380,7 +392,10 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                                 style={{ paddingLeft: 36 }}
                                 placeholder="0"
                                 value={data.monthly_revenue || ''}
-                                onChange={e => handleChange('monthly_revenue', parseInt(e.target.value) || 0)}
+                                onChange={e => handleChange(
+                                    'monthly_revenue',
+                                    e.target.value === '' ? undefined : parseInt(e.target.value, 10)
+                                )}
                             />
                         </div>
                     </div>

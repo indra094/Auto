@@ -75,12 +75,11 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     setError(null);
 
     try {
-      // Only now do we call RPCs
-      await AuthService.updateUser({ fullName, email, industryExperience });
-
-
       const user = AuthService.getUser();
       const ws = await AuthService.fetchWorkspaceFromServer(user?.current_org_id);
+      // Only now do we call RPCs
+      await AuthService.updateUser({ fullName, email, industryExperience, current_org_id: ws?.id });
+
       if (ws && user) {
         await AuthService.setUserOrgInfo(user.id, ws.id, role, "ADMIN", 100, "", 60);
       }
