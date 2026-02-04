@@ -624,7 +624,7 @@ export const AddFounderPanel = ({
                   ? "Saving..."
                   : isEditMode
                     ? "Save Changes"
-                    : "Send Invite"}
+                    : "Add user"}
               </Button>
 
             </Card>
