@@ -205,11 +205,39 @@ export const AuthService = {
     return user;
   },
 
-  createUserForOrg: async (fullName: string, email: string, orgID: string, status: string, role: string, permission_level: string, equity: number, vesting: string, commitment: number): Promise<User> => {
+  updateUserForOrg: async (
+    userId: string,
+    orgID: string,
+    role: string,
+    permission_level: string,
+    equity: number,
+    vesting: string,
+    commitment: number,
+    status?: string,
+    salary?: number,
+    bonus?: number
+  ): Promise<User> => {
+    return await api.post('/auth/set-user-org-info', {
+      user_id: userId,
+      org_id: orgID,
+      role,
+      permission_level,
+      equity,
+      vesting,
+      commitment,
+      ...(status !== undefined ? { status } : {}),
+      ...(salary !== undefined ? { salary } : {}),
+      ...(bonus !== undefined ? { bonus } : {}),
+    });
+
+  },
+
+
+  createUserForOrg: async (fullName: string, email: string, orgID: string, status: string, role: string, permission_level: string, equity: number, vesting: string, commitment: number, salary: number, bonus: number): Promise<User> => {
     let user;
 
     try {
-      user = await api.post('/auth/user', { fullName, email, org_id: orgID, status: status, role: role, permission_level: permission_level, equity: equity, vesting: vesting, commitment: commitment });
+      user = await api.post('/auth/user', { fullName, email, org_id: orgID, status: status, role: role, permission_level: permission_level, equity: equity, vesting: vesting, commitment: commitment, salary: salary, bonus: bonus });
     } catch (err: any) {
       console.log("err:", err);
       const detail = err?.message || "";
@@ -227,12 +255,14 @@ export const AuthService = {
     return await api.post('/auth/set-user-org-info', {
       user_id: user.id,
       org_id: orgID,
-      role: role,
-      permission_level: permission_level,
-      equity: equity,
-      vesting: vesting,
-      commitment: commitment,
-      status: status
+      role,
+      permission_level,
+      equity,
+      vesting,
+      commitment,
+      ...(status !== undefined ? { status } : {}),
+      ...(salary !== undefined ? { salary } : {}),
+      ...(bonus !== undefined ? { bonus } : {}),
     });
   },
 
@@ -360,7 +390,7 @@ export const AuthService = {
       equity: equity,
       vesting: vesting,
       commitment: commitment,
-      status: "Active"
+      status: "Active",
     });
   },
 

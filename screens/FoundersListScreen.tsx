@@ -12,6 +12,7 @@ interface ScreenProps {
 
 export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [users, setUsers] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isInviting, setIsInviting] = React.useState(false);
@@ -198,19 +199,18 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                       </div>
 
 
-                      {/* Row 3: Equity + Vesting */}
+                      {/* Row 3: Equity / Vesting / Salary / Bonus */}
                       <div className="grid grid-cols-2 gap-4 text-sm">
+
+                        {/* Equity */}
                         <div>
-                          <div>
-                            <div className="text-xs text-slate-500 mb-1">
-                              Equity
-                            </div>
-                            <div className="font-medium text-slate-900">
-                              {u.equity}%
-                            </div>
+                          <div className="text-xs text-slate-500 mb-1">Equity</div>
+                          <div className="font-medium text-slate-900">
+                            {u.equity}%
                           </div>
                         </div>
 
+                        {/* Vesting */}
                         <div>
                           <div className="text-xs text-slate-500 mb-1">Vesting</div>
                           <div className="font-medium text-slate-900">
@@ -219,7 +219,31 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                             )}
                           </div>
                         </div>
+
+                        {/* Salary (ADMIN only) */}
+                        {isAdmin && (
+                          <div>
+                            <div className="text-xs text-slate-500 mb-1">Salary</div>
+                            <div className="font-medium text-slate-900">
+                              {u.salary ? `$${u.salary.toLocaleString()}` : "—"}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Bonus (ADMIN only) */}
+                        {isAdmin && (
+                          <div>
+                            <div className="text-xs text-slate-500 mb-1">Bonus</div>
+                            <div className="font-medium text-slate-900">
+                              {u.bonus && u.bonus > 0
+                                ? `$${u.bonus.toLocaleString()}`
+                                : "—"}
+                            </div>
+                          </div>
+                        )}
+
                       </div>
+
 
                       {/* Row 4:  Audit */}
 
@@ -228,6 +252,17 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
                         <div className="flex items-center gap-6">
                           <span>Last updated: {u.lastUpdated}</span>
+                          {isAdmin && (
+                            <button
+                              onClick={() => {
+                                setEditingUser(u);
+                                setShowAddFounder(true);
+                              }}
+                              className="text-indigo-600 hover:underline font-medium"
+                            >
+                              Edit
+                            </button>
+                          )}
 
                           {isAdmin && !isSelf && (
                             <button
@@ -256,16 +291,19 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         <AddFounderPanel
           open={showAddFounder}
           isAdmin={isAdmin}
+          initialData={editingUser}   // 👈 NEW
           onClose={async () => {
             setShowAddFounder(false);
+            setEditingUser(null);
             await loadUsers();
           }}
-          onSave={() => {
+          onSave={async () => {
             setShowAddFounder(false);
+            setEditingUser(null);
+            await loadUsers();
           }}
         />
       )}
-
     </div >
   );
 };
@@ -274,25 +312,32 @@ export const AddFounderPanel = ({
   open,
   onClose,
   onSave,
-  isAdmin
+  isAdmin,
+  initialData
 }: {
   open: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
   isAdmin: boolean;
+  initialData?: any | null;
 }) => {
   if (!open) return null;
+  const [salary, setSalary] = useState(initialData?.salary ?? 0);
+  const [bonus, setBonus] = useState(initialData?.bonus || 0);
+  const [status, setStatus] = useState(initialData?.status || "Pending Activation");
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("Founder");
-  const [commitment, setCommitment] = useState(40);
-  const [equity, setEquity] = useState(0);
-  const [vesting, setVesting] = useState("4y / 1y cliff");
-  const [permissionLevel, setPermissionLevel] = useState("MEMBER");
+
+  const [name, setName] = useState(initialData?.fullName || "");
+  const [email, setEmail] = useState(initialData?.email || "");
+  const [role, setRole] = useState(initialData?.role || "Founder");
+  const [commitment, setCommitment] = useState(initialData?.commitment ?? 40);
+  const [equity, setEquity] = useState(initialData?.equity ?? 0);
+  const [vesting, setVesting] = useState(initialData?.vesting || "4y / 1y cliff");
+  const [permissionLevel, setPermissionLevel] =
+    useState(initialData?.permission_level || "MEMBER");
   const [isSending, setIsSending] = useState(false);
 
-  const user = AuthService.getUser();
+  let user = AuthService.getUser();
 
   const isValid = name.trim().length > 0 && email.trim().length > 0;
 
@@ -307,40 +352,59 @@ export const AddFounderPanel = ({
 
     setIsSending(true);
     try {
-      const orgID =
-        (await AuthService.fetchWorkspaceFromServer(user.current_org_id))?.id ?? "";
 
-      const created = await AuthService.createUserForOrg(
-        name,
-        email,
-        orgID,
-        "Pending Activation",
-        role,
-        permissionLevel,
-        equity,
-        vesting,
-        commitment,
-      );
+      if (isEditMode) {
+        await AuthService.updateUserForOrg(
+          initialData.id,
+          user.current_org_id,
+          role,
+          permissionLevel,
+          equity,
+          vesting,
+          commitment,
+          status,
+          salary,
+          bonus
+        );
 
-      onSave({
-        id: created.id,
-        fullName: name,
-        email,
-        role,
-        commitment,
-        equity,
-        vesting,
-        permissionLevel: permissionLevel,
-      });
+      } else {
+        const orgID =
+          (await AuthService.fetchWorkspaceFromServer(user.current_org_id))?.id ?? "";
 
-      onClose();
+        await AuthService.createUserForOrg(
+          name,
+          email,
+          orgID,
+          "Pending Activation",
+          role,
+          permissionLevel,
+          equity,
+          vesting,
+          commitment,
+          salary,
+          bonus
+        );
+      }
+
+      onSave({});
     } catch (err) {
       console.error(err);
-      alert("Failed to send invite. Please try again.");
+      alert("Failed to save user.");
     } finally {
       setIsSending(false);
     }
   };
+
+
+  React.useEffect(() => {
+    if (!initialData) return;
+
+    setStatus(initialData.status ?? "Pending Activation");
+    user = AuthService.getUser();
+  }, [initialData]);
+
+  const isEditMode = Boolean(initialData?.id);
+
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <Card className="w-full max-w-2xl max-h-[70vh] p-6 overflow-y-auto">
@@ -348,7 +412,9 @@ export const AddFounderPanel = ({
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="text-xl font-bold">Add User to Organization</h3>
+            <h3 className="text-xl font-bold">
+              {isEditMode ? "Edit User" : "Add User to Organization"}
+            </h3>
             <p className="text-slate-500 mt-1">
               Invite a member and assign a role.
             </p>
@@ -379,10 +445,9 @@ export const AddFounderPanel = ({
             {/* Email */}
             <div>
               <input
-                className="w-full p-3 rounded-xl border border-slate-200"
-                placeholder="Email"
+                disabled={isEditMode}
+                className="w-full p-3 rounded-xl border border-slate-200 disabled:bg-slate-100"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
               />
               <div className="text-[10px] text-slate-400 mt-1">
                 The email address of the user you’re inviting.
@@ -391,19 +456,14 @@ export const AddFounderPanel = ({
 
             {/* Role */}
             <div>
-              <select
+              <input
                 className="w-full p-3 rounded-xl border border-slate-200"
+                placeholder="Role (e.g. Founder, CTO, Advisor)"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-              >
-                <option>Founder</option>
-                <option>CEO</option>
-                <option>CTO</option>
-                <option>CPO</option>
-                <option>Advisor</option>
-              </select>
+              />
               <div className="text-[10px] text-slate-400 mt-1">
-                Select the role they will hold in the organization.
+                Enter the role they will hold in the organization.
               </div>
             </div>
 
@@ -470,6 +530,43 @@ export const AddFounderPanel = ({
               </div>
             </div>
 
+            {/* Salary (ADMIN only) */}
+            <div>
+              <input
+                type="number"
+                className="w-full p-3 rounded-xl border border-slate-200 disabled:bg-slate-100"
+                placeholder="Annual Salary"
+                value={salary}
+                disabled={!isAdmin}
+                onChange={(e) => setSalary(Number(e.target.value))}
+              />
+              {!isAdmin && (
+                <div className="text-[10px] text-slate-400 mt-1">
+                  Salary can only be edited by ADMIN
+                </div>
+              )}
+              <div className="text-[10px] text-slate-400 mt-1">
+                Annual compensation in USD.
+              </div>
+            </div>
+
+            {/* Bonus (ADMIN only) */}
+            <div>
+              <input
+                className="w-full p-3 rounded-xl border border-slate-200 disabled:bg-slate-100"
+                placeholder="Bonus (e.g. 10% performance)"
+                value={bonus}
+                disabled={!isAdmin}
+                onChange={(e) => setBonus(Number(e.target.value))}
+              />
+
+              <div className="text-[10px] text-slate-400 mt-1">
+                Annual Bonus amount in USD.
+              </div>
+
+            </div>
+
+
             {/* Vesting */}
             <div>
               <input
@@ -482,6 +579,7 @@ export const AddFounderPanel = ({
                 Vesting schedule for the equity granted.
               </div>
             </div>
+
           </div>
 
           {/* Right: Preview */}
@@ -522,8 +620,13 @@ export const AddFounderPanel = ({
                 disabled={!isValid || isSending}
                 onClick={handleSendInvite}
               >
-                {isSending ? "Sending..." : "Send Invite"}
+                {isSending
+                  ? "Saving..."
+                  : isEditMode
+                    ? "Save Changes"
+                    : "Send Invite"}
               </Button>
+
             </Card>
           </div>
         </div>

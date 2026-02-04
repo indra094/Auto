@@ -257,12 +257,15 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         setError(null);
 
         try {
+            const workspace = AuthService.getCachedWorkspace();
             await AuthService.updateWorkspace({
                 ...formData,
-                onboardingStep: 3
+                onboardingStep: Math.max(workspace.onboardingStep, 3)
             });
 
-            onNavigate(ScreenId.COMPANY_DASHBOARD);
+            if (workspace.onboardingStep < 4) {
+                onNavigate(ScreenId.FINANCIALS_ONBOARDING);
+            }
         } catch (err: any) {
             setError(err?.message || "Something went wrong.");
             setRetryCooldown(5);
