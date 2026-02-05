@@ -293,21 +293,29 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     };
 
     const handleSave = async () => {
+
         if (!validate()) return;
 
         setSaving(true);
         try {
+            // Make a copy and fill 0 for empty numeric fields
+            const dataToSave = { ...data };
+            ['monthly_revenue', 'monthly_burn', 'cash_in_bank', 'price_per_customer', 'customers_in_pipeline'].forEach(field => {
+                if (dataToSave[field as keyof Financials] === undefined || dataToSave[field as keyof Financials] === '') {
+                    dataToSave[field as keyof Financials] = 0;
+                }
+            });
+
             let workspace = AuthService.getCachedWorkspace();
-            await AuthService.updateFinancials(data.org_id, data);
+            await AuthService.updateFinancials(data.org_id, dataToSave);
 
             if (!workspace || (workspace?.onboardingStep && workspace.onboardingStep <= 4)) {
                 await AuthService.setOnboarding(data.org_id, 4);
             }
 
-            if (workspace.onboardingStep < 4) {
+            if (workspace?.onboardingStep < 4) {
                 onNavigate(ScreenId.COMPANY_DASHBOARD);
             }
-
         } catch (e) {
             console.error(e);
             alert("Failed to save.");
@@ -315,6 +323,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             setSaving(false);
         }
     };
+
 
 
     const handleSkip = async () => {
@@ -350,11 +359,11 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 100 }}><Loader2 className="animate-spin" /></div>;
     const isFormValid =
-        data.revenue_stage !== undefined &&
-        data.revenue_trend !== undefined &&
-        data.monthly_revenue !== undefined &&
-        data.monthly_burn !== undefined &&
-        data.cash_in_bank !== undefined;
+        data.revenue_stage !== undefined && data.revenue_stage !== '' && data.revenue_stage !== null &&
+        data.revenue_trend !== undefined && data.revenue_trend !== '' && data.revenue_trend !== null &&
+        data.monthly_revenue !== undefined && data.monthly_revenue !== null &&
+        data.monthly_burn !== undefined && data.monthly_burn !== null &&
+        data.cash_in_bank !== undefined && data.cash_in_bank !== null;
     return (
         <>
             <style>{styles}</style>
@@ -388,10 +397,12 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                         <div style={{ position: 'relative' }}>
                             <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 14, color: '#94a3b8' }} />
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 style={{ paddingLeft: 36 }}
                                 placeholder="0"
-                                value={data.monthly_revenue || ''}
+                                value={data.monthly_revenue !== undefined && data.monthly_revenue !== null ? data.monthly_revenue : ''}
                                 onChange={e => handleChange(
                                     'monthly_revenue',
                                     e.target.value === '' ? undefined : parseInt(e.target.value, 10)
@@ -425,25 +436,27 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     <div className="section-title">Expenses</div>
 
                     <div className="input-group">
-                        <label className="label">Monthly Burn <span className="required">*</span></label>
+                        <label className="label">Monthly Expenses <span className="required">*</span></label>
                         <div style={{ position: 'relative' }}>
                             <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 14, color: '#94a3b8' }} />
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 style={{ paddingLeft: 36 }}
                                 placeholder="0"
-                                value={data.monthly_burn || ''}
+                                value={data.monthly_burn !== undefined && data.monthly_burn !== null ? data.monthly_burn : ''}
                                 onChange={e => handleChange('monthly_burn', parseInt(e.target.value) || 0)}
                             />
                         </div>
                     </div>
 
                     <div className="input-group">
-                        <label className="label">Cost Structure</label>
+                        <label className="label">Expense Pattern</label>
                         <div className="slider-container">
                             <div className="slider-labels">
-                                <span>Fixed</span>
-                                <span>Variable</span>
+                                <span>Mostly the same</span>
+                                <span>Changes with growth</span>
                             </div>
                             <input
                                 type="range"
@@ -462,14 +475,16 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     <div className="section-title">Runway</div>
 
                     <div className="input-group">
-                        <label className="label">Cash in Bank <span className="required">*</span></label>
+                        <label className="label">Cash Reserves <span className="required">*</span></label>
                         <div style={{ position: 'relative' }}>
                             <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 14, color: '#94a3b8' }} />
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 style={{ paddingLeft: 36 }}
                                 placeholder="0"
-                                value={data.cash_in_bank || ''}
+                                value={data.cash_in_bank !== undefined && data.cash_in_bank !== null ? data.cash_in_bank : ''}
                                 onChange={e => handleChange('cash_in_bank', parseInt(e.target.value) || 0)}
                             />
                         </div>
@@ -495,7 +510,9 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                         <div style={{ position: 'relative' }}>
                             <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 14, color: '#94a3b8' }} />
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 style={{ paddingLeft: 36 }}
                                 placeholder="0"
                                 value={data.price_per_customer || ''}
@@ -507,7 +524,9 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     <div className="input-group">
                         <label className="label">Customers / Month</label>
                         <input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             placeholder="0"
                             value={data.customers_in_pipeline || ''}
                             onChange={e => handleChange('customers_in_pipeline', parseInt(e.target.value) || 0)}
@@ -556,15 +575,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                         {saving ? <Loader2 className="animate-spin" /> : (isOnboarding ? <>Save & Continue <ArrowRight size={20} /></> : 'Save Changes')}
                     </button>
 
-                    {isOnboarding && (
-                        <button
-                            className="btn-secondary"
-                            onClick={handleSkip}
-                            disabled={saving}
-                        >
-                            Skip for now
-                        </button>
-                    )}
+
                 </div>
 
             </div>
