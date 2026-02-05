@@ -226,70 +226,96 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
       {/* Hero and other sections remain same... */}
       <section className="pt-20 pb-32 px-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-medium mb-8">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-            </span>
-            New: Founder Alignment Engine
-          </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6">
+
             Align, Decide, <span className="text-indigo-600">Act.</span>
           </h1>
           <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
             Make founder decisions clear before they become expensive.
             Foundry is the operating system for early-stage alignment, equity modeling, and diligence.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button onClick={openSignup} className="h-14 px-8 text-lg rounded-full w-full sm:w-auto shadow-lg shadow-indigo-200">
-              Get Started
-            </Button>
-            <button onClick={openSignup} className="h-14 px-8 text-lg font-medium text-slate-600 hover:text-slate-900 flex items-center gap-2">
-              See how it works <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Dashboard Preview */}
-        <div className="container mx-auto max-w-6xl mt-16 relative">
-          <div className="absolute inset-0 bg-indigo-600/5 blur-3xl rounded-full transform scale-90 translate-y-10"></div>
-          <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden aspect-video flex items-center justify-center bg-slate-50">
-            <div className="text-center p-8">
-              <div className="mb-4 flex justify-center text-indigo-200"><PieChart className="w-16 h-16" /></div>
-              <h3 className="text-lg font-semibold text-slate-400">Interactive Founder Dashboard</h3>
-              <p className="text-slate-400 text-sm">Equity Splits • Decision Gates • Cap Table Modeling</p>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Feature Grid */}
-      <section className="py-24 bg-slate-50 border-t border-slate-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Everything you need to incorporate with confidence</h2>
-            <p className="text-lg text-slate-600">Don't let legal ambiguity kill your startup. Foundry handles the hard conversations for you.</p>
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { icon: Users, title: "Founder Alignment", desc: "Structured questionnaires to align on vision, roles, and exit strategy." },
-              { icon: PieChart, title: "Smart Equity", desc: "Dynamic equity splitting based on contribution, risk, and time commitment." },
-              { icon: Cpu, title: "AI Council", desc: "Simulate board meetings and get unbiased advice on critical decisions." },
-              { icon: Rocket, title: "Incorporation Ready", desc: "Generate legal-ready documents once you hit your alignment milestones." },
-              { icon: ChevronRight, title: "Decision Gates", desc: "Track progress through Stage Gates from idea to Series A." },
-              { icon: Users, title: "Team Management", desc: "Manage early employees, vesting schedules, and offer letters." }
-            ].map((feature, i) => (
-              <div key={i} className="bg-white p-8 rounded-2xl border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-6">
-                  <feature.icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
+      <section className="px-8 py-16 bg-gray-50">
+        <h2 className="text-3xl font-semibold text-center mb-4">
+          Understand Your Startup Like an Investor
+        </h2>
+        <p className="text-center text-gray-600 mb-12">
+          We analyze your startup the same way investors do — team, idea,
+          market, and financials.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <FeatureBox
+            title="Analyze Your Startup"
+            icon="📊"
+            description="Structured evaluation of founders, idea, market, and financial health."
+          />
+          <FeatureBox
+            title="AI-Driven Insights"
+            icon="🧠"
+            description="Surface the single biggest risks and leverage points investors care about."
+          />
+          <FeatureBox
+            title="Clear Next Actions"
+            icon="🎯"
+            description="Concrete steps to improve alignment, traction, and readiness to raise."
+          />
         </div>
+      </section>
+
+      {/* ============ HOW IT WORKS ============ */}
+      <section className="px-8 py-16">
+        <h3 className="text-2xl font-semibold text-center mb-10">
+          How It Works
+        </h3>
+
+        <div className="flex flex-col md:flex-row justify-center items-center gap-8 text-center">
+          <Step number="1" text="Enter your startup details" />
+          <Step number="2" text="We analyze your data in real time" />
+          <Step number="3" text="Get an investor-style dashboard" />
+        </div>
+      </section>
+
+      {/* ============ WHAT YOU’LL SEE ============ */}
+      <section className="px-8 py-16 bg-gray-50">
+        <h3 className="text-2xl font-semibold text-center mb-12">
+          What You’ll See
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <FeatureBox
+            title="Executive Summary"
+            icon="📌"
+            description="A plain-English snapshot of your startup’s overall health."
+          />
+          <FeatureBox
+            title="Killer Insight"
+            icon="🔥"
+            description="The single most important factor helping or hurting investment."
+          />
+          <FeatureBox
+            title="Investor Readiness Signal"
+            icon="📈"
+            description="A clear signal showing how ready you are to raise capital."
+          />
+        </div>
+      </section>
+
+      {/* ============ GET STARTED ============ */}
+      <section className="px-8 py-20 text-center">
+        <h3 className="text-3xl font-semibold mb-4">
+          See Your Startup Through an Investor’s Eyes
+        </h3>
+        <p className="text-gray-600 mb-8">
+          No fluff. No generic advice. Just clarity.
+        </p>
+
+        <button onClick={openSignup} className="px-8 py-4 bg-black text-white rounded-lg text-lg">
+          Get Started
+        </button>
       </section>
 
       <footer className="py-12 bg-white border-t border-slate-100">
@@ -300,3 +326,31 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
     </div >
   );
 };
+
+interface FeatureBoxProps {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+const FeatureBox: React.FC<FeatureBoxProps> = ({ title, description, icon }) => (
+  <div className="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition">
+    <div className="text-3xl mb-4">{icon}</div>
+    <h4 className="text-lg font-semibold mb-2">{title}</h4>
+    <p className="text-gray-600 text-sm">{description}</p>
+  </div>
+);
+
+interface StepProps {
+  number: string;
+  text: string;
+}
+
+const Step: React.FC<StepProps> = ({ number, text }) => (
+  <div className="flex flex-col items-center">
+    <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center mb-2">
+      {number}
+    </div>
+    <p className="text-gray-700 text-sm">{text}</p>
+  </div>
+);
