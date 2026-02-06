@@ -363,7 +363,7 @@ export const AuthService = {
 
   setOnboarding: async (workspaceId: string, step: number) => {
     const data = await api.post(`/auth/${workspaceId}/set-onboarding`, { step });
-
+    console.log("[AuthService] Set onboarding step:", step);
     // Notify listeners so UI updates immediately
     AuthService.setWorkspaceAndNotify(data);
 

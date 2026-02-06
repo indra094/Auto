@@ -22,6 +22,7 @@ const beforeOnboardingNav: NavGroup[] = [
     label: "Get Started",
     screens: [
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
+      { id: ScreenId.FOUNDERS_LIST, label: "Founding Team" },
       { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
       { id: ScreenId.FINANCIALS_ONBOARDING, label: "Financials" }
     ]
@@ -160,8 +161,8 @@ export const Layout: React.FC = () => {
       console.log("here layout" + u.current_org_id);
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
-        const progressMap = [0, 10, 50, 75, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 4)]);
+        const progressMap = [0, 20, 40, 60, 80, 100];
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 5)]);
       }
     };
 
@@ -176,8 +177,9 @@ export const Layout: React.FC = () => {
 
       // also update progress when workspace changes
       if (w) {
-        const progressMap = [0, 10, 50, 75, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 4)]);
+        const progressMap = [0, 20, 40, 60, 80, 100];
+        console.log("[Layout] Onboarding Step:", w?.onboardingStep);
+        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 5)]);
       }
     });
 
@@ -213,8 +215,9 @@ export const Layout: React.FC = () => {
       const onboardingSteps = [
         { id: ScreenId.COMPANY_DASHBOARD, minStep: 0 },
         { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
-        { id: ScreenId.COMPANY_INFORMATION, minStep: 2 },
-        { id: ScreenId.FINANCIALS_ONBOARDING, minStep: 3 },
+        { id: ScreenId.FOUNDERS_LIST, minStep: 2 },
+        { id: ScreenId.COMPANY_INFORMATION, minStep: 3 },
+        { id: ScreenId.FINANCIALS_ONBOARDING, minStep: 4 },
       ];
 
       const onboardingStep = onboardingSteps.find(s => s.id === screenId);
@@ -268,11 +271,11 @@ export const Layout: React.FC = () => {
   const stage = workspace?.stage || "Onboarding";
 
   // Determine which navigation to show
-  const isActivationMode = (workspace?.onboardingStep || 0) < 4;
+  const isActivationMode = (workspace?.onboardingStep || 0) < 5;
   const currentNav = isActivationMode ? beforeOnboardingNav : afterOnboardingNav;
 
   // Hide search/notifications during early onboarding to minimize distraction
-  const isSetupMode = (workspace?.onboardingStep || 0) < 4;
+  const isSetupMode = (workspace?.onboardingStep || 0) < 5;
 
   return (
     <div className="flex h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">

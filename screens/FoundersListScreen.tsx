@@ -21,6 +21,8 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [showAddFounder, setShowAddFounder] = useState(false);
   const currentUser = AuthService.getUser();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState<number>(0);
+
 
 
   const loadPermission = async () => {
@@ -56,9 +58,33 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   };
 
   React.useEffect(() => {
-    loadPermission();
-    loadUsers();
-  }, []);
+    let isMounted = true;
+
+    const onEnter = async () => {
+      // Always refresh these on page entry
+      await loadPermission();
+      await loadUsers();
+
+      // Read onboarding step once on entry
+      if (currentUser?.id && isMounted) {
+        const orgId = AuthService.getCachedUser()?.current_org_id;
+        if (!orgId) return;
+        const fetchStep = async () => {
+          const ws = await AuthService.fetchWorkspaceFromServer(orgId);
+          setOnboardingStep(ws?.onboardingStep || 0);
+        };
+        fetchStep();
+        await AuthService.setOnboarding(orgId, Math.max(onboardingStep, 3));
+      }
+    };
+
+    onEnter();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // 👈 runs on every screen entry (mount)
+
 
 
   const handleRemoveUser = async (userId: string) => {
@@ -303,6 +329,20 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             await loadUsers();
           }}
         />
+      )}
+
+
+      {/* Continue onboarding */}
+      {onboardingStep < 5 && (
+        <div className="flex justify-end pt-6">
+          <Button
+            onClick={() => onNavigate(ScreenId.COMPANY_INFORMATION)}
+            className="flex items-center gap-2"
+          >
+            Continue
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
       )}
     </div >
   );

@@ -260,10 +260,11 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
             const workspace = AuthService.getCachedWorkspace();
             await AuthService.updateWorkspace({
                 ...formData,
-                onboardingStep: Math.max(workspace.onboardingStep, 3)
+                onboardingStep: Math.max(workspace.onboardingStep, 4)
             });
 
-            if (workspace.onboardingStep < 4) {
+
+            if (workspace.onboardingStep < 5) {
                 onNavigate(ScreenId.FINANCIALS_ONBOARDING);
             }
         } catch (err: any) {
@@ -284,10 +285,10 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
             const workspace = AuthService.getCachedWorkspace();
             await AuthService.updateWorkspace({
                 ...formData,
-                onboardingStep: Math.max(workspace.onboardingStep, 3)
+                onboardingStep: Math.max(workspace.onboardingStep, 4)
             });
 
-            if (workspace.onboardingStep < 4) {
+            if (workspace.onboardingStep < 5) {
                 onNavigate(ScreenId.FINANCIALS_ONBOARDING);
             }
         } catch (err: any) {
@@ -532,7 +533,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                     )}
 
                     {/* Continue flow */}
-                    {onboardingStep !== 4 && (
+                    {onboardingStep !== 5 && (
                         <button
                             className="btn-primary"
                             onClick={handleCreate}
@@ -542,8 +543,8 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         </button>
                     )}
 
-                    {/* SAVE flow when onboardingStep === 4 */}
-                    {onboardingStep === 4 && (
+                    {/* SAVE flow when onboardingStep === 5 */}
+                    {onboardingStep === 5 && (
                         <button
                             className="btn-primary"
                             onClick={handleSave}
@@ -557,7 +558,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         <button
                             className="btn-primary btn-retry"
                             disabled={retryCooldown > 0}
-                            onClick={onboardingStep === 4 ? handleSave : handleCreate}
+                            onClick={onboardingStep === 5 ? handleSave : handleCreate}
                         >
                             {retryCooldown > 0
                                 ? `Retry available in ${retryCooldown}s`

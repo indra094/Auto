@@ -307,7 +307,7 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
 
 
     const readinessScore = data.readiness_score;
-    const isReady = readinessScore >= 0.7;
+    const isReady = readinessScore >= 70;
     // Map API data to UI
     const pushbacks = data.pushbacks;
     const fixes = data.fixes;
@@ -469,7 +469,7 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
 
                     {/* Simulated Reaction */}
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Pitch Reaction (Simulated)</h3>
+                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Likely Pitch Reaction</h3>
                         <div className="space-y-4">
                             {simulatedReaction.map((item, i) => (
                                 <div key={i} className="flex items-center gap-4">

@@ -309,11 +309,11 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             let workspace = AuthService.getCachedWorkspace();
             await AuthService.updateFinancials(data.org_id, dataToSave);
 
-            if (!workspace || (workspace?.onboardingStep && workspace.onboardingStep <= 4)) {
-                await AuthService.setOnboarding(data.org_id, 4);
+            if (!workspace || (workspace?.onboardingStep && workspace.onboardingStep <= 5)) {
+                await AuthService.setOnboarding(data.org_id, 5);
             }
 
-            if (workspace?.onboardingStep < 4) {
+            if (workspace?.onboardingStep < 5) {
                 onNavigate(ScreenId.COMPANY_DASHBOARD);
             }
         } catch (e) {
@@ -332,7 +332,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         setSaving(true);
         try {
             // ONLY update onboarding step, do NOT save form data
-            await AuthService.setOnboarding(workspace.id, 4);
+            await AuthService.setOnboarding(workspace.id, 5);
             onNavigate(ScreenId.COMPANY_DASHBOARD);
         } catch (e) {
             console.error(e);
@@ -355,7 +355,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     };
 
     const runway = calculateRunway();
-    const isOnboarding = workspace?.onboardingStep < 4;
+    const isOnboarding = workspace?.onboardingStep < 5;
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 100 }}><Loader2 className="animate-spin" /></div>;
     const isFormValid =
@@ -506,7 +506,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     <div className="section-title">Pricing (Optional)</div>
 
                     <div className="input-group">
-                        <label className="label">Price per customer</label>
+                        <label className="label">Revenue per customer</label>
                         <div style={{ position: 'relative' }}>
                             <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 14, color: '#94a3b8' }} />
                             <input

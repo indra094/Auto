@@ -178,7 +178,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isActivationMode = (workspace?.onboardingStep || 0) < 4;
+  const isActivationMode = (workspace?.onboardingStep || 0) < 5;
 
   // Simple MVP progress score
   const onboardingProgress = useMemo(() => {
@@ -269,20 +269,27 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       label: 'Your Info',
       completed: (workspace?.onboardingStep || 0) >= 2,
       current: (workspace?.onboardingStep || 0) === 1,
-      why: 'This affects founder equity.',
+      why: 'This is information about your role.',
+    },
+    {
+      id: ScreenId.FOUNDERS_LIST,
+      label: 'Founding Team',
+      completed: (workspace?.onboardingStep || 0) >= 3,
+      current: (workspace?.onboardingStep || 0) === 2,
+      why: 'This is information about your founding team.',
     },
     {
       id: ScreenId.COMPANY_INFORMATION,
       label: 'Company Information',
-      completed: (workspace?.onboardingStep || 0) >= 3,
-      current: (workspace?.onboardingStep || 0) === 2,
-      why: 'This affects how much money you need.',
+      completed: (workspace?.onboardingStep || 0) >= 4,
+      current: (workspace?.onboardingStep || 0) === 3,
+      why: 'This is information about your business idea and strategy.',
     },
     {
       id: ScreenId.FINANCIALS_ONBOARDING,
       label: 'Financials',
-      completed: (workspace?.onboardingStep || 0) >= 4,
-      current: (workspace?.onboardingStep || 0) === 3,
+      completed: (workspace?.onboardingStep || 0) >= 5,
+      current: (workspace?.onboardingStep || 0) === 4,
       why: 'This is information about your company\'s financials.',
     },
   ];

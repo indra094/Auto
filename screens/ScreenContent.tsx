@@ -118,6 +118,8 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ screenId, onNaviga
       // --- B. ONBOARDING ---
       case ScreenId.ACCOUNT_CREATION:
         return <AccountCreationScreen onNavigate={onNavigate} />;
+      case ScreenId.FOUNDERS_LIST:
+        return <FoundersListScreen onNavigate={onNavigate} />;
       case ScreenId.COMPANY_INFORMATION:
         return <CompanyCreationScreen onNavigate={onNavigate} active={true} />;
       case ScreenId.FINANCIALS_ONBOARDING:
