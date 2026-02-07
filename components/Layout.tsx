@@ -272,8 +272,8 @@ export const Layout: React.FC = () => {
 
   const stage =
     onboarding_step < 5
-      ? "Onboarding"
-      : "Active";
+      ? "Onboarding in progress."
+      : "Insights generated.";
 
   // Determine which navigation to show
   const isActivationMode = (workspace?.onboarding_step || 0) < 5;

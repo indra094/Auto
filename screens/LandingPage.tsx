@@ -60,10 +60,10 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
     try {
       if (authMode === 'signup') {
         // Create new user, step 1 of onboarding
-        await AuthService.signup(fullName, email);
+        await AuthService.signup(fullName, email, password);
       } else {
         // Login existing user, retrieve workspace data
-        await AuthService.login(email);
+        await AuthService.login(email, password);
       }
 
       onEnterApp();

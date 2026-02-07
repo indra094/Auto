@@ -187,8 +187,8 @@ export const AuthService = {
     return api.get(`/auth/${orgId}/founder-alignment`);
   },
 
-  login: async (email: string): Promise<User> => {
-    const user = await api.post('/auth/login', { email });
+  login: async (email: string, password: string): Promise<User> => {
+    const user = await api.post('/auth/login', { email, password });
     console.log("in login", user)
     DB.setItem('user', user);
     AuthService.refreshSession();
@@ -266,11 +266,11 @@ export const AuthService = {
     });
   },
 
-  signup: async (fullName: string, email: string): Promise<User> => {
+  signup: async (fullName: string, email: string, password: string): Promise<User> => {
     let user: User | null = null;
     let userOrgInfo: UserOrgInfo | null = null;
     try {
-      user = await api.post("/auth/signup", { fullName, email, status: "Active" });
+      user = await api.post("/auth/signup", { fullName, email, password, status: "Active" });
       if (!user) throw new Error("Signup failed");
 
       const ws = await api.post("/auth/workspace", { email });
