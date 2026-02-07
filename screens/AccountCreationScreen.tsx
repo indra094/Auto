@@ -35,7 +35,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
       const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
       setWorkspace(ws);
-      setIsOnboardingComplete((ws?.onboardingStep ?? 0) >= 5);
+      setIsOnboardingComplete((ws?.onboarding_step ?? 0) >= 5);
     };
 
     loadWorkspace();
@@ -85,7 +85,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
       }
 
       if (ws && !isOnboardingComplete) {
-        await AuthService.setOnboarding(ws.id, 2);
+        await AuthService.setOnboarding(ws.id, Math.max(ws?.onboarding_step || 0, 2));
         onNavigate(ScreenId.FOUNDERS_LIST);
       }
     } catch (err: any) {

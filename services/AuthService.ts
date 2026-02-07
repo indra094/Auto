@@ -39,7 +39,7 @@ export interface Workspace {
   solution?: string;
   customer?: string;
 
-  onboardingStep?: number;
+  onboarding_step?: number;
 };
 
 export interface UserOrgInfo {

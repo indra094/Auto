@@ -21,7 +21,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [showAddFounder, setShowAddFounder] = useState(false);
   const currentUser = AuthService.getUser();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [onboardingStep, setOnboardingStep] = useState<number>(0);
+  const [onboarding_step, setOnboardingStep] = useState<number>(0);
 
 
 
@@ -71,10 +71,10 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         if (!orgId) return;
         const fetchStep = async () => {
           const ws = await AuthService.fetchWorkspaceFromServer(orgId);
-          setOnboardingStep(ws?.onboardingStep || 0);
+          setOnboardingStep(ws?.onboarding_step || 0);
         };
         fetchStep();
-        await AuthService.setOnboarding(orgId, Math.max(onboardingStep, 3));
+        await AuthService.setOnboarding(orgId, Math.max(onboarding_step, 3));
       }
     };
 
@@ -333,7 +333,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
 
       {/* Continue onboarding */}
-      {onboardingStep < 5 && (
+      {onboarding_step < 5 && (
         <div className="flex justify-end pt-6">
           <Button
             onClick={() => onNavigate(ScreenId.COMPANY_INFORMATION)}

@@ -178,12 +178,12 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isActivationMode = (workspace?.onboardingStep || 0) < 5;
+  const isActivationMode = (workspace?.onboarding_step || 0) < 5;
 
   // Simple MVP progress score
   const onboardingProgress = useMemo(() => {
-    return getOnboardingProgress(workspace?.onboardingStep);
-  }, [workspace?.onboardingStep]);
+    return getOnboardingProgress(workspace?.onboarding_step);
+  }, [workspace?.onboarding_step]);
 
   const [data, setData] = useState<Dashboard | null>(null);
 
@@ -203,7 +203,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       const data = await AuthService.getDashboard(orgId);
 
       if (data) {
-        console.log("responsesize" + data.size)
+        //console.log("responsesize" + data.size)
         setQueueSize(data.size);       // update state
         queueSizeRef.current = data.size;  // update ref immediately for interval
         if (data.dashboard) {
@@ -234,7 +234,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       interval = setInterval(async () => {
         const ready = await fetchDashboard();
         let current = queueSizeRef.current;
-        console.log("queue size", current); // always latest value
+        //console.log("queue size", current); // always latest value
 
         if (!ready && current === 0) {
           AuthService.updateDashboard(orgId);
@@ -263,33 +263,33 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       </div>
     );
 
-  const onboardingSteps = [
+  const onboarding_steps = [
     {
       id: ScreenId.ACCOUNT_CREATION,
       label: 'Your Info',
-      completed: (workspace?.onboardingStep || 0) >= 2,
-      current: (workspace?.onboardingStep || 0) === 1,
+      completed: (workspace?.onboarding_step || 0) >= 2,
+      current: (workspace?.onboarding_step || 0) === 1,
       why: 'This is information about your role.',
     },
     {
       id: ScreenId.FOUNDERS_LIST,
       label: 'Founding Team',
-      completed: (workspace?.onboardingStep || 0) >= 3,
-      current: (workspace?.onboardingStep || 0) === 2,
+      completed: (workspace?.onboarding_step || 0) >= 3,
+      current: (workspace?.onboarding_step || 0) === 2,
       why: 'This is information about your founding team.',
     },
     {
       id: ScreenId.COMPANY_INFORMATION,
       label: 'Company Information',
-      completed: (workspace?.onboardingStep || 0) >= 4,
-      current: (workspace?.onboardingStep || 0) === 3,
+      completed: (workspace?.onboarding_step || 0) >= 4,
+      current: (workspace?.onboarding_step || 0) === 3,
       why: 'This is information about your business idea and strategy.',
     },
     {
       id: ScreenId.FINANCIALS_ONBOARDING,
       label: 'Financials',
-      completed: (workspace?.onboardingStep || 0) >= 5,
-      current: (workspace?.onboardingStep || 0) === 4,
+      completed: (workspace?.onboarding_step || 0) >= 5,
+      current: (workspace?.onboarding_step || 0) === 4,
       why: 'This is information about your company\'s financials.',
     },
   ];
@@ -337,7 +337,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
             <Target className="w-4 h-4" /> Setup Progress
           </h3>
           <div className="space-y-3">
-            {onboardingSteps.map((step, i) => (
+            {onboarding_steps.map((step, i) => (
               <Card
                 key={i}
                 className={`p-5 transition-all ${step.current
@@ -543,7 +543,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         </h3>
 
         <div className="space-y-3">
-          {onboardingSteps.map((step, i) => (
+          {onboarding_steps.map((step, i) => (
             <Card
               key={i}
               className={`p-5 transition-all ${step.completed

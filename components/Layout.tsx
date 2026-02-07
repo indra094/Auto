@@ -158,11 +158,11 @@ export const Layout: React.FC = () => {
           console.error("Layout: Error fetching workspaces", e);
         }
       }
-      console.log("here layout" + u.current_org_id);
+      console.log("useEffect: " + w.onboarding_step);
       // Calculate fake progress based on step for the sidebar visual
       if (w) {
         const progressMap = [0, 20, 40, 60, 80, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 5)]);
+        setOnboardingProgress(progressMap[Math.min(w.onboarding_step, 5)]);
       }
     };
 
@@ -172,14 +172,14 @@ export const Layout: React.FC = () => {
     // Listen for workspace updates
     const unsubscribe = AuthService.onWorkspaceChange((w) => {
       console.log("[Layout] Workspace updated:", w);
-      console.log("[Layout] Onboarding Step:", w?.onboardingStep);
+      console.log("[Layout] Onboarding Step:", w?.onboarding_step);
       setWorkspace(w);
 
       // also update progress when workspace changes
       if (w) {
         const progressMap = [0, 20, 40, 60, 80, 100];
-        console.log("[Layout] Onboarding Step:", w?.onboardingStep);
-        setOnboardingProgress(progressMap[Math.min(w.onboardingStep, 5)]);
+        console.log("[Layout] Onboarding Step:", w?.onboarding_step);
+        setOnboardingProgress(progressMap[Math.min(w.onboarding_step, 5)]);
       }
     });
 
@@ -204,7 +204,7 @@ export const Layout: React.FC = () => {
 
   // Determine status of each screen based on onboarding step
   const getScreenStatus = (screenId: ScreenId, isActivationMode: boolean): ScreenStatus => {
-    const step = workspace?.onboardingStep || 1;
+    const step = workspace?.onboarding_step || 1;
 
     // Always accessible
     if ([ScreenId.APP_SHELL, ScreenId.NOTIFICATIONS, ScreenId.COMPANY_DASHBOARD].includes(screenId)) return 'accessible';
@@ -212,7 +212,7 @@ export const Layout: React.FC = () => {
     // During activation (before onboarding complete)
     if (isActivationMode) {
       // Onboarding screens - only current and previous are accessible
-      const onboardingSteps = [
+      const onboarding_steps = [
         { id: ScreenId.COMPANY_DASHBOARD, minStep: 0 },
         { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
         { id: ScreenId.FOUNDERS_LIST, minStep: 2 },
@@ -220,9 +220,9 @@ export const Layout: React.FC = () => {
         { id: ScreenId.FINANCIALS_ONBOARDING, minStep: 4 },
       ];
 
-      const onboardingStep = onboardingSteps.find(s => s.id === screenId);
-      if (onboardingStep) {
-        return step >= onboardingStep.minStep ? 'accessible' : 'locked';
+      const onboarding_step = onboarding_steps.find(s => s.id === screenId);
+      if (onboarding_step) {
+        return step >= onboarding_step.minStep ? 'accessible' : 'locked';
       }
 
       // Everything else is locked during activation
@@ -268,14 +268,19 @@ export const Layout: React.FC = () => {
   };
 
   const companyName = workspace?.name || "New Startup";
-  const stage = workspace?.stage || "Onboarding";
+  const onboarding_step = workspace?.onboarding_step ?? 0;
+
+  const stage =
+    onboarding_step < 5
+      ? "Onboarding"
+      : "Active";
 
   // Determine which navigation to show
-  const isActivationMode = (workspace?.onboardingStep || 0) < 5;
+  const isActivationMode = (workspace?.onboarding_step || 0) < 5;
   const currentNav = isActivationMode ? beforeOnboardingNav : afterOnboardingNav;
 
   // Hide search/notifications during early onboarding to minimize distraction
-  const isSetupMode = (workspace?.onboardingStep || 0) < 5;
+  const isSetupMode = (workspace?.onboarding_step || 0) < 5;
 
   return (
     <div className="flex h-screen w-full bg-white text-slate-900 font-sans overflow-hidden">
@@ -400,7 +405,7 @@ export const Layout: React.FC = () => {
                       >
                         <div>
                           <div className={`font-bold ${workspace?.id === w.id ? 'text-indigo-600' : 'text-slate-700'}`}>{w.name}</div>
-                          <div className="text-[10px] text-slate-400 font-medium">{w.stage || 'Onboarding'}</div>
+
                         </div>
                         {workspace?.id === w.id && <CheckCircle className="w-4 h-4 text-indigo-500" />}
                       </button>

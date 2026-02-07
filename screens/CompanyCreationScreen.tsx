@@ -260,11 +260,11 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
             const workspace = AuthService.getCachedWorkspace();
             await AuthService.updateWorkspace({
                 ...formData,
-                onboardingStep: Math.max(workspace.onboardingStep, 4)
+                onboarding_step: Math.max(workspace.onboarding_step, 4)
             });
 
 
-            if (workspace.onboardingStep < 5) {
+            if (workspace.onboarding_step < 5) {
                 onNavigate(ScreenId.FINANCIALS_ONBOARDING);
             }
         } catch (err: any) {
@@ -285,10 +285,10 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
             const workspace = AuthService.getCachedWorkspace();
             await AuthService.updateWorkspace({
                 ...formData,
-                onboardingStep: Math.max(workspace.onboardingStep, 4)
+                onboarding_step: Math.max(workspace.onboarding_step, 4)
             });
 
-            if (workspace.onboardingStep < 5) {
+            if (workspace.onboarding_step < 5) {
                 onNavigate(ScreenId.FINANCIALS_ONBOARDING);
             }
         } catch (err: any) {
@@ -361,15 +361,15 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         return valid;
     };
 
-    // Always get latest onboardingStep from workspace
-    const [onboardingStep, setOnboardingStep] = useState(0);
+    // Always get latest onboarding_step from workspace
+    const [onboarding_step, setOnboardingStep] = useState(0);
     useEffect(() => {
         const orgId = AuthService.getCachedUser()?.current_org_id;
         if (!orgId) return;
         if (!active) return;
         const fetchStep = async () => {
             const ws = await AuthService.fetchWorkspaceFromServer(orgId);
-            setOnboardingStep(ws?.onboardingStep || 0);
+            setOnboardingStep(ws?.onboarding_step || 0);
         };
         fetchStep();
     }, [active, formData]);
@@ -533,7 +533,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                     )}
 
                     {/* Continue flow */}
-                    {onboardingStep !== 5 && (
+                    {onboarding_step !== 5 && (
                         <button
                             className="btn-primary"
                             onClick={handleCreate}
@@ -543,8 +543,8 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         </button>
                     )}
 
-                    {/* SAVE flow when onboardingStep === 5 */}
-                    {onboardingStep === 5 && (
+                    {/* SAVE flow when onboarding_step === 5 */}
+                    {onboarding_step === 5 && (
                         <button
                             className="btn-primary"
                             onClick={handleSave}
@@ -558,7 +558,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                         <button
                             className="btn-primary btn-retry"
                             disabled={retryCooldown > 0}
-                            onClick={onboardingStep === 5 ? handleSave : handleCreate}
+                            onClick={onboarding_step === 5 ? handleSave : handleCreate}
                         >
                             {retryCooldown > 0
                                 ? `Retry available in ${retryCooldown}s`

@@ -309,11 +309,11 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             let workspace = AuthService.getCachedWorkspace();
             await AuthService.updateFinancials(data.org_id, dataToSave);
 
-            if (!workspace || (workspace?.onboardingStep && workspace.onboardingStep <= 5)) {
+            if (!workspace || (workspace?.onboarding_step && workspace.onboarding_step <= 5)) {
                 await AuthService.setOnboarding(data.org_id, 5);
             }
 
-            if (workspace?.onboardingStep < 5) {
+            if (workspace?.onboarding_step < 5) {
                 onNavigate(ScreenId.COMPANY_DASHBOARD);
             }
         } catch (e) {
@@ -355,7 +355,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     };
 
     const runway = calculateRunway();
-    const isOnboarding = workspace?.onboardingStep < 5;
+    const isOnboarding = workspace?.onboarding_step < 5;
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 100 }}><Loader2 className="animate-spin" /></div>;
     const isFormValid =
