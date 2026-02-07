@@ -325,17 +325,22 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
         low: <CheckCircle className="w-6 h-6" />
     };
 
-    const simulatedReaction = data.simulated_reaction.map((item) => ({
-        ...item,
-        color:
-            item.label === "Reject" ? "bg-red-500" :
-                item.label === "Soft Interest" ? "bg-amber-400" :
-                    "bg-emerald-500",
-        icon:
-            item.label === "Reject" ? verdictIconMap[data.recommendation.severity] :
-                item.label === "Soft Interest" ? <Briefcase className="w-4 h-4 text-amber-500" /> :
-                    <DollarSign className="w-4 h-4 text-emerald-500" />
-    }));
+    const simulatedReaction = ["Reject", "Soft Interest", "Fund"].map(label => {
+        const item = data.simulated_reaction.find(r => r.label === label);
+
+        return {
+            label,
+            value: item?.value ?? 0,
+            color:
+                label === "Reject" ? "bg-red-500" :
+                    label === "Soft Interest" ? "bg-amber-400" :
+                        "bg-emerald-500",
+            icon:
+                label === "Reject" ? <XCircle className="w-4 h-4 text-red-500" /> :
+                    label === "Soft Interest" ? <Briefcase className="w-4 h-4 text-amber-500" /> :
+                        <DollarSign className="w-4 h-4 text-emerald-500" />
+        };
+    });
 
     return (
         <div className="p-6 md:p-10 space-y-8 max-w-7xl mx-auto pb-20">

@@ -310,7 +310,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             await AuthService.updateFinancials(data.org_id, dataToSave);
 
             if (!workspace || (workspace?.onboarding_step && workspace.onboarding_step <= 5)) {
-                await AuthService.setOnboarding(data.org_id, 5);
+                await AuthService.setOnboarding(data.org_id, Math.max(workspace?.onboarding_step ?? 0, 5));
             }
 
             if (workspace?.onboarding_step < 5) {

@@ -405,7 +405,7 @@ export const Layout: React.FC = () => {
                       >
                         <div>
                           <div className={`font-bold ${workspace?.id === w.id ? 'text-indigo-600' : 'text-slate-700'}`}>{w.name}</div>
-
+                          <div className="text-[10px] text-slate-400 font-medium">{w.onboarding_step === 5 ? 'Insights generated.' : 'Onboarding in progress.'}</div>
                         </div>
                         {workspace?.id === w.id && <CheckCircle className="w-4 h-4 text-indigo-500" />}
                       </button>
