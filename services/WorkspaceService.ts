@@ -7,12 +7,12 @@ let workspaceChangeListeners: ((w: Workspace | null) => void)[] = [];
 export const WorkspaceService = {
     getWorkspaces: async (email: string): Promise<Workspace[]> => {
         // Handle potential null response if API fails
-        const res = await api.get(`/auth/workspaces?email=${email}`);
+        const res = await api.get(`/api/v1/workspaces?email=${email}`);
         return res || [];
     },
 
     fetchWorkspaceFromServer: async (workspaceId: string) => {
-        const workspace = await api.get(`/auth/workspace/${workspaceId}`);
+        const workspace = await api.get(`/api/v1/workspace/${workspaceId}`);
 
         if (workspace) {
             DB.setItem('workspace', workspace);
@@ -26,7 +26,7 @@ export const WorkspaceService = {
 
     createWorkspace: async (email: string): Promise<Workspace> => {
         // After switching, we need to sync the role for this specific org
-        const workspace = await api.post(`/auth/workspace`, { email: email });
+        const workspace = await api.post(`/api/v1/workspace`, { email: email });
         if (workspace) {
             DB.setItem('workspace', workspace);
         }
@@ -34,7 +34,7 @@ export const WorkspaceService = {
     },
 
     updateWorkspace: async (orgId: string, data: Partial<Workspace>) => {
-        const updated = await api.patch(`/auth/${orgId}/workspace`, data);
+        const updated = await api.patch(`/api/v1/${orgId}/workspace`, data);
 
         // Notify listeners so UI updates immediately
         WorkspaceService.setWorkspaceAndNotify(updated);
@@ -43,7 +43,7 @@ export const WorkspaceService = {
     },
 
     setOnboarding: async (workspaceId: string, step: number) => {
-        const data = await api.post(`/auth/${workspaceId}/set-onboarding`, { step });
+        const data = await api.post(`/api/v1/${workspaceId}/set-onboarding`, { step });
         console.log("[WorkspaceService] Set onboarding step:", step);
         // Notify listeners so UI updates immediately
         WorkspaceService.setWorkspaceAndNotify(data);

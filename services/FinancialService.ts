@@ -3,10 +3,10 @@ import { Financials } from '../types';
 
 export const FinancialService = {
     getFinancials: async (orgId: string): Promise<Financials | null> => {
-        return await api.get(`/auth/${orgId}/financials`);
+        return await api.get(`/api/v1/${orgId}/financials`);
     },
 
     updateFinancials: async (orgId: string, data: Financials): Promise<Financials> => {
-        return await api.put(`/auth/${orgId}/financials`, data);
+        return await api.put(`/api/v1/${orgId}/financials`, data);
     },
 };

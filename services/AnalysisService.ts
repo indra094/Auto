@@ -3,7 +3,7 @@ import { DB } from './db';
 
 export const AnalysisService = {
     fetchIdeaAnalysisFromServer: async (workspaceId: string) => {
-        const analysis = await api.get(`/auth/${workspaceId}/idea-analysis`);
+        const analysis = await api.get(`/api/v1/${workspaceId}/idea-analysis`);
         if (analysis) {
             DB.setItem('ideaAnalysis', analysis);
         }
@@ -11,22 +11,22 @@ export const AnalysisService = {
     },
 
     createOrUpdateFounderAlignment: (orgId: string) => {
-        return api.post(`/auth/${orgId}/founder-alignment`, {});
+        return api.post(`/api/v1/${orgId}/founder-alignment`, {});
     },
 
     createOrUpdateAnalysis: (orgId: string) => {
-        return api.post(`/auth/${orgId}/idea-analysis`, {});
+        return api.post(`/api/v1/${orgId}/idea-analysis`, {});
     },
 
     createOrUpdateInvestorReadiness: (orgId: string) => {
-        return api.post(`/auth/${orgId}/investor-readiness`, {});
+        return api.post(`/api/v1/${orgId}/investor-readiness`, {});
     },
 
     getInvestorReadiness: (orgId: string) => {
-        return api.get(`/auth/${orgId}/investor-readiness`);
+        return api.get(`/api/v1/${orgId}/investor-readiness`);
     },
 
     getFounderAlignment: (orgId: string) => {
-        return api.get(`/auth/${orgId}/founder-alignment`);
+        return api.get(`/api/v1/${orgId}/founder-alignment`);
     },
 };

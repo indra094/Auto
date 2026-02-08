@@ -34,7 +34,7 @@ export const AuthService = {
 
     try {
       // 1. Sync Workspaces
-      const workspaces = await api.get(`/auth/workspaces?email=${user.email}`);
+      const workspaces = await api.get(`/api/v1/workspaces?email=${user.email}`);
 
       let activeWorkspace: Workspace | null = null;
 
@@ -66,7 +66,7 @@ export const AuthService = {
   },
 
   login: async (email: string, password: string): Promise<User> => {
-    const user = await api.post('/auth/login', { email, password });
+    const user = await api.post('/api/v1/login', { email, password });
     console.log("in login", user)
     DB.setItem('user', user);
     AuthService.refreshSession();
@@ -82,7 +82,7 @@ export const AuthService = {
       AuthService.logout();
       return null;
     }
-    const user = await api.get(`/auth/user-by-email/${email}`);
+    const user = await api.get(`/api/v1/user-by-email/${email}`);
     DB.setItem('user', user);
     return user;
   },
@@ -91,11 +91,11 @@ export const AuthService = {
     let user: User | null = null;
     let userOrgInfo: UserOrgInfo | null = null;
     try {
-      user = await api.post("/auth/signup", { fullName, email, password, status: "Active" });
+      user = await api.post("/api/v1/signup", { fullName, email, password, status: "Active" });
       if (!user) throw new Error("Signup failed");
 
       // Use WorkspaceService just for creation, but we need to set it as current
-      const ws = await api.post("/auth/workspace", { email });
+      const ws = await api.post("/api/v1/workspace", { email });
       await AuthService.setCurrentWorkspace(ws);
 
       // Use TeamService for updated info
@@ -122,7 +122,7 @@ export const AuthService = {
   },
 
   googleSignup: async (email: string): Promise<User> => {
-    const user = await api.post(`/auth/google?email=${email}`, {});
+    const user = await api.post(`/api/v1/google?email=${email}`, {});
     DB.setItem('user', user);
     AuthService.refreshSession();
 
@@ -157,7 +157,7 @@ export const AuthService = {
     const current = AuthService.getCachedUser();
     if (!current) return null;
 
-    const updatedUser = await api.patch(`/auth/user?email=${current.email}`, data);
+    const updatedUser = await api.patch(`/api/v1/user?email=${current.email}`, data);
 
     // 🔥 update local cache
     DB.setItem('user', updatedUser);

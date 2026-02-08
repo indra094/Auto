@@ -3,10 +3,10 @@ import { Dashboard } from '../types';
 
 export const DashboardService = {
     getDashboard: async (orgId: string): Promise<{ size: number; dashboard: Dashboard } | null> => {
-        return await api.get(`/auth/${orgId}/dashboard`);
+        return await api.get(`/api/v1/${orgId}/dashboard`);
     },
 
     updateDashboard: async (orgId: string): Promise<any> => {
-        return await api.post(`/auth/${orgId}/dashboard`, {});
+        return await api.post(`/api/v1/${orgId}/dashboard`, {});
     },
 };

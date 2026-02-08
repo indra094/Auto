@@ -3,12 +3,12 @@ import { User, UserOrgInfo } from '../types';
 
 export const TeamService = {
     getUsersForOrg: async (orgId: string): Promise<User[]> => {
-        const users = await api.get(`/auth/${orgId}/users`);
+        const users = await api.get(`/api/v1/${orgId}/users`);
         return users || [];
     },
 
     getUserOrgInfo: async (userId: string, orgId: string) => {
-        return await (api.get(`/auth/user-org-info?user_id=${userId}&org_id=${orgId}`));
+        return await (api.get(`/api/v1/user-org-info?user_id=${userId}&org_id=${orgId}`));
     },
 
     updateUserForOrg: async (
@@ -23,7 +23,7 @@ export const TeamService = {
         salary?: number,
         bonus?: number
     ): Promise<User> => {
-        return await api.post('/auth/set-user-org-info', {
+        return await api.post('/api/v1/set-user-org-info', {
             user_id: userId,
             org_id: orgID,
             role,
@@ -41,7 +41,7 @@ export const TeamService = {
         let user;
 
         try {
-            user = await api.post('/auth/user', { fullName, email, org_id: orgID, status: status, role: role, permission_level: permission_level, equity: equity, vesting: vesting, commitment: commitment, salary: salary, bonus: bonus });
+            user = await api.post('/api/v1/user', { fullName, email, org_id: orgID, status: status, role: role, permission_level: permission_level, equity: equity, vesting: vesting, commitment: commitment, salary: salary, bonus: bonus });
         } catch (err: any) {
             console.log("err:", err);
             const detail = err?.message || "";
@@ -49,14 +49,14 @@ export const TeamService = {
             if (detail === "Email already registered") {
                 // If email already exists, continue with the next call
                 // fetch the existing user (you need an endpoint for this, or you can keep the returned id)
-                user = await api.get(`/auth/user-by-email/${email}`);
+                user = await api.get(`/api/v1/user-by-email/${email}`);
             } else {
                 console.log("in here again", err)
                 throw err;
             }
         }
 
-        return await api.post('/auth/set-user-org-info', {
+        return await api.post('/api/v1/set-user-org-info', {
             user_id: user.id,
             org_id: orgID,
             role,
@@ -71,7 +71,7 @@ export const TeamService = {
     },
 
     setUserOrgInfo: async (userId: string, orgId: string, permission_level: string, equity: number, vesting: string, commitment: number) => {
-        return await api.post('/auth/set-user-org-info', {
+        return await api.post('/api/v1/set-user-org-info', {
             user_id: userId,
             org_id: orgId,
             permission_level: permission_level,
