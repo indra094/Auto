@@ -292,27 +292,26 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
 
   const renderHeader = (title: string, subtitle?: string) => (
-    <header className="mb-10 flex justify-between items-start">
-      <div>
-        <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none">
-          {title}
-        </h2>
-        {subtitle && (
-          <p className="text-slate-500 mt-2 font-medium">
-            {subtitle}
-          </p>
-        )}
-      </div>
+    <header className="mb-2">
+      <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none">
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="text-slate-500 mt-2 font-medium">
+          {subtitle}
 
+        </p>
+      )}
       <button
         onClick={handleRefresh}
         disabled={loading}
-        className="p-2 mt-1 rounded-full hover:bg-slate-100 transition"
+        className="p-2 mt-4 rounded-full hover:bg-slate-100 transition"
       >
         <RefreshCcw className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
       </button>
     </header>
   );
+
 
   // ======================
   // ACTIVATION MODE (Onboarding)
@@ -433,15 +432,25 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
             ))}
           </div>
         </div>
-      </div>
+      </div >
     );
   }
 
   if (!data && !isActivationMode) {
     return (
-      <div className="p-8 max-w-6xl mx-auto">
-        {renderHeader("Company Dashboard")}
-        <CompanyDashboardSkeleton />
+      <div>
+
+        <button
+          onClick={handleRefresh}
+          disabled={loading}
+          className="p-2 mt-4 rounded-full hover:bg-slate-100 transition"
+        >
+          <RefreshCcw className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
+        </button>
+
+        <div className="mt-6">
+          <CompanyDashboardSkeleton />
+        </div>
       </div>
     )
   }

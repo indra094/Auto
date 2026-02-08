@@ -132,44 +132,32 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-10">
       {/* header */}
-      {/* header */}
-      <header className="flex items-end">
-        <div className="flex items-start gap-3">
-          <div>
-            <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">
-              Workspace / Team
-            </div>
-
-            <div className="flex items-center gap-3">
-              <h2 className="text-4xl font-black text-slate-900">
-                Core Founders
-              </h2>
-
-              {/* Refresh */}
-              <button
-                onClick={handleRefresh}
-                title="Refresh"
-                className="p-2 mt-1 rounded-full hover:bg-slate-100 transition"
-              >
-                <RefreshCw className="w-6 h-6 text-slate-500" />
-              </button>
-            </div>
-
-            <p className="text-slate-500 font-medium mt-2">
-              Manage ownership and invite new key leaders.
-            </p>
+      <header className="flex justify-between items-end">
+        <div>
+          <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">
+            Workspace / Team
           </div>
-
-          {/* Right actions */}
-          <div className="ml-6 flex items-center gap-3">
-            {isAdmin && (
-              <Button onClick={() => setShowAddFounder(true)}>
-                <Plus className="w-4 h-4" /> Add Founder
-              </Button>
-            )}
-          </div>
+          <h2 className="text-4xl font-black text-slate-900 mb-2">Core Founders</h2>
+          <p className="text-slate-500 font-medium">
+            Manage ownership and invite new key leaders.
+          </p>
+        </div>
+        <div className="flex gap-4">
+          {isAdmin && (
+            <Button onClick={() => setShowAddFounder(true)}>
+              <Plus className="w-4 h-4" /> Add Founder
+            </Button>
+          )}
         </div>
       </header>
+      {/* Refresh */}
+      <button
+        onClick={handleRefresh}
+        title="Refresh"
+        className="p-2 mt-1 rounded-full hover:bg-slate-100 transition"
+      >
+        <RefreshCw className="w-6 h-6 text-slate-500" />
+      </button>
 
 
       {/* NEW: Users list */}

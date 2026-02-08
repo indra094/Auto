@@ -38,65 +38,34 @@ export const FoundersAlignmentScreen: React.FC = ({
 
   const orgId = AuthService.getCachedUser()?.current_org_id;
 
-  useEffect(() => {
+  const handleRefresh = async () => {
     if (!orgId) return;
 
-    let interval: NodeJS.Timeout | null = null;
+    setLoading(true);
+    setUpdating(true);
 
-    const fetchAlignment = async () => {
+    try {
+      const founders = await AuthService.getUsersForOrg(orgId);
+      setFounders(founders);
+
       const data = await AuthService.getFounderAlignment(orgId);
 
       if (data && data.alignment) {
         setAlignment(data.alignment);
-        //console.log("responsesize" + data.size)
-
-        setQueueSize(data.size);   // queue size from response
+        setQueueSize(data.size ?? 0);
         setUpdating(false);
-        return true;
+      } else {
+        setAlignment(null);
+        setUpdating(true);
       }
-
-      return false;
-    };
-
-    const init = async () => {
-      setLoading(true);
-
-      const founders = await AuthService.getUsersForOrg(orgId);
-      setFounders(founders);
-
-      // first call immediately
-      const hasAlignment = await fetchAlignment();
-      //console.log("fetched")
-      // set updating state based on availability
-      if (!hasAlignment) setUpdating(true);
-
-      // start polling every 5 seconds
-      interval = setInterval(async () => {
-        const ready = await fetchAlignment();
-
-        if (!ready) {
-
-
-          // if alignment not ready and queue is empty, trigger background job
-          if (queueSize === 0) {
-            //console.log("gonna update")
-            AuthService.createOrUpdateFounderAlignment(orgId);
-          }
-          setUpdating(true);
-        } else {
-          setUpdating(false);
-        }
-      }, 5000);
-
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
-    init();
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [orgId, queueSize]);
+  useEffect(() => {
+    handleRefresh();
+  }, [orgId]);
 
 
   if (loading || !alignment) {
@@ -182,6 +151,7 @@ export const FoundersAlignmentScreen: React.FC = ({
       {/* Header */}
       <header className="flex justify-between items-end">
         <div>
+
           <h1 className="text-4xl font-black text-slate-900">
             Founder Alignment
           </h1>
