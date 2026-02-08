@@ -247,6 +247,8 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
     const [isLoading, setIsLoading] = useState(false);
     const [retryCooldown, setRetryCooldown] = useState(0);
     const [error, setError] = useState<string | null>(null);
+    const [customType, setCustomType] = useState('');
+
 
     // --- Effects ---
 
@@ -421,14 +423,32 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                                     type="button"
                                     key={t}
                                     className={`option-btn ${formData.type === t ? 'selected' : ''}`}
-                                    onClick={() => handleChange('type', t)}
+                                    onClick={() => {
+                                        handleChange('type', t);
+                                        if (t !== 'Other') setCustomType(''); // reset custom type if not Other
+                                    }}
                                 >
                                     {t}
                                 </button>
                             ))}
                         </div>
-                        {isError('type') && <div className="error-msg">Please select a type</div>}
+
+                        {/* Show text input if "Other" is selected */}
+                        {formData.type === 'Other' && (
+                            <div style={{ marginTop: 12 }}>
+                                <input
+                                    type="text"
+                                    className={`has-icon ${isError('type') ? 'error' : ''}`}
+                                    placeholder="Enter your company type"
+                                    value={customType}
+                                    onChange={e => setCustomType(e.target.value)}
+                                    onBlur={() => handleChange('type', e.target.value)}
+                                />
+                                {isError('type') && <div className="error-msg">Please enter a type</div>}
+                            </div>
+                        )}
                     </div>
+
 
 
                 </div>

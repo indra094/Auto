@@ -22,7 +22,7 @@ export interface User {
   startDate: string;
   lastUpdated: string;
   permission_level: 'ADMIN' | 'VIEWER';
-  industryExperience: number;
+  industry_experience: number;
 }
 
 
@@ -381,11 +381,10 @@ export const AuthService = {
     userListeners.forEach(cb => cb(user));
   },
 
-  setUserOrgInfo: async (userId: string, orgId: string, role: string, permission_level: string, equity: number, vesting: string, commitment: number) => {
+  setUserOrgInfo: async (userId: string, orgId: string, permission_level: string, equity: number, vesting: string, commitment: number) => {
     return await api.post('/auth/set-user-org-info', {
       user_id: userId,
       org_id: orgId,
-      role: role,
       permission_level: permission_level,
       equity: equity,
       vesting: vesting,

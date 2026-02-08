@@ -24,7 +24,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
   let currentUser: User | null = null;
   let currentWorkspace: Workspace | null = null;
-  const [industryExperience, setIndustryExperience] = useState<number | null>(null);
+  const [industry_experience, setindustry_experience] = useState<number | null>(null);
 
   const hasLoaded = useRef(false);
 
@@ -42,34 +42,39 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
   }, []);
 
   useEffect(() => {
-    if (hasLoaded.current) return;
-    hasLoaded.current = true;
-    const hydrateRoleFromOrg = async () => {
-      const user = AuthService.getUser();
-      const ws = await AuthService.fetchWorkspaceFromServer(user?.current_org_id);
-
-      if (!user || !ws) {
-        setRoleLoading(false);
-        return;
-      }
-
+    const loadAllData = async () => {
       try {
-        const res = await AuthService.getUserOrgInfo(user.id, ws.id);
-        setRole(res?.role || null);
+        const user = await AuthService.getUser();
+        if (!user) return;
+
+        setFullName(user.fullName);
+        setEmail(user.email);
+        setindustry_experience(user.industry_experience ?? null);
+
+        if (!user.current_org_id) return;
+
+        // Fetch workspace
+        const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
+        setWorkspace(ws);
+        setIsOnboardingComplete((ws?.onboarding_step ?? 0) >= 5);
+
+
+
       } catch (err) {
-        console.error('Failed to load user org info', err);
+        console.error("Failed to load user/org info", err);
       } finally {
         setRoleLoading(false);
       }
     };
 
-    hydrateRoleFromOrg();
+    loadAllData();
   }, []);
 
 
 
+
   const handleContinue = async () => {
-    if (!fullName || !email || !role) return;
+    if (!fullName || !email) return;
 
     setIsLoading(true);
     setError(null);
@@ -77,11 +82,12 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     try {
       const user = AuthService.getUser();
       const ws = await AuthService.fetchWorkspaceFromServer(user?.current_org_id);
+      console.log(industry_experience)
       // Only now do we call RPCs
-      await AuthService.updateUser({ fullName, email, industryExperience, current_org_id: ws?.id });
+      await AuthService.updateUser({ fullName, email, industry_experience, current_org_id: ws?.id });
 
       if (ws && user) {
-        await AuthService.setUserOrgInfo(user.id, ws.id, role, "ADMIN", 100, "", 60);
+        await AuthService.setUserOrgInfo(user.id, ws.id, "ADMIN", 100, "", 60);
       }
 
       if (ws && !isOnboardingComplete) {
@@ -160,34 +166,16 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
               step={1}
               className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all"
               placeholder="e.g. 3"
-              value={industryExperience ?? ''}
+              value={industry_experience ?? ''}
               onChange={(e) => {
                 const val = e.target.value;
                 const num = val === '' ? null : parseInt(val);
                 if (num === null || (Number.isInteger(num) && num >= 0)) {
-                  setIndustryExperience(num);
+                  setindustry_experience(num);
                 }
               }}
             />
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {roles.map(r => (
-            <button
-              key={r}
-              disabled={roleLoading}
-              onClick={() => setRole(r)}
-              className={`py-3 px-4 rounded-xl border text-sm font-medium transition-all
-              ${role === r
-                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200'
-                  : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'}
-              ${roleLoading ? 'opacity-50 cursor-not-allowed' : ''}
-            `}
-            >
-              {r}
-            </button>
-          ))}
         </div>
 
         <div className="pt-4">
@@ -195,7 +183,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
             fullWidth
             className="h-14 rounded-xl text-lg flex items-center justify-center gap-2"
             onClick={handleContinue}
-            disabled={!fullName || !email || !role || isLoading || retryLocked || roleLoading}
+            disabled={!fullName || !email || isLoading || retryLocked}
           >
             {isLoading ? (
               <Loader2 className="w-6 h-6 animate-spin" />
