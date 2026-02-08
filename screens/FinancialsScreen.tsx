@@ -266,7 +266,14 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [workspace, setWorkspace] = useState<any>(null);
+    const loadWorkspace = async () => {
+        const user = AuthService.getCachedUser();
+        if (!user?.current_org_id) return;
 
+        const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
+        setWorkspace(ws);
+        isOnboarding = ws?.onboarding_step < 5;
+    };
     // Unified load function
     const loadFinancials = async () => {
         try {
@@ -291,6 +298,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     // On page enter
     useEffect(() => {
         loadFinancials();
+        loadWorkspace();
     }, []); // only runs once on mount
 
     // Manual refresh
@@ -367,7 +375,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     };
 
     const runway = calculateRunway();
-    const isOnboarding = workspace?.onboarding_step < 5;
+    let isOnboarding = workspace?.onboarding_step < 5;
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 100 }}><Loader2 className="animate-spin" /></div>;
     const isFormValid =

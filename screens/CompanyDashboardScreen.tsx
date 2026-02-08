@@ -178,7 +178,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isActivationMode = (workspace?.onboarding_step || 0) < 5;
+  let isActivationMode = false;//(workspace?.onboarding_step || 0) < 5;
 
   // Simple MVP progress score
   const onboardingProgress = useMemo(() => {
@@ -217,9 +217,14 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   // --- Handle refresh manually ---
   const handleRefresh = async () => {
     setLoading(true);
-    const hasDashboard = await fetchDashboard();
+    const ws = await AuthService.fetchWorkspaceFromServer(
+      AuthService.getCachedUser()?.current_org_id
+    );
+    setWorkspace(ws);
+    isActivationMode = (ws?.onboarding_step || 0) < 5;
+    const hasDashboard = isActivationMode ? false : await fetchDashboard();
 
-    if (!hasDashboard && queueSizeRef.current === 0) {
+    if (isActivationMode && !hasDashboard && queueSizeRef.current === 0) {
       // Only call update if dashboard not ready and queue size is 0
       await AuthService.updateDashboard(orgId!);
       setUpdating(true);
@@ -240,8 +245,8 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     );
     setWorkspace(ws);
 
-    const hasDashboard = await fetchDashboard();
-    if (!hasDashboard) setUpdating(true);
+    const hasDashboard = isActivationMode ? false : await fetchDashboard();
+    if (!isActivationMode && !hasDashboard) setUpdating(true);
 
     setLoading(false);
   };

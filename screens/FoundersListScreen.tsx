@@ -40,6 +40,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
 
   const loadUsers = async () => {
+    console.log("load users called")
     const user = AuthService.getCachedUser();
     if (!user) return;
 

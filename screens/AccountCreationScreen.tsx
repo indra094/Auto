@@ -39,6 +39,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
   const loadAllData = async () => {
     try {
+      await loadWorkspace();
       const user = AuthService.getCachedUser();
       if (!user) return;
 
@@ -60,7 +61,6 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
   useEffect(() => {
     if (!hasLoaded.current) {
       loadAllData();
-      loadWorkspace();
       hasLoaded.current = true;
     }
   }, []);
