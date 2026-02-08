@@ -1,60 +1,11 @@
 
 import { DB } from './db';
 import { api } from './api';
-import { Financials } from '../types';
+import { Financials, User, Workspace, UserOrgInfo } from '../types';
 
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
-export interface User {
-  id: string;
-  fullName: string;
-  email: string;
-  role?: string;
-  avatarUrl?: string;
-  current_org_id: string;
 
-  title: string;
-  commitment: number;
-  equity: number;
-  vesting: string;
-  status: 'Active' | 'Pending Activation' | 'Inactive';
-  plannedChange: 'none' | 'reduce' | 'exit' | 'advisory';
-  startDate: string;
-  lastUpdated: string;
-  permission_level: 'ADMIN' | 'VIEWER';
-  industry_experience: number;
-}
-
-
-
-export interface Workspace {
-  id: string;
-  name: string;
-  industry?: string;
-  geography?: string;
-  type?: string;
-  stage?: string;
-
-  problem?: string;
-  solution?: string;
-  customer?: string;
-
-  onboarding_step?: number;
-};
-
-export interface UserOrgInfo {
-  user_id: string;
-  title: string;
-  role: string;
-  commitment: number;
-  equity: number;
-  vesting: string;
-  status: 'Active' | 'Pending Activation' | 'Inactive';
-  plannedChange: 'none' | 'reduce' | 'exit' | 'advisory';
-  startDate: string;
-  lastUpdated: string;
-  permission_level: 'ADMIN' | 'VIEWER';
-}
 
 let workspaceChangeListeners: ((w: Workspace | null) => void)[] = [];
 let userListeners: ((user: User | null) => void)[] = [];

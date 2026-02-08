@@ -58,10 +58,26 @@ export interface NavGroup {
 }
 
 export interface User {
+  id: string;
   fullName: string;
   email: string;
-  role: string;
+  role?: string;
+  avatarUrl?: string;
+  current_org_id: string;
+
+  title: string;
+  commitment: number;
+  equity: number;
+  vesting: string;
+  status: 'Active' | 'Pending Activation' | 'Inactive';
+  plannedChange: 'none' | 'reduce' | 'exit' | 'advisory';
+  startDate: string;
+  lastUpdated: string;
+  permission_level: 'ADMIN' | 'VIEWER';
+  industry_experience: number;
 }
+
+
 
 export interface Workspace {
   id: string;
@@ -71,13 +87,26 @@ export interface Workspace {
   type?: string;
   stage?: string;
 
-  // 🔥 NEW
   problem?: string;
   solution?: string;
   customer?: string;
 
   onboarding_step?: number;
 };
+
+export interface UserOrgInfo {
+  user_id: string;
+  title: string;
+  role: string;
+  commitment: number;
+  equity: number;
+  vesting: string;
+  status: 'Active' | 'Pending Activation' | 'Inactive';
+  plannedChange: 'none' | 'reduce' | 'exit' | 'advisory';
+  startDate: string;
+  lastUpdated: string;
+  permission_level: 'ADMIN' | 'VIEWER';
+}
 
 export interface Financials {
   org_id: string;

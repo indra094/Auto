@@ -7,7 +7,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Card, Button, Badge } from "../components/UI";
-import { AuthService, User } from "../services/AuthService";
+import { AuthService } from "../services/AuthService";
+import { User } from "../types"
 
 interface FounderAlignment {
   score: number;

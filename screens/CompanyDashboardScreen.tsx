@@ -14,7 +14,8 @@ import {
   Lock,
   RefreshCcw,
 } from 'lucide-react';
-import { AuthService, Workspace } from '../services/AuthService';
+import type { Workspace } from '../types';
+import { AuthService } from '../services/AuthService';
 import { Info } from "lucide-react";
 
 interface ScreenProps {

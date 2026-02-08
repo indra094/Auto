@@ -3,7 +3,7 @@ import { ScreenId } from '../types';
 import { Button } from '../components/UI';
 import { UserIcon, Mail, Loader2, ArrowRight, Calendar, RefreshCcw } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
-import type { User, Workspace } from '../services/AuthService';
+import type { User, Workspace } from '../types';
 
 
 interface ScreenProps {

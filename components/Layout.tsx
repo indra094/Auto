@@ -8,7 +8,7 @@ import {
 import { ScreenContent } from '../screens/ScreenContent';
 import { AuthService } from '../services/AuthService';
 import { ProgressBar } from './UI';
-import type { User, Workspace } from '../services/AuthService';
+import type { User, Workspace } from '../types';
 
 // BEFORE ONBOARDING - Minimal, completion-focused navigation
 const beforeOnboardingNav: NavGroup[] = [
