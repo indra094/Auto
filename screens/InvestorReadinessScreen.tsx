@@ -4,7 +4,8 @@ import { Button, Card, Badge } from '../components/UI';
 import {
     TrendingUp, AlertTriangle, CheckCircle, XCircle,
     Target, Users, DollarSign, Brain, ArrowRight,
-    Shield, Briefcase, FileText, ChevronRight
+    Shield, Briefcase, FileText, ChevronRight,
+    RefreshCw
 } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
 import { format } from 'date-fns';
@@ -243,66 +244,67 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
     const orgId = AuthService.getCachedUser()?.current_org_id;
     const queueSizeRef = useRef(queueSize);
 
+    // Function to fetch investor readiness
+    const fetchInvestorReadiness = async () => {
+        if (!orgId) return false;
+
+        try {
+            setLoading(true);
+
+            const response = await AuthService.getInvestorReadiness(orgId);
+
+            if (response && response.investor_readiness) {
+                const readiness = response.investor_readiness;
+
+                // Format last_updated
+                readiness.last_updated = new Date(readiness.last_updated).toLocaleString();
+
+                setData(readiness);
+                setQueueSize(response.size ?? 0);
+                setUpdating(false);
+
+                return true;
+            } else {
+                setUpdating(true);
+                return false;
+            }
+        } catch (e) {
+            console.error("Failed to fetch investor readiness", e);
+            setUpdating(true);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Load on page enter
     useEffect(() => {
         if (!orgId) return;
+        fetchInvestorReadiness();
+    }, [orgId]);
 
-        let interval: NodeJS.Timeout | null = null;
+    // Manual refresh
+    const handleRefresh = async () => {
+        await fetchInvestorReadiness();
+    };
 
-        const fetchAnalysis = async () => {
-            const data = await AuthService.getInvestorReadiness(orgId);
-
-            if (data && data.investor_readiness) {
-                setData(data.investor_readiness);
-                data.last_updated = new Date(data.investor_readiness.last_updated).toLocaleString();
-                //console.log("responsesize" + data.size)
-
-                setQueueSize(data.size);   // queue size from response
-                setUpdating(false);
-                return true;
-            }
-
-            return false;
-        };
-
-        const init = async () => {
-            setLoading(true);
-            // console.log("orgId", orgId)
-
-            // first call immediately
-            const hasAnalysis = await fetchAnalysis();
-            // set updating state based on availability
-            if (!hasAnalysis) setUpdating(true);
-
-            // start polling every 5 seconds
-            interval = setInterval(async () => {
-                const ready = await fetchAnalysis();
-
-                if (!ready) {
-
-                    queueSizeRef.current = queueSize;
-                    // if alignment not ready and queue is empty, trigger background job
-                    if (queueSizeRef.current === 0) {
-                        //console.log("gonna update")
-                        AuthService.createOrUpdateInvestorReadiness(orgId);
-                    }
-                    setUpdating(true);
-                } else {
-                    setUpdating(false);
-                }
-            }, 5000);
-
-            setLoading(false);
-        };
-        init();
-
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [orgId, queueSize]);
-
-
+    // Render skeleton if loading
     if (loading || !data) {
-        return <InvestorReadinessSkeleton />;
+        return (
+            <div className="flex flex-col items-center gap-4">
+                {/* Refresh button above skeleton */}
+                <button
+                    onClick={handleRefresh}
+                    title="Refresh"
+                    className="p-2 rounded-full hover:bg-slate-100 transition"
+                    disabled={loading}
+                >
+                    <RefreshCw className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`} />
+                </button>
+
+                <InvestorReadinessSkeleton />
+            </div>
+        );
     }
 
 
@@ -348,11 +350,27 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">Investor Readiness</h1>
-                    <p className="text-slate-500 font-medium mt-1">AI-driven analysis of your fundraising potential</p>
+                    <p className="text-slate-500 font-medium mt-1">
+                        AI-driven analysis of your fundraising potential
+                    </p>
+
+                    {/* Refresh button below subtitle */}
+                    <div className="mt-4 flex justify-start md:justify-start">
+                        <button
+                            onClick={handleRefresh}
+                            title="Refresh"
+                            className="p-2 rounded-full hover:bg-slate-100 transition"
+                            disabled={loading} // optional
+                        >
+                            <RefreshCw
+                                className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`}
+                            />
+                        </button>
+                    </div>
                 </div>
             </div>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 

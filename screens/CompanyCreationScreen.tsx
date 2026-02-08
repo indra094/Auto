@@ -8,7 +8,8 @@ import {
     Target,
     MapPin,
     Briefcase,
-    Users
+    Users,
+    RefreshCw
 } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 import { ScreenId } from '../types';
@@ -302,34 +303,6 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
     };
 
 
-    useEffect(() => {
-        if (retryCooldown <= 0) return;
-        const timer = setInterval(() => setRetryCooldown(p => p - 1), 1000);
-        return () => clearInterval(timer);
-    }, [retryCooldown]);
-
-    useEffect(() => {
-        if (!active) return;
-        // Always fetch latest workspace info when screen is opened
-        const fetchWorkspace = async () => {
-            const orgId = AuthService.getCachedUser()?.current_org_id;
-            if (!orgId) return;
-            console.log("here")
-            const ws = await AuthService.fetchWorkspaceFromServer(orgId);
-            setFormData(prev => ({
-                ...prev,
-                name: ws.name ?? prev.name,
-                type: ws.type ?? prev.type,
-                problem: ws.problem ?? prev.problem,
-                solution: ws.solution ?? prev.solution,
-                industry: ws.industry ?? prev.industry,
-                geography: ws.geography ?? prev.geography,
-                stage: ws.stage ?? prev.stage,
-                customer: ws.customer ?? prev.customer,
-            }));
-        };
-        fetchWorkspace();
-    }, [active]);
 
 
     // --- Handlers ---
@@ -363,19 +336,46 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         return valid;
     };
 
+
     // Always get latest onboarding_step from workspace
     const [onboarding_step, setOnboardingStep] = useState(0);
-    useEffect(() => {
+
+
+    // Unified fetch function
+    const loadWorkspaceData = async () => {
         const orgId = AuthService.getCachedUser()?.current_org_id;
         if (!orgId) return;
-        if (!active) return;
-        const fetchStep = async () => {
-            const ws = await AuthService.fetchWorkspaceFromServer(orgId);
-            setOnboardingStep(ws?.onboarding_step || 0);
-        };
-        fetchStep();
-    }, [active, formData]);
 
+        // Fetch workspace info
+        const ws = await AuthService.fetchWorkspaceFromServer(orgId);
+
+        // Update form data
+        setFormData(prev => ({
+            ...prev,
+            name: ws.name ?? prev.name,
+            type: ws.type ?? prev.type,
+            problem: ws.problem ?? prev.problem,
+            solution: ws.solution ?? prev.solution,
+            industry: ws.industry ?? prev.industry,
+            geography: ws.geography ?? prev.geography,
+            stage: ws.stage ?? prev.stage,
+            customer: ws.customer ?? prev.customer,
+        }));
+
+        // Update onboarding step
+        setOnboardingStep(ws?.onboarding_step || 0);
+    };
+
+    // On page load
+    useEffect(() => {
+        if (!active) return;
+        loadWorkspaceData();
+    }, [active]); // only runs on mount / when active becomes true
+
+    // On manual refresh
+    const handleRefresh = async () => {
+        await loadWorkspaceData();
+    };
     // --- Render Helpers ---
 
     const isError = (field: keyof TouchedState) =>
@@ -393,7 +393,20 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                 <header style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <h1>Create Your Company</h1>
                     <p className="subtitle">Let's define the core identity and strategy of your venture.</p>
+
+                    {/* Refresh button on its own line */}
+                    <div style={{ marginTop: '16px' }}>
+                        <button
+                            onClick={handleRefresh}
+                            title="Refresh"
+                            className="p-2 rounded-full hover:bg-slate-100 transition"
+                            disabled={isLoading} // optional
+                        >
+                            <RefreshCw className={`w-6 h-6 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
+                        </button>
+                    </div>
                 </header>
+
 
                 {/* --- Section 1: Company Identity --- */}
                 <div className="form-section">

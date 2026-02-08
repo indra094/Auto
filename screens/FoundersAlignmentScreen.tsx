@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Brain,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import { Card, Button, Badge } from "../components/UI";
 import { AuthService, User } from "../services/AuthService";
@@ -70,7 +71,20 @@ export const FoundersAlignmentScreen: React.FC = ({
 
   if (loading || !alignment) {
     return (
+
       <div className="max-w-6xl mx-auto px-6 py-12 space-y-12">
+        {/* Refresh button above skeleton */}
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={handleRefresh}
+            title="Refresh"
+            className="p-2 rounded-full hover:bg-slate-100 transition"
+            disabled={loading} // optional: disable while loading
+          >
+            <RefreshCw className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+
         {/* Header Skeleton */}
         <div className="flex justify-between items-end">
           <div className="space-y-3">
@@ -142,6 +156,7 @@ export const FoundersAlignmentScreen: React.FC = ({
           </Card>
         </div>
       </div>
+
     );
   }
 
@@ -160,9 +175,16 @@ export const FoundersAlignmentScreen: React.FC = ({
           </p>
         </div>
 
-
       </header>
 
+      {/* Refresh button */}
+      <button
+        onClick={handleRefresh}
+        title="Refresh"
+        className="p-2 rounded-full hover:bg-slate-100 transition"
+      >
+        <RefreshCw className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`} />
+      </button>
       {/* Alignment Score */}
       <Card className="p-10 text-center">
         <div className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-4">

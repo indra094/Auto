@@ -1,6 +1,6 @@
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { Lightbulb, Target, TrendingUp, AlertCircle, Users, DollarSign, Calendar, ArrowRight } from 'lucide-react';
+import { Lightbulb, Target, TrendingUp, AlertCircle, Users, DollarSign, Calendar, ArrowRight, RefreshCw } from 'lucide-react';
 
 import React, { useState, useRef, useEffect } from "react";
 import { Info } from "lucide-react";
@@ -203,66 +203,62 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
     const [queueSize, setQueueSize] = useState<number>(0);  // <-- ADD THIS
 
     const orgId = AuthService.getCachedUser()?.current_org_id;
-
-    useEffect(() => {
+    // Fetch analysis once
+    const fetchAnalysisOnce = async () => {
         if (!orgId) return;
 
-        let interval: NodeJS.Timeout | null = null;
+        setIsLoading(true);
 
-
-        const fetchAnalysis = async () => {
+        try {
             const data = await AuthService.fetchIdeaAnalysisFromServer(orgId);
-
 
             if (data && data.analysis) {
                 setAnalysis(data.analysis);
-                //console.log("responsesize" + data.size)
-
                 setQueueSize(data.size);   // queue size from response
                 setUpdating(false);
                 return true;
+            } else {
+                setUpdating(true);
+                return false;
             }
-
+        } catch (e) {
+            console.error("Failed to fetch analysis", e);
+            setUpdating(true);
             return false;
-        };
-
-        const init = async () => {
-            setIsLoading(true);
-            // console.log("orgId", orgId)
-
-            // first call immediately
-            const hasAnalysis = await fetchAnalysis();
-            // set updating state based on availability
-            if (!hasAnalysis) setUpdating(true);
-
-            // start polling every 5 seconds
-            interval = setInterval(async () => {
-                const ready = await fetchAnalysis();
-
-                if (!ready) {
-
-                    if (queueSize === 0) {
-                        AuthService.createOrUpdateAnalysis(orgId);
-                    }
-                    setUpdating(true);
-                } else {
-                    setUpdating(false);
-                }
-            }, 5000);
-
+        } finally {
             setIsLoading(false);
-        };
-        init();
+        }
+    };
 
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [orgId, queueSize]);
+    // On page enter
+    useEffect(() => {
+        if (!orgId) return;
+        fetchAnalysisOnce();
+    }, [orgId]); // only runs on mount / orgId change
 
+    // Manual refresh
+    const handleRefresh = async () => {
+        await fetchAnalysisOnce();
+    };
 
 
     if (isLoading || !analysis || isAnalysisIncomplete(analysis)) {
-        return <IdeaValidationSkeleton />;
+        return (
+            <div className="flex flex-col items-center gap-4">
+                {/* Refresh button */}
+                <button
+                    onClick={handleRefresh}
+                    title="Refresh"
+                    className="p-2 rounded-full hover:bg-slate-100 transition"
+                    disabled={isLoading} // optional
+                >
+                    <RefreshCw className={`w-6 h-6 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
+                </button>
+
+                {/* Skeleton */}
+                <IdeaValidationSkeleton />
+            </div>
+        );
     }
 
 
@@ -274,6 +270,15 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                         <Lightbulb className="text-yellow-500 w-10 h-10" /> AI Idea Validation
                     </h2>
                     <p className="text-slate-500 mt-2 font-medium">AI-driven analysis of your startup concept before you build.</p>
+                    {/* Refresh button */}
+                    <button
+                        onClick={handleRefresh}
+                        title="Refresh"
+                        className="p-2 rounded-full hover:bg-slate-100 transition"
+                        disabled={isLoading} // optional
+                    >
+                        <RefreshCw className={`w-6 h-6 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
+                    </button>
                 </header>
 
                 <div className="grid md:grid-cols-2 gap-6">

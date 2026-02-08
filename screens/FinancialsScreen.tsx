@@ -6,7 +6,8 @@ import {
     TrendingDown,
     Minus,
     ArrowRight,
-    Loader2
+    Loader2,
+    RefreshCw
 } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 import { ScreenId, Financials } from '../types';
@@ -266,26 +267,37 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     const [saving, setSaving] = useState(false);
     const [workspace, setWorkspace] = useState<any>(null);
 
-    // Initial Load
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const orgId = AuthService.getCachedUser()?.current_org_id;
-                if (!orgId) return;
-                const fetched = await AuthService.getFinancials(orgId);
-                if (fetched) {
-                    setData(prev => ({ ...prev, ...fetched, org_id: orgId }));
-                } else {
-                    setData(prev => ({ ...prev, org_id: orgId }));
-                }
-            } catch (e) {
-                console.error("Failed to load financials", e);
-            } finally {
-                setLoading(false);
+    // Unified load function
+    const loadFinancials = async () => {
+        try {
+            setLoading(true); // optional, show loader during refresh
+            const orgId = AuthService.getCachedUser()?.current_org_id;
+            if (!orgId) return;
+
+            const fetched = await AuthService.getFinancials(orgId);
+
+            if (fetched) {
+                setData(prev => ({ ...prev, ...fetched, org_id: orgId }));
+            } else {
+                setData(prev => ({ ...prev, org_id: orgId }));
             }
-        };
-        load();
-    }, []);
+        } catch (e) {
+            console.error("Failed to load financials", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // On page enter
+    useEffect(() => {
+        loadFinancials();
+    }, []); // only runs once on mount
+
+    // Manual refresh
+    const handleRefresh = async () => {
+        await loadFinancials();
+    };
+
 
     // Handlers
     const handleChange = (field: keyof Financials, value: any) => {
@@ -371,6 +383,17 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                 <header style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <h1>Financial Snapshot</h1>
                     <p className="subtitle">Enter your current financial reality</p>
+                    {/* Refresh button below subtitle */}
+                    <div style={{ marginTop: '16px' }}>
+                        <button
+                            onClick={handleRefresh}
+                            title="Refresh"
+                            className="p-2 rounded-full hover:bg-slate-100 transition"
+                            disabled={loading} // optional
+                        >
+                            <RefreshCw className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`} />
+                        </button>
+                    </div>
                 </header>
 
                 {/* --- REVENUE --- */}
