@@ -60,7 +60,7 @@ let workspaceChangeListeners: ((w: Workspace | null) => void)[] = [];
 let userListeners: ((user: User | null) => void)[] = [];
 
 export const AuthService = {
-  getUser: (): User | null => {
+  getCachedUser: (): User | null => {
     if (!AuthService.isSessionValid()) {
       AuthService.logout();
       return null;
@@ -130,7 +130,7 @@ export const AuthService = {
   },
 
   syncState: async (): Promise<void> => {
-    const user = AuthService.getUser();
+    const user = AuthService.getCachedUser();
     if (!user) return;
 
     try {
@@ -200,6 +200,10 @@ export const AuthService = {
   },
 
   getUserByEmail: async (email: string): Promise<User | null> => {
+    if (!AuthService.isSessionValid()) {
+      AuthService.logout();
+      return null;
+    }
     const user = await api.get(`/auth/user-by-email/${email}`);
     DB.setItem('user', user);
     return user;
@@ -334,7 +338,7 @@ export const AuthService = {
 
 
   async updateUser(data: Partial<User>) {
-    const current = AuthService.getUser();
+    const current = AuthService.getCachedUser();
     if (!current) return null;
 
     const updatedUser = await api.patch(`/auth/user?email=${current.email}`, data);
@@ -349,7 +353,7 @@ export const AuthService = {
   },
 
   updateWorkspace: async (data: Partial<Workspace>) => {
-    const user = AuthService.getUser();
+    const user = AuthService.getCachedUser();
     if (!user) return null;
 
     const updated = await api.patch(`/auth/${user.current_org_id}/workspace`, data);

@@ -18,7 +18,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [inviteEmail, setInviteEmail] = React.useState('');
   const [inviteName, setInviteName] = React.useState('');
   const [showAddFounder, setShowAddFounder] = useState(false);
-  const currentUser = AuthService.getUser();
+  const currentUser = AuthService.getCachedUser();
   const [isAdmin, setIsAdmin] = useState(false);
   const [onboarding_step, setOnboardingStep] = useState<number>(0);
 
@@ -40,7 +40,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
 
   const loadUsers = async () => {
-    const user = AuthService.getUser();
+    const user = AuthService.getCachedUser();
     if (!user) return;
 
     try {
@@ -109,7 +109,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
   const handleInvite = async () => {
     if (!inviteEmail || !inviteName) return;
-    const user = AuthService.getUser();
+    const user = AuthService.getCachedUser();
     if (!user) return;
 
     setIsInviting(true);
@@ -379,7 +379,7 @@ export const AddFounderPanel = ({
     useState(initialData?.permission_level || "MEMBER");
   const [isSending, setIsSending] = useState(false);
 
-  let user = AuthService.getUser();
+  let user = AuthService.getCachedUser();
 
   const isValid = name.trim().length > 0 && email.trim().length > 0;
 
@@ -442,7 +442,7 @@ export const AddFounderPanel = ({
     if (!initialData) return;
 
     setStatus(initialData.status ?? "Pending Activation");
-    user = AuthService.getUser();
+    user = AuthService.getCachedUser();
   }, [initialData]);
 
   const isEditMode = Boolean(initialData?.id);

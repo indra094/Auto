@@ -116,7 +116,7 @@ const afterOnboardingNav: NavGroup[] = [
 type ScreenStatus = 'locked' | 'partial' | 'accessible';
 
 export const Layout: React.FC = () => {
-  const [workspace, setWorkspace] = useState(AuthService.fetchWorkspaceFromServer(AuthService.getUser()?.current_org_id));
+  const [workspace, setWorkspace] = useState(AuthService.fetchWorkspaceFromServer(AuthService.getCachedUser()?.current_org_id));
 
   const initialScreen = ScreenId.COMPANY_DASHBOARD;
 
@@ -124,7 +124,7 @@ export const Layout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
-  const [user, setUser] = useState(AuthService.getUser());
+  const [user, setUser] = useState(AuthService.getCachedUser());
   const [onboardingProgress, setOnboardingProgress] = useState(0);
   // Ref for switcher to detect outside clicks
   const switcherRef = useRef<HTMLDivElement>(null);
@@ -142,7 +142,7 @@ export const Layout: React.FC = () => {
 
   useEffect(() => {
     const refreshData = async () => {
-      const u = AuthService.getUser();
+      const u = AuthService.getCachedUser();
       console.log("layout user" + u.current_org_id);
       const user = AuthService.getUserByEmail(u.email);
       const w = await AuthService.fetchWorkspaceFromServer((await user).current_org_id);

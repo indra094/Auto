@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ScreenId } from '../types';
 import { Button } from '../components/UI';
-import { UserIcon, Mail, Loader2, ArrowRight, Calendar } from 'lucide-react';
+import { UserIcon, Mail, Loader2, ArrowRight, Calendar, RefreshCcw } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 import type { User, Workspace } from '../services/AuthService';
 
@@ -11,8 +11,8 @@ interface ScreenProps {
 }
 
 export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
-  const [fullName, setFullName] = useState(AuthService.getUser()?.fullName || '');
-  const [email, setEmail] = useState(AuthService.getUser()?.email || '');
+  const [fullName, setFullName] = useState(AuthService.getCachedUser()?.fullName || '');
+  const [email, setEmail] = useState(AuthService.getCachedUser()?.email || '');
   const [role, setRole] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
 
@@ -26,51 +26,51 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
   let currentWorkspace: Workspace | null = null;
   const [industry_experience, setindustry_experience] = useState<number | null>(null);
 
+
   const hasLoaded = useRef(false);
+  const loadWorkspace = async () => {
+    const user = AuthService.getCachedUser();
+    if (!user?.current_org_id) return;
+
+    const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
+    setWorkspace(ws);
+    setIsOnboardingComplete((ws?.onboarding_step ?? 0) >= 5);
+  };
+
+  const loadAllData = async () => {
+    try {
+      const user = AuthService.getCachedUser();
+      if (!user) return;
+
+      const userByEmail = await AuthService.getUserByEmail(user.email);
+      setFullName(userByEmail.fullName);
+      setEmail(userByEmail.email);
+      setindustry_experience(userByEmail.industry_experience ?? null);
+
+      //if (!user.current_org_id) return;
+
+      //await loadWorkspace();
+    } catch (err) {
+      console.error("Failed to load user/org info", err);
+    } finally {
+      setRoleLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadWorkspace = async () => {
-      const user = AuthService.getUser();
-      if (!user?.current_org_id) return;
-
-      const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
-      setWorkspace(ws);
-      setIsOnboardingComplete((ws?.onboarding_step ?? 0) >= 5);
-    };
-
-    loadWorkspace();
+    if (!hasLoaded.current) {
+      loadAllData();
+      loadWorkspace();
+      hasLoaded.current = true;
+    }
   }, []);
 
-  useEffect(() => {
-    const loadAllData = async () => {
-      try {
-        const user = await AuthService.getUser();
-        if (!user) return;
-
-        setFullName(user.fullName);
-        setEmail(user.email);
-        setindustry_experience(user.industry_experience ?? null);
-
-        if (!user.current_org_id) return;
-
-        // Fetch workspace
-        const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
-        setWorkspace(ws);
-        setIsOnboardingComplete((ws?.onboarding_step ?? 0) >= 5);
-
-
-
-      } catch (err) {
-        console.error("Failed to load user/org info", err);
-      } finally {
-        setRoleLoading(false);
-      }
-    };
-
-    loadAllData();
-  }, []);
-
-
+  // --- Handle refresh click ---
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    await loadAllData();
+    setIsLoading(false);
+  };
 
 
   const handleContinue = async () => {
@@ -80,7 +80,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     setError(null);
 
     try {
-      const user = AuthService.getUser();
+      const user = AuthService.getCachedUser();
       const ws = await AuthService.fetchWorkspaceFromServer(user?.current_org_id);
       console.log(industry_experience)
       // Only now do we call RPCs
@@ -122,6 +122,13 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
       <header className="text-center mb-10">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Your Info</h1>
         <p className="text-slate-500">Let's get to know you first.</p>
+        <button
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="p-2 rounded-full hover:bg-slate-100 transition"
+        >
+          <RefreshCcw className={`w-6 h-6 ${isLoading ? 'animate-spin' : ''}`} />
+        </button>
       </header>
 
       <div className="space-y-6">
