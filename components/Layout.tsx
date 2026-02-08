@@ -143,47 +143,46 @@ export const Layout: React.FC = () => {
   useEffect(() => {
     const refreshData = async () => {
       const u = AuthService.getCachedUser();
-      console.log("layout user" + u.current_org_id);
-      const user = AuthService.getUserByEmail(u.email);
-      const w = await AuthService.fetchWorkspaceFromServer((await user).current_org_id);
+      if (!u) return;
 
-      //setUser(user);
+      console.log("layout user", u.current_org_id);
+
+      // Fetch workspace from server
+      const user = await AuthService.getUserByEmail(u.email);
+      const w = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
+
       setWorkspace(w);
 
-      if (u) {
-        try {
-          const list = await AuthService.getWorkspaces(u.email);
-          setWorkspaces(list);
-        } catch (e) {
-          console.error("Layout: Error fetching workspaces", e);
-        }
+      // Fetch workspaces list
+      try {
+        const list = await AuthService.getWorkspaces(u.email);
+        setWorkspaces(list);
+      } catch (e) {
+        console.error("Layout: Error fetching workspaces", e);
       }
-      console.log("useEffect: " + w.onboarding_step);
-      // Calculate fake progress based on step for the sidebar visual
+
+      // Update onboarding progress
       if (w) {
         const progressMap = [0, 20, 40, 60, 80, 100];
         setOnboardingProgress(progressMap[Math.min(w.onboarding_step, 5)]);
       }
     };
 
+    // Initial load
     refreshData();
-    const interval = setInterval(refreshData, 3000); // every 5 seconds
 
-    // Listen for workspace updates
+    // Subscription to workspace changes
     const unsubscribe = AuthService.onWorkspaceChange((w) => {
       console.log("[Layout] Workspace updated:", w);
-      console.log("[Layout] Onboarding Step:", w?.onboarding_step);
       setWorkspace(w);
 
-      // also update progress when workspace changes
       if (w) {
         const progressMap = [0, 20, 40, 60, 80, 100];
-        console.log("[Layout] Onboarding Step:", w?.onboarding_step);
         setOnboardingProgress(progressMap[Math.min(w.onboarding_step, 5)]);
       }
     });
 
-    // Outside click handler
+    // Outside click handler for switcher/profile
     const handleClickOutside = (e: MouseEvent) => {
       if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
         setSwitcherOpen(false);
@@ -192,13 +191,11 @@ export const Layout: React.FC = () => {
         setProfileMenuOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      clearInterval(interval);
-      document.removeEventListener('mousedown', handleClickOutside);
       unsubscribe();
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 

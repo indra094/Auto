@@ -72,10 +72,6 @@ export const AuthService = {
     return DB.getItem<Workspace | null>('workspace', null);
   },
 
-  getCachedUser: (): User | null => {
-    return DB.getItem<User | null>('user', null);
-  },
-
   fetchWorkspaceFromServer: async (workspaceId: string) => {
     const workspace = await api.get(`/auth/workspace/${workspaceId}`);
 

@@ -313,6 +313,11 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   );
 
 
+  const CardSkeleton = ({ label }: { label?: string }) => (
+    <div className="p-6 border-2 border-slate-200 bg-slate-50 rounded animate-pulse flex items-center justify-center h-28">
+      <span className="text-slate-400 font-medium">{label || "Generating insight..."}</span>
+    </div>
+  );
   // ======================
   // ACTIVATION MODE (Onboarding)
   // ======================
@@ -404,34 +409,41 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
           </div>
         </div>
 
-        {/* Teaser */}
+        {/* Teaser replaced with real insights */}
         <div className="mb-6">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-yellow-500" /> Coming Soon
+            <Zap className="w-4 h-4 text-yellow-500" /> Key Insights
           </h3>
+
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { icon: AlertTriangle, title: 'Founder Imbalance' },
-              { icon: DollarSign, title: 'Capital Estimate' },
-              { icon: Heart, title: 'Market Timing' },
+              { icon: AlertTriangle, title: 'Executive Summary', data: data?.founderImbalance },
+              { icon: DollarSign, title: 'Attention Points', data: data?.capitalEstimate },
+              { icon: Heart, title: 'Capital and Runway', data: data?.marketTiming },
             ].map((insight, i) => (
-              <Card
-                key={i}
-                className="p-6 bg-slate-900/5 backdrop-blur-sm border-2 border-dashed border-slate-300 relative overflow-hidden cursor-not-allowed"
-              >
-                <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] flex items-center justify-center z-10">
-                  <div className="text-center">
-                    <Lock className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                    <p className="text-xs font-bold text-slate-600">Complete onboarding to unlock</p>
-                  </div>
-                </div>
-                <insight.icon className="w-6 h-6 text-slate-400 mb-3" />
-                <h4 className="font-bold text-slate-700 mb-1">{insight.title}</h4>
-                <p className="text-sm text-slate-500">AI insights locked</p>
-              </Card>
+              insight.data ? (
+                <Card key={i} className="p-6 border-2 border-slate-200">
+                  <insight.icon className="w-6 h-6 text-slate-400 mb-3" />
+                  <h4 className="font-bold text-slate-700 mb-1">{insight.title}</h4>
+                  <p className="text-sm text-slate-500">{insight.data.summary}</p>
+                  {insight.data.risk && (
+                    <Badge color="red" className="mt-2">{insight.data.risk}</Badge>
+                  )}
+                  {insight.data.confidence !== undefined && (
+                    <span className="text-xs text-slate-500 mt-1 block">
+                      Confidence {(insight.data.confidence * 100).toFixed(0)}%
+                    </span>
+                  )}
+                </Card>
+              ) : (
+                // Pass key to the component, not inside the props object
+                <CardSkeleton key={i} label={`Generating ${insight.title.toLowerCase()} insight upon onboarding completion...`} />
+              )
             ))}
+
           </div>
         </div>
+
       </div >
     );
   }
@@ -454,7 +466,6 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       </div>
     )
   }
-
   // ======================
   // OPERATING MODE (MVP)
   // ======================
@@ -496,10 +507,14 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
           <Heart className="w-4 h-4 text-pink-500" /> Executive Summary
         </h3>
 
-        <Card className="p-6 border-2 border-slate-200">
-          <h3 className="text-xl font-black">{workspace?.name}</h3>
-          <p className="text-sm text-slate-500 mt-1">{data.thesis}</p>
-        </Card>
+        {workspace?.name && data.thesis ? (
+          <Card className="p-6 border-2 border-slate-200">
+            <h3 className="text-xl font-black">{workspace.name}</h3>
+            <p className="text-sm text-slate-500 mt-1">{data.thesis}</p>
+          </Card>
+        ) : (
+          <CardSkeleton />
+        )}
       </section>
 
       <section className="mb-10">
@@ -507,38 +522,30 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
           <AlertTriangle className="w-4 h-4 text-red-500" /> Killer Insight
         </h3>
 
-        <Card className="p-6 border-l-4 border-l-red-500 bg-red-50/50">
-          <p className="font-medium text-slate-800">
-            {data.killer_insight}
-          </p>
-
-          <div className="flex items-center gap-4 mt-3">
-            {data.killer_insight_risk && (
-              <Badge color="red">{data.killer_insight_risk}</Badge>
-            )}
-            {data.killer_insight_confidence !== undefined && (
-              <span className="text-xs text-slate-500">
-                Confidence {(data.killer_insight_confidence * 100).toFixed(0)}%
-              </span>
-            )}
-          </div>
-        </Card>
+        {data.killer_insight ? (
+          <Card className="p-6 border-l-4 border-l-red-500 bg-red-50/50">
+            <p className="font-medium text-slate-800">{data.killer_insight}</p>
+            <div className="flex items-center gap-4 mt-3">
+              {data.killer_insight_risk && <Badge color="red">{data.killer_insight_risk}</Badge>}
+              {data.killer_insight_confidence !== undefined && (
+                <span className="text-xs text-slate-500">
+                  Confidence {(data.killer_insight_confidence * 100).toFixed(0)}%
+                </span>
+              )}
+            </div>
+          </Card>
+        ) : (
+          <CardSkeleton />
+        )}
       </section>
 
 
-      {/* 2) What Needs Attention Now */}
       <section className="mb-10">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <Zap className="w-4 h-4 text-yellow-500" /> What Needs Attention Now
         </h3>
 
-        {data?.top_actions?.length === 0 ? (
-          <Card className="p-6 bg-emerald-50 border-emerald-200">
-            <p className="text-sm text-emerald-800 font-medium">
-              No critical risks detected at this time.
-            </p>
-          </Card>
-        ) : (
+        {data?.top_actions?.length > 0 ? (
           <div className="space-y-3">
             {data.top_actions.slice(0, 3).map((action, i) => (
               <Card
@@ -556,78 +563,76 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
               </Card>
             ))}
           </div>
+        ) : (
+          <CardSkeleton />
         )}
       </section>
 
-
-      {/* 3) Readiness Tracker */}
       <section className="mb-10">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <Target className="w-4 h-4" /> Readiness Tracker
         </h3>
 
-        <div className="space-y-3">
-          {onboarding_steps.map((step, i) => (
-            <Card
-              key={i}
-              className={`p-5 transition-all ${step.completed
-                ? 'border-emerald-200 bg-emerald-50/50'
-                : 'border-slate-200 bg-slate-50'
-                }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step.completed ? 'bg-emerald-500 text-white' : 'bg-slate-300 text-slate-500'}`}>
-                    {step.completed ? <CheckCircle className="w-5 h-5" /> : <span className="font-bold text-sm">{i + 1}</span>}
+        {onboarding_steps.length > 0 ? (
+          <div className="space-y-3">
+            {onboarding_steps.map((step, i) => (
+              <Card
+                key={i}
+                className={`p-5 transition-all ${step.completed ? 'border-emerald-200 bg-emerald-50/50' : 'border-slate-200 bg-slate-50'
+                  }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step.completed ? 'bg-emerald-500 text-white' : 'bg-slate-300 text-slate-500'}`}>
+                      {step.completed ? <CheckCircle className="w-5 h-5" /> : <span className="font-bold text-sm">{i + 1}</span>}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-700">{step.label}</h4>
+                      <p className="text-xs text-slate-500 mt-1">{step.why}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-slate-700">{step.label}</h4>
-                    <p className="text-xs text-slate-500 mt-1">{step.why}</p>
-                  </div>
+                  {step.current && (
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 font-bold" onClick={() => onNavigate(step.id)}>
+                      Continue →
+                    </Button>
+                  )}
                 </div>
-                {step.current && (
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 font-bold" onClick={() => onNavigate(step.id)}>
-                    Continue →
-                  </Button>
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <CardSkeleton label="Loading readiness tracker upon onboarding completion..." />
+        )}
       </section>
 
-      {(data.runway_months && data.burn_rate && data.capital_recommendation) && (
-        <section>
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
-          </h3>
+      <section>
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
+        </h3>
 
+        {data.runway_months && data.burn_rate && data.capital_recommendation ? (
           <Card className="p-6 border-2 border-slate-200">
             <div className="grid md:grid-cols-3 gap-6">
-              {data.runway_months && (
-                <div>
-                  <p className="text-xs text-slate-500">Runway</p>
-                  <p className="text-2xl font-black">{data.runway_months} months</p>
-                </div>
-              )}
+              <div>
+                <p className="text-xs text-slate-500">Runway</p>
+                <p className="text-2xl font-black">{data.runway_months} months</p>
+              </div>
 
-              {data.burn_rate && (
-                <div>
-                  <p className="text-xs text-slate-500">Burn Rate</p>
-                  <p className="text-2xl font-black">${data.burn_rate}/mo</p>
-                </div>
-              )}
+              <div>
+                <p className="text-xs text-slate-500">Burn Rate</p>
+                <p className="text-2xl font-black">${data.burn_rate}/mo</p>
+              </div>
 
-              {data.capital_recommendation && (
-                <div>
-                  <p className="text-xs text-slate-500">Recommendation</p>
-                  <Badge color="indigo">{data.capital_recommendation}</Badge>
-                </div>
-              )}
+              <div>
+                <p className="text-xs text-slate-500">Recommendation</p>
+                <Badge color="indigo">{data.capital_recommendation}</Badge>
+              </div>
             </div>
           </Card>
-        </section>
-      )}
+        ) : (
+          <CardSkeleton label="Loading capital insight upon onboarding completion..." />
+        )}
+      </section>
 
     </div>
   );
