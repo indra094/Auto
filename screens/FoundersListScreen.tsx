@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { User, Plus, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Plus, ShieldAlert, RefreshCw, ArrowRight, Loader2 } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 import ReactDOM from "react-dom";
 
@@ -56,36 +56,41 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     }
   };
 
+  const refreshOnEnter = async () => {
+    // Always refresh these
+    await loadPermission();
+    await loadUsers();
+
+    if (!currentUser?.id) return;
+
+    const orgId = AuthService.getCachedUser()?.current_org_id;
+    if (!orgId) return;
+
+    const ws = await AuthService.fetchWorkspaceFromServer(orgId);
+    const step = ws?.onboarding_step || 0;
+
+    setOnboardingStep(step);
+    console.log("[FoundersListScreen] ws onboarding step", step);
+
+    await AuthService.setOnboarding(orgId, Math.max(step, 3));
+  };
+
+
   React.useEffect(() => {
     let isMounted = true;
-    let step = 0;
-    const onEnter = async () => {
-      // Always refresh these on page entry
-      await loadPermission();
-      await loadUsers();
 
-      // Read onboarding step once on entry
-      if (currentUser?.id && isMounted) {
-        const orgId = AuthService.getCachedUser()?.current_org_id;
-        if (!orgId) return;
-        const fetchStep = async () => {
-          const ws = await AuthService.fetchWorkspaceFromServer(orgId);
-          step = ws?.onboarding_step || 0;
-          setOnboardingStep(step);
-          return step
-        };
-        step = await fetchStep();
-        console.log("[FoundersListScreen] ws onboarding step" + step);
-        await AuthService.setOnboarding(orgId, Math.max(step, 3));
-      }
-    };
-
-    onEnter();
+    if (isMounted) {
+      refreshOnEnter();
+    }
 
     return () => {
       isMounted = false;
     };
-  }, []); // 👈 runs on every screen entry (mount)
+  }, []); // runs once on mount
+
+  const handleRefresh = async () => {
+    await refreshOnEnter();
+  };
 
 
 
@@ -127,24 +132,45 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-10">
       {/* header */}
-      <header className="flex justify-between items-end">
-        <div>
-          <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">
-            Workspace / Team
+      {/* header */}
+      <header className="flex items-end">
+        <div className="flex items-start gap-3">
+          <div>
+            <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">
+              Workspace / Team
+            </div>
+
+            <div className="flex items-center gap-3">
+              <h2 className="text-4xl font-black text-slate-900">
+                Core Founders
+              </h2>
+
+              {/* Refresh */}
+              <button
+                onClick={handleRefresh}
+                title="Refresh"
+                className="p-2 mt-1 rounded-full hover:bg-slate-100 transition"
+              >
+                <RefreshCw className="w-6 h-6 text-slate-500" />
+              </button>
+            </div>
+
+            <p className="text-slate-500 font-medium mt-2">
+              Manage ownership and invite new key leaders.
+            </p>
           </div>
-          <h2 className="text-4xl font-black text-slate-900 mb-2">Core Founders</h2>
-          <p className="text-slate-500 font-medium">
-            Manage ownership and invite new key leaders.
-          </p>
-        </div>
-        <div className="flex gap-4">
-          {isAdmin && (
-            <Button onClick={() => setShowAddFounder(true)}>
-              <Plus className="w-4 h-4" /> Add Founder
-            </Button>
-          )}
+
+          {/* Right actions */}
+          <div className="ml-6 flex items-center gap-3">
+            {isAdmin && (
+              <Button onClick={() => setShowAddFounder(true)}>
+                <Plus className="w-4 h-4" /> Add Founder
+              </Button>
+            )}
+          </div>
         </div>
       </header>
+
 
       {/* NEW: Users list */}
       <Card className="p-6 bg-white border-slate-100 shadow-sm">
@@ -443,13 +469,15 @@ export const AddFounderPanel = ({
 
     setStatus(initialData.status ?? "Pending Activation");
     user = AuthService.getCachedUser();
+
   }, [initialData]);
 
   const isEditMode = Boolean(initialData?.id);
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <Card className="w-full max-w-2xl max-h-[70vh] p-6 overflow-y-auto">
+      <Card className="w-full max-w-5xl max-h-[90vh] p-8 overflow-y-auto rounded-2xl shadow-xl">
+
 
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
@@ -476,6 +504,7 @@ export const AddFounderPanel = ({
               <input
                 className="w-full p-3 rounded-xl border border-slate-200"
                 placeholder="Full Name"
+                disabled={isEditMode}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
