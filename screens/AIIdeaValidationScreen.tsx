@@ -198,6 +198,11 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
     const [canProceedToReadiness, setCanProceedToReadiness] = useState(false);
 
     const [isLoading, setIsLoading] = useState(true);
+    const [modalPersona, setModalPersona] = useState<{
+        name: string;
+        pain: string;
+        solution: string;
+    } | null>(null);
 
     const [updating, setUpdating] = useState(false);
     const [queueSize, setQueueSize] = useState<number>(0);  // <-- ADD THIS
@@ -406,34 +411,29 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                             .map((p, i) => (
                                 <div
                                     key={i}
-                                    className="p-4 bg-slate-50 rounded-2xl border border-slate-100"
+                                    className="p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:shadow-lg transition"
+                                    onClick={() => setModalPersona(p)}
                                 >
                                     <div className="font-bold text-slate-900 text-base">
                                         {showOrFallback(p.name, "Unnamed Persona")}
                                     </div>
 
                                     <div className="text-sm font-medium tracking-tight mt-3 space-y-3">
-                                        {/* Pain */}
                                         <div>
-                                            <div className="uppercase text-xs font-bold text-slate-400">
-                                                Pain:
-                                            </div>
+                                            <div className="uppercase text-xs font-bold text-slate-400">Pain:</div>
                                             <div className="text-slate-600 line-clamp-2">
                                                 {showOrFallback(p.pain, "Pain not provided")}
                                             </div>
                                         </div>
-
-                                        {/* Solution */}
                                         <div>
-                                            <div className="uppercase text-xs font-bold text-indigo-500">
-                                                Solution:
-                                            </div>
+                                            <div className="uppercase text-xs font-bold text-indigo-500">Solution:</div>
                                             <div className="text-slate-700 line-clamp-2">
                                                 {showOrFallback(p.solution, "Solution not provided")}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             ))}
 
                         {/* Placeholder when no personas exist */}
@@ -516,6 +516,38 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                 </aside>
 
             </div>
+
+            {modalPersona && (
+                <div
+                    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                    onClick={() => setModalPersona(null)} // close on background click
+                >
+                    <div
+                        className="bg-white p-6 rounded-xl max-w-lg w-full relative"
+                        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+                    >
+                        <button
+                            className="absolute top-3 right-3 text-slate-500 hover:text-slate-800"
+                            onClick={() => setModalPersona(null)}
+                        >
+                            ✕
+                        </button>
+
+                        <h3 className="text-xl font-bold mb-4">{modalPersona.name}</h3>
+
+                        <div className="mb-4">
+                            <div className="uppercase text-xs font-bold text-slate-400 mb-1">Pain</div>
+                            <p className="text-slate-700">{modalPersona.pain}</p>
+                        </div>
+
+                        <div>
+                            <div className="uppercase text-xs font-bold text-indigo-500 mb-1">Solution</div>
+                            <p className="text-slate-700">{modalPersona.solution}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
         </div>
     );
