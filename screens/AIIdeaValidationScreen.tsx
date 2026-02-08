@@ -381,7 +381,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                             <div className="p-4 bg-indigo-50 rounded-xl">
                                 <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Verdict</div>
                                 <p className="text-indigo-900 font-bold italic text-lg">
-                                    {showOrFallback(analysis?.investor_verdict)}
+                                    {showOrFallback(analysis?.investor)}
                                 </p>
                             </div>
                             <div className="flex justify-between items-center">
@@ -398,8 +398,8 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                     <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
                         <Users className="w-5 h-5 text-blue-500" />
                         Target Customer Personas
-                        {/* <Tooltip content="Primary buyer profiles identified based on pain severity, willingness to pay, and urgency." />*/}
                     </h3>
+
                     <div className="grid md:grid-cols-3 gap-4 text-center">
                         {(analysis?.personas?.length ? analysis.personas : [])
                             .filter(p => p.name || p.pain || p.solution) // show only filled personas
@@ -408,24 +408,24 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                                     key={i}
                                     className="p-4 bg-slate-50 rounded-2xl border border-slate-100"
                                 >
-                                    <div className="font-bold text-slate-900">
+                                    <div className="font-bold text-slate-900 text-base">
                                         {showOrFallback(p.name, "Unnamed Persona")}
                                     </div>
 
-                                    <div className="text-[11px] font-medium tracking-tight mt-2 space-y-2">
+                                    <div className="text-sm font-medium tracking-tight mt-3 space-y-3">
                                         {/* Pain */}
                                         <div>
-                                            <div className="uppercase text-[10px] font-bold text-slate-400">
+                                            <div className="uppercase text-xs font-bold text-slate-400">
                                                 Pain:
                                             </div>
-                                            <div className="text-slate-500 line-clamp-2">
+                                            <div className="text-slate-600 line-clamp-2">
                                                 {showOrFallback(p.pain, "Pain not provided")}
                                             </div>
                                         </div>
 
                                         {/* Solution */}
                                         <div>
-                                            <div className="uppercase text-[10px] font-bold text-indigo-500">
+                                            <div className="uppercase text-xs font-bold text-indigo-500">
                                                 Solution:
                                             </div>
                                             <div className="text-slate-700 line-clamp-2">
@@ -433,12 +433,10 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                                             </div>
                                         </div>
                                     </div>
-
-
                                 </div>
                             ))}
 
-                        {/* Optional: show a placeholder when no personas exist */}
+                        {/* Placeholder when no personas exist */}
                         {(!analysis?.personas?.length ||
                             analysis.personas.filter(p => p.name || p.pain || p.solution).length === 0) && (
                                 <div className="col-span-3 text-sm text-slate-500">
@@ -447,6 +445,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                             )}
                     </div>
                 </Card>
+
             </div>
 
             <div className="w-80 shrink-0">

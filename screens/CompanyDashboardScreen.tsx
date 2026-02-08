@@ -140,8 +140,21 @@ const CompanyDashboardSkeleton = () => {
         ))}
       </section>
 
+      {/* Capital & Runway Skeleton */}
+      <section className="space-y-6">
+        <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse mb-3" />
+        <div className="grid md:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <span className="block h-3 w-32 bg-slate-200 rounded animate-pulse" />
+              <span className="block h-8 w-40 bg-slate-200 rounded animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Readiness Tracker Skeleton */}
-      <section className="space-y-3 mb-10">
+      <section className="space-y-6 mt-10 mb-10">
         <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse mb-3" />
         {[...Array(3)].map((_, i) => (
           <div key={i} className="flex items-center justify-between mb-4">
@@ -157,18 +170,7 @@ const CompanyDashboardSkeleton = () => {
         ))}
       </section>
 
-      {/* Capital & Runway Skeleton */}
-      <section className="space-y-3">
-        <span className="block h-4 w-48 bg-slate-200 rounded animate-pulse mb-3" />
-        <div className="grid md:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="space-y-2">
-              <span className="block h-3 w-32 bg-slate-200 rounded animate-pulse" />
-              <span className="block h-8 w-40 bg-slate-200 rounded animate-pulse" />
-            </div>
-          ))}
-        </div>
-      </section>
+
     </div>
   );
 };
@@ -423,8 +425,9 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
           <div className="grid md:grid-cols-3 gap-4">
             {[
               { icon: AlertTriangle, title: 'Executive Summary', data: data?.founderImbalance },
-              { icon: DollarSign, title: 'Attention Points', data: data?.capitalEstimate },
               { icon: Heart, title: 'Capital and Runway', data: data?.marketTiming },
+              { icon: DollarSign, title: 'Attention Points', data: data?.capitalEstimate },
+
             ].map((insight, i) => (
               insight.data ? (
                 <Card key={i} className="p-6 border-2 border-slate-200">
@@ -555,8 +558,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
             {data.top_actions.slice(0, 3).map((action, i) => (
               <Card
                 key={i}
-                className="p-5 border-l-4 border-l-red-500 bg-red-50/50 cursor-pointer"
-                onClick={() => onNavigate(action.screen_id)}
+                className="p-5 border-l-4 border-l-red-500 bg-red-50/50"
               >
                 <p className="font-medium">{action.title}</p>
                 <p className="text-xs text-slate-600 mt-1">
@@ -573,7 +575,37 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         )}
       </section>
 
-      <section className="mb-10">
+
+      <section>
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
+        </h3>
+
+        {data.runway_months && data.burn_rate && data.capital_recommendation ? (
+          <Card className="p-6 border-2 border-slate-200">
+            <div className="grid md:grid-cols-3 gap-6">
+              <div>
+                <p className="text-xs text-slate-500">Runway</p>
+                <p className="text-2xl font-black">{data.runway_months} months</p>
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-500">Burn Rate</p>
+                <p className="text-2xl font-black">${data.burn_rate}/mo</p>
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-500">Recommendation</p>
+                <Badge color="indigo">{data.capital_recommendation}</Badge>
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <CardSkeleton label="Loading capital insight upon onboarding completion..." />
+        )}
+      </section>
+
+      <section className="space-y-6 mt-10 mb-10">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <Target className="w-4 h-4" /> Readiness Tracker
         </h3>
@@ -610,34 +642,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         )}
       </section>
 
-      <section>
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
-        </h3>
 
-        {data.runway_months && data.burn_rate && data.capital_recommendation ? (
-          <Card className="p-6 border-2 border-slate-200">
-            <div className="grid md:grid-cols-3 gap-6">
-              <div>
-                <p className="text-xs text-slate-500">Runway</p>
-                <p className="text-2xl font-black">{data.runway_months} months</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-slate-500">Burn Rate</p>
-                <p className="text-2xl font-black">${data.burn_rate}/mo</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-slate-500">Recommendation</p>
-                <Badge color="indigo">{data.capital_recommendation}</Badge>
-              </div>
-            </div>
-          </Card>
-        ) : (
-          <CardSkeleton label="Loading capital insight upon onboarding completion..." />
-        )}
-      </section>
 
     </div>
   );
