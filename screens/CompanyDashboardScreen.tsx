@@ -12,6 +12,7 @@ import {
   DollarSign,
   Target,
   Lock,
+  RefreshCcw,
 } from 'lucide-react';
 import { AuthService, Workspace } from '../services/AuthService';
 import { Info } from "lucide-react";
@@ -192,66 +193,61 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   let size = 0;
   const orgId = AuthService.getCachedUser()?.current_org_id;
 
+  // --- Fetch dashboard data ---
+  const fetchDashboard = async (): Promise<boolean> => {
+    const data = await AuthService.getDashboard(orgId!);
 
-  useEffect(() => {
+    if (data) {
+      setQueueSize(data.size);
+      queueSizeRef.current = data.size;
+
+      if (data.dashboard) {
+        // Format date
+        data.last_computed_at = new Date(data.dashboard.last_computed_at).toLocaleString();
+        setData(data.dashboard);
+
+        setUpdating(false);
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  // --- Handle refresh manually ---
+  const handleRefresh = async () => {
+    setLoading(true);
+    const hasDashboard = await fetchDashboard();
+
+    if (!hasDashboard && queueSizeRef.current === 0) {
+      // Only call update if dashboard not ready and queue size is 0
+      await AuthService.updateDashboard(orgId!);
+      setUpdating(true);
+    } else {
+      setUpdating(false);
+    }
+
+    setLoading(false);
+  };
+
+  // --- Initial load ---
+  const init = async () => {
     if (!orgId) return;
 
-    let interval: NodeJS.Timeout | null = null;
+    setLoading(true);
+    const ws = await AuthService.fetchWorkspaceFromServer(
+      AuthService.getCachedUser()?.current_org_id
+    );
+    setWorkspace(ws);
 
-    const fetchDashboard = async () => {
-      const data = await AuthService.getDashboard(orgId);
+    const hasDashboard = await fetchDashboard();
+    if (!hasDashboard) setUpdating(true);
 
-      if (data) {
-        //console.log("responsesize" + data.size)
-        setQueueSize(data.size);       // update state
-        queueSizeRef.current = data.size;  // update ref immediately for interval
-        if (data.dashboard) {
-          setData(data.dashboard);
-          data.last_computed_at = new Date(data.dashboard.last_computed_at).toLocaleString();
+    setLoading(false);
+  };
 
-          setUpdating(false);
-          return true;
-        }
-      }
-
-      return false;
-    };
-
-    const init = async () => {
-      setLoading(true);
-      const ws = await AuthService.fetchWorkspaceFromServer(
-        AuthService.getCachedUser()?.current_org_id
-      );
-      setWorkspace(ws);
-      setLoading(false);
-      // console.log("orgId", orgId)
-
-      // first call immediately
-      const hasDashboard = await fetchDashboard();
-      // set updating state based on availability
-      if (!hasDashboard) setUpdating(true);
-      interval = setInterval(async () => {
-        const ready = await fetchDashboard();
-        let current = queueSizeRef.current;
-        //console.log("queue size", current); // always latest value
-
-        if (!ready && current === 0) {
-          AuthService.updateDashboard(orgId);
-
-          setUpdating(true);
-        } else {
-          setUpdating(false);
-        }
-      }, 5000);
-
-
-      setLoading(false);
-    };
+  useEffect(() => {
     init();
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
   }, [orgId]);
 
 
@@ -293,18 +289,39 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     },
   ];
 
+
+
+  const renderHeader = (title: string, subtitle?: string) => (
+    <header className="mb-10 flex justify-between items-start">
+      <div>
+        <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-slate-500 mt-2 font-medium">
+            {subtitle}
+          </p>
+        )}
+      </div>
+
+      <button
+        onClick={handleRefresh}
+        disabled={loading}
+        className="p-2 mt-1 rounded-full hover:bg-slate-100 transition"
+      >
+        <RefreshCcw className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
+      </button>
+    </header>
+  );
+
   // ======================
   // ACTIVATION MODE (Onboarding)
   // ======================
   if (isActivationMode) {
     return (
       <div className="p-8 max-w-5xl mx-auto">
-        <header className="mb-12 text-center">
-          <h2 className="text-5xl font-black text-slate-900 tracking-tight mb-3">Welcome to Foundry</h2>
-          <p className="text-slate-500 text-lg font-medium">
-            Complete setup to unlock AI-powered insights
-          </p>
-        </header>
+        {renderHeader("Welcome to Foundry", "Complete setup to unlock AI-powered insights")}
+
 
         {/* Progress */}
         <Card className="mb-10 p-10 bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none shadow-2xl relative overflow-hidden">
@@ -422,7 +439,10 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
   if (!data && !isActivationMode) {
     return (
-      <CompanyDashboardSkeleton />
+      <div className="p-8 max-w-6xl mx-auto">
+        {renderHeader("Company Dashboard")}
+        <CompanyDashboardSkeleton />
+      </div>
     )
   }
 
@@ -445,12 +465,8 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <header className="mb-10 flex justify-between items-center">
-        <div>
-          <h2 className="text-4xl font-black text-slate-900 tracking-tight">Company Dashboard</h2>
-          <p className="text-slate-500 mt-2 font-medium">
-            AI-powered operating system for {workspace?.name || 'your startup'}
-          </p>
-        </div>
+        {renderHeader("Company Dashboard", `AI-powered operating system for ${workspace?.name || 'your startup'}`)}
+
         <Badge
           color={
             data.verdict === 'Execution Stable'
@@ -571,7 +587,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         </div>
       </section>
 
-      {(data.runway_months || data.burn_rate) && (
+      {(data.runway_months && data.burn_rate && data.capital_recommendation) && (
         <section>
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
