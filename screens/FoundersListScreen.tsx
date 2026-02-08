@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
 import { User, Plus, ShieldAlert, ArrowRight, Loader2 } from 'lucide-react';
-//import { FounderService } from '../services/FounderService';
 import { AuthService } from '../services/AuthService';
 import ReactDOM from "react-dom";
 

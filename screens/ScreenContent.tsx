@@ -1,10 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { ScreenId } from '../types';
 
-// Global
-import { AppShellScreen } from './AppShellScreen';
-import { NotificationsScreen } from './NotificationsScreen';
-
 // Onboarding
 import { AccountCreationScreen } from './AccountCreationScreen';
 import { CompanyCreationScreen } from './CompanyCreationScreen';
@@ -13,44 +9,9 @@ import { InvestorReadinessScreen } from './InvestorReadinessScreen';
 
 // Founders
 import { FoundersListScreen } from './FoundersListScreen';
-import { FounderProfileScreen } from './FounderProfileScreen';
-import { AlignmentOverviewScreen } from './AlignmentOverviewScreen';
-import { EquityModelingScreen } from './EquityModelingScreen';
-import { ScenarioSimulatorScreen } from './ScenarioSimulatorScreen';
-import { LockAlignmentScreen } from './LockAlignmentScreen';
-import { AlignmentHistoryScreen } from './AlignmentHistoryScreen';
-import { CoFounderFindingScreen } from './CoFounderFindingScreen';
-import { UserOrgInfoScreen } from './MyRoleScreen';
-
-// AI
-import { AIAdvisorsHomeScreen } from './AIAdvisorsHomeScreen';
-import { AIAdvisorPanelScreen } from './AIAdvisorPanelScreen';
-import { TeamEmployeesScreen } from './TeamEmployeesScreen';
-import { AIEmployeeDetailScreen } from './AIEmployeeDetailScreen';
-
-// Intelligence
 import { CompanyDashboardScreen } from './CompanyDashboardScreen';
-import { SubOrgDetailScreen } from './SubOrgDetailScreen';
-import { RelevantConnectionsScreen } from './RelevantConnectionsScreen';
-import { StagesCapitalScreen } from './StagesCapitalScreen';
-import { ValidationChecklistScreen } from './ValidationChecklistScreen';
-import { BuildStatusScreen } from './BuildStatusScreen';
-import { FinancialDashboardScreen } from './FinancialDashboardScreen';
 import { FinancialsScreen } from './FinancialsScreen';
-
-// External
-import { InvestorsListScreen } from './InvestorsListScreen';
-import { InvestorDetailScreen } from './InvestorDetailScreen';
-import { CustomersListScreen } from './CustomersListScreen';
-import { CustomerDetailScreen } from './CustomerDetailScreen';
-
-// AI & Idea
 import { AIIdeaValidationScreen } from './AIIdeaValidationScreen';
-
-// Groups & Systems
-import { IncorporationReadinessScreen } from './IncorporationReadinessScreen';
-import { ProceedAnywayScreen } from './ProceedAnywayScreen';
-import { DocumentsScreen } from './DocumentsScreen';
 
 interface ScreenContentProps {
   screenId: ScreenId;

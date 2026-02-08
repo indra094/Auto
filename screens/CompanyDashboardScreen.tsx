@@ -14,7 +14,6 @@ import {
   Lock,
 } from 'lucide-react';
 import { AuthService, Workspace } from '../services/AuthService';
-import { IntelligenceService } from '../services/IntelligenceService';
 import { Info } from "lucide-react";
 
 interface ScreenProps {

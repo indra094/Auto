@@ -174,7 +174,6 @@ export const LandingPage: React.FC<{ onEnterApp: () => void }> = ({ onEnterApp }
                   <div className="space-y-1">
                     <div className="flex justify-between ml-1">
                       <label className="block text-sm font-semibold text-slate-700">Password</label>
-                      {!isSignup && <a href="#" className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Forgot?</a>}
                     </div>
                     <input
                       type="password"
