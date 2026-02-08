@@ -10,6 +10,8 @@ import {
     RefreshCw
 } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
+import { FinancialService } from '../services/FinancialService';
+import { WorkspaceService } from '../services/WorkspaceService';
 import { ScreenId, Financials } from '../types';
 
 const styles = `
@@ -270,7 +272,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         const user = AuthService.getCachedUser();
         if (!user?.current_org_id) return;
 
-        const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
+        const ws = await WorkspaceService.fetchWorkspaceFromServer(user.current_org_id);
         setWorkspace(ws);
         isOnboarding = ws?.onboarding_step < 5;
     };
@@ -281,7 +283,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             const orgId = AuthService.getCachedUser()?.current_org_id;
             if (!orgId) return;
 
-            const fetched = await AuthService.getFinancials(orgId);
+            const fetched = await FinancialService.getFinancials(orgId);
 
             if (fetched) {
                 setData(prev => ({ ...prev, ...fetched, org_id: orgId }));
@@ -326,11 +328,11 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                 }
             });
 
-            let workspace = AuthService.getCachedWorkspace();
-            await AuthService.updateFinancials(data.org_id, dataToSave);
+            let workspace = WorkspaceService.getCachedWorkspace();
+            await FinancialService.updateFinancials(data.org_id, dataToSave);
 
             if (!workspace || (workspace?.onboarding_step && workspace.onboarding_step <= 5)) {
-                await AuthService.setOnboarding(data.org_id, Math.max(workspace?.onboarding_step ?? 0, 5));
+                await WorkspaceService.setOnboarding(data.org_id, Math.max(workspace?.onboarding_step ?? 0, 5));
             }
 
             if (workspace?.onboarding_step < 5) {
@@ -347,12 +349,12 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
 
     const handleSkip = async () => {
-        let workspace = AuthService.getCachedWorkspace();
+        let workspace = WorkspaceService.getCachedWorkspace();
         if (!workspace) return;
         setSaving(true);
         try {
             // ONLY update onboarding step, do NOT save form data
-            await AuthService.setOnboarding(workspace.id, 5);
+            await WorkspaceService.setOnboarding(workspace.id, 5);
             onNavigate(ScreenId.COMPANY_DASHBOARD);
         } catch (e) {
             console.error(e);

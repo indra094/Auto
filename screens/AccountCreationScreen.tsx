@@ -3,6 +3,8 @@ import { ScreenId } from '../types';
 import { Button } from '../components/UI';
 import { UserIcon, Mail, Loader2, ArrowRight, Calendar, RefreshCcw } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
+import { WorkspaceService } from '../services/WorkspaceService';
+import { TeamService } from '../services/TeamService';
 import type { User, Workspace } from '../types';
 
 
@@ -32,7 +34,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
     const user = AuthService.getCachedUser();
     if (!user?.current_org_id) return;
 
-    const ws = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
+    const ws = await WorkspaceService.fetchWorkspaceFromServer(user.current_org_id);
     setWorkspace(ws);
     setIsOnboardingComplete((ws?.onboarding_step ?? 0) >= 5);
   };
@@ -81,17 +83,17 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
     try {
       const user = AuthService.getCachedUser();
-      const ws = await AuthService.fetchWorkspaceFromServer(user?.current_org_id);
+      const ws = await WorkspaceService.fetchWorkspaceFromServer(user?.current_org_id);
       console.log(industry_experience)
       // Only now do we call RPCs
       await AuthService.updateUser({ fullName, email, industry_experience, current_org_id: ws?.id });
 
       if (ws && user) {
-        await AuthService.setUserOrgInfo(user.id, ws.id, "ADMIN", 100, "", 60);
+        await TeamService.setUserOrgInfo(user.id, ws.id, "ADMIN", 100, "", 60);
       }
 
       if (ws && !isOnboardingComplete) {
-        await AuthService.setOnboarding(ws.id, Math.max(ws?.onboarding_step || 0, 2));
+        await WorkspaceService.setOnboarding(ws.id, Math.max(ws?.onboarding_step || 0, 2));
         onNavigate(ScreenId.FOUNDERS_LIST);
       }
     } catch (err: any) {

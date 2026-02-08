@@ -12,6 +12,7 @@ import {
     RefreshCw
 } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
+import { WorkspaceService } from '../services/WorkspaceService';
 import { ScreenId } from '../types';
 
 // --- CSS Styles (Light Mode) ---
@@ -260,8 +261,9 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         setError(null);
 
         try {
-            const workspace = AuthService.getCachedWorkspace();
-            await AuthService.updateWorkspace({
+            const workspace = WorkspaceService.getCachedWorkspace();
+            if (!workspace) return;
+            await WorkspaceService.updateWorkspace(workspace.id, {
                 ...formData,
                 onboarding_step: Math.max(workspace.onboarding_step, 4)
             });
@@ -285,8 +287,9 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         setError(null);
 
         try {
-            const workspace = AuthService.getCachedWorkspace();
-            await AuthService.updateWorkspace({
+            const workspace = WorkspaceService.getCachedWorkspace();
+            if (!workspace) return;
+            await WorkspaceService.updateWorkspace(workspace.id, {
                 ...formData,
                 onboarding_step: Math.max(workspace.onboarding_step, 4)
             });
@@ -347,7 +350,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         if (!orgId) return;
 
         // Fetch workspace info
-        const ws = await AuthService.fetchWorkspaceFromServer(orgId);
+        const ws = await WorkspaceService.fetchWorkspaceFromServer(orgId);
 
         // Update form data
         setFormData(prev => ({

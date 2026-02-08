@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { Card, Button, Badge } from "../components/UI";
 import { AuthService } from "../services/AuthService";
+import { TeamService } from "../services/TeamService";
+import { AnalysisService } from "../services/AnalysisService";
 import { User } from "../types"
 
 interface FounderAlignment {
@@ -47,10 +49,10 @@ export const FoundersAlignmentScreen: React.FC = ({
     setUpdating(true);
 
     try {
-      const founders = await AuthService.getUsersForOrg(orgId);
+      const founders = await TeamService.getUsersForOrg(orgId);
       setFounders(founders);
 
-      const data = await AuthService.getFounderAlignment(orgId);
+      const data = await AnalysisService.getFounderAlignment(orgId);
 
       if (data && data.alignment) {
         setAlignment(data.alignment);

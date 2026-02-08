@@ -3,6 +3,8 @@ import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
 import { User, Plus, ShieldAlert, RefreshCw, ArrowRight, Loader2 } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
+import { TeamService } from '../services/TeamService';
+import { WorkspaceService } from '../services/WorkspaceService';
 import ReactDOM from "react-dom";
 
 interface ScreenProps {
@@ -28,7 +30,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     if (!currentUser?.id || !currentUser?.current_org_id) return;
 
     try {
-      const info = await AuthService.getUserOrgInfo(
+      const info = await TeamService.getUserOrgInfo(
         currentUser.id,
         currentUser.current_org_id
       );
@@ -47,7 +49,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     try {
       console.log("founders list screen user" + user);
       // NEW: load all users in this org
-      const orgUsers = await AuthService.getUsersForOrg(user.current_org_id);
+      const orgUsers = await TeamService.getUsersForOrg(user.current_org_id);
       setUsers(orgUsers || []);
 
     } catch (err) {
@@ -67,13 +69,13 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     const orgId = AuthService.getCachedUser()?.current_org_id;
     if (!orgId) return;
 
-    const ws = await AuthService.fetchWorkspaceFromServer(orgId);
+    const ws = await WorkspaceService.fetchWorkspaceFromServer(orgId);
     const step = ws?.onboarding_step || 0;
 
     setOnboardingStep(step);
     console.log("[FoundersListScreen] ws onboarding step", step);
 
-    await AuthService.setOnboarding(orgId, Math.max(step, 3));
+    await WorkspaceService.setOnboarding(orgId, Math.max(step, 3));
   };
 
 
@@ -411,7 +413,7 @@ export const AddFounderPanel = ({
     try {
 
       if (isEditMode) {
-        await AuthService.updateUserForOrg(
+        await TeamService.updateUserForOrg(
           initialData.id,
           user.current_org_id,
           role,
@@ -426,9 +428,9 @@ export const AddFounderPanel = ({
 
       } else {
         const orgID =
-          (await AuthService.fetchWorkspaceFromServer(user.current_org_id))?.id ?? "";
+          (await WorkspaceService.fetchWorkspaceFromServer(user.current_org_id))?.id ?? "";
 
-        await AuthService.createUserForOrg(
+        await TeamService.createUserForOrg(
           name,
           email,
           orgID,
@@ -508,6 +510,8 @@ export const AddFounderPanel = ({
                 disabled={isEditMode}
                 className="w-full p-3 rounded-xl border border-slate-200 disabled:bg-slate-100"
                 value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
               />
               <div className="text-[10px] text-slate-400 mt-1">
                 The email address of the user you’re inviting.

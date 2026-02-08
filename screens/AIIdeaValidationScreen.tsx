@@ -5,6 +5,7 @@ import { Lightbulb, Target, TrendingUp, AlertCircle, Users, DollarSign, Calendar
 import React, { useState, useRef, useEffect } from "react";
 import { Info } from "lucide-react";
 import { AuthService } from '../services/AuthService';
+import { AnalysisService } from '../services/AnalysisService';
 
 interface TooltipProps {
     content: string;
@@ -215,7 +216,7 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
         setIsLoading(true);
 
         try {
-            const data = await AuthService.fetchIdeaAnalysisFromServer(orgId);
+            const data = await AnalysisService.fetchIdeaAnalysisFromServer(orgId);
 
             if (data && data.analysis) {
                 setAnalysis(data.analysis);

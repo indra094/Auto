@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { ScreenContent } from '../screens/ScreenContent';
 import { AuthService } from '../services/AuthService';
+import { WorkspaceService } from '../services/WorkspaceService';
 import { ProgressBar } from './UI';
 import type { User, Workspace } from '../types';
 
@@ -116,7 +117,7 @@ const afterOnboardingNav: NavGroup[] = [
 type ScreenStatus = 'locked' | 'partial' | 'accessible';
 
 export const Layout: React.FC = () => {
-  const [workspace, setWorkspace] = useState(AuthService.fetchWorkspaceFromServer(AuthService.getCachedUser()?.current_org_id));
+  const [workspace, setWorkspace] = useState(WorkspaceService.getCachedWorkspace());
 
   const initialScreen = ScreenId.COMPANY_DASHBOARD;
 
@@ -149,13 +150,13 @@ export const Layout: React.FC = () => {
 
       // Fetch workspace from server
       const user = await AuthService.getUserByEmail(u.email);
-      const w = await AuthService.fetchWorkspaceFromServer(user.current_org_id);
+      const w = await WorkspaceService.fetchWorkspaceFromServer(user.current_org_id);
 
       setWorkspace(w);
 
       // Fetch workspaces list
       try {
-        const list = await AuthService.getWorkspaces(u.email);
+        const list = await WorkspaceService.getWorkspaces(u.email);
         setWorkspaces(list);
       } catch (e) {
         console.error("Layout: Error fetching workspaces", e);
@@ -172,7 +173,7 @@ export const Layout: React.FC = () => {
     refreshData();
 
     // Subscription to workspace changes
-    const unsubscribe = AuthService.onWorkspaceChange((w) => {
+    const unsubscribe = WorkspaceService.onWorkspaceChange((w) => {
       console.log("[Layout] Workspace updated:", w);
       setWorkspace(w);
 
@@ -248,19 +249,21 @@ export const Layout: React.FC = () => {
   const handleSwitchWorkspace = async (w: any) => {
     await AuthService.setCurrentWorkspace(w);
     setWorkspace(w);
+    setWorkspace(w);
     setSwitcherOpen(false);
     setCurrentScreen(ScreenId.COMPANY_DASHBOARD);
   };
 
   const handleCreateNewCompany = async () => {
     setSwitcherOpen(false);
-    const w = await AuthService.createWorkspace(user?.email);
+    const w = await WorkspaceService.createWorkspace(user?.email || '');
     await AuthService.setCurrentWorkspace(w);
+    setWorkspace(w);
     setWorkspace(w);
     setCurrentScreen(ScreenId.COMPANY_DASHBOARD);
 
     // Refresh list
-    const list = await AuthService.getWorkspaces();
+    const list = await WorkspaceService.getWorkspaces(user?.email || '');
     setWorkspaces(list);
   };
 

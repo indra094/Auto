@@ -7,7 +7,8 @@ import {
     Shield, Briefcase, FileText, ChevronRight,
     RefreshCw
 } from 'lucide-react';
-import { AuthService } from '@/services/AuthService';
+import { AuthService } from '../services/AuthService';
+import { AnalysisService } from '../services/AnalysisService';
 import { format } from 'date-fns';
 
 import { Info } from "lucide-react";
@@ -251,7 +252,7 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
         try {
             setLoading(true);
 
-            const response = await AuthService.getInvestorReadiness(orgId);
+            const response = await AnalysisService.getInvestorReadiness(orgId);
 
             if (response && response.investor_readiness) {
                 const readiness = response.investor_readiness;

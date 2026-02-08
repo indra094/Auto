@@ -123,4 +123,51 @@ export interface Financials {
   last_updated?: string;
 }
 
+
+export type KillerInsightRisk =
+  | "Founder Risk"
+  | "Capital Risk"
+  | "Market Risk"
+  | "Execution Risk"
+  | string;
+
+export interface DashboardAction {
+  title: string;
+  why: string;
+  risk: string;
+  screenId:
+  | "ALIGNMENT_OVERVIEW"
+  | "FINANCIAL_DASHBOARD"
+  | "VALIDATION_CHECKLIST"
+  | string;
+}
+
+export interface Dashboard {
+  id: number;
+
+  // --- Executive Summary ---
+  verdict: string;
+  thesis: string;
+
+  // --- Killer Insight ---
+  killer_insight: string;
+  killer_insight_risk?: KillerInsightRisk;
+  killer_insight_confidence?: number; // 0.0 – 1.0
+
+  // --- Capital & Runway ---
+  runway_months?: number;
+  burn_rate?: number;
+
+  capital_recommendation?: string;
+
+  // --- Action Items ---
+  top_actions: DashboardAction[];
+
+  // --- Metadata ---
+  data_sources?: string[];
+
+  last_computed_at?: string; // ISO date string
+  model_version?: string;
+}
+
 export type ScreenStatus = 'accessible' | 'locked' | 'hidden';

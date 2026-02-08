@@ -16,59 +16,14 @@ import {
 } from 'lucide-react';
 import type { Workspace } from '../types';
 import { AuthService } from '../services/AuthService';
+import { WorkspaceService } from '../services/WorkspaceService';
 import { Info } from "lucide-react";
 
 interface ScreenProps {
   onNavigate: (id: ScreenId) => void;
 }
 
-// src/types/dashboard.ts
 
-export type KillerInsightRisk =
-  | "Founder Risk"
-  | "Capital Risk"
-  | "Market Risk"
-  | "Execution Risk"
-  | string;
-
-export interface DashboardAction {
-  title: string;
-  why: string;
-  risk: string;
-  screenId:
-  | "ALIGNMENT_OVERVIEW"
-  | "FINANCIAL_DASHBOARD"
-  | "VALIDATION_CHECKLIST"
-  | string;
-}
-
-export interface Dashboard {
-  id: number;
-
-  // --- Executive Summary ---
-  verdict: string;
-  thesis: string;
-
-  // --- Killer Insight ---
-  killer_insight: string;
-  killer_insight_risk?: KillerInsightRisk;
-  killer_insight_confidence?: number; // 0.0 – 1.0
-
-  // --- Capital & Runway ---
-  runway_months?: number;
-  burn_rate?: number;
-
-  capital_recommendation?: string;
-
-  // --- Action Items ---
-  top_actions: DashboardAction[];
-
-  // --- Metadata ---
-  data_sources?: string[];
-
-  last_computed_at?: string; // ISO date string
-  model_version?: string;
-}
 
 interface InfoTooltipProps {
   content: string;
@@ -177,11 +132,15 @@ const CompanyDashboardSkeleton = () => {
 };
 
 
+import { Dashboard, DashboardAction, KillerInsightRisk } from '../types';
+import { DashboardService } from '../services/DashboardService';
+
 export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
 
-  let isActivationMode = false;//(workspace?.onboarding_step || 0) < 5;
+  const [isActivationMode, setIsActivationMode] = useState(false);
+
 
   // Simple MVP progress score
   const onboardingProgress = useMemo(() => {
@@ -198,7 +157,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
   // --- Fetch dashboard data ---
   const fetchDashboard = async (): Promise<boolean> => {
-    const data = await AuthService.getDashboard(orgId!);
+    const data = await DashboardService.getDashboard(orgId!);
 
     if (data) {
       setQueueSize(data.size);
@@ -206,7 +165,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
       if (data.dashboard) {
         // Format date
-        data.last_computed_at = new Date(data.dashboard.last_computed_at).toLocaleString();
+        data.dashboard.last_computed_at = new Date(data.dashboard.last_computed_at!).toLocaleString();
         setData(data.dashboard);
 
         setUpdating(false);
@@ -220,16 +179,17 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   // --- Handle refresh manually ---
   const handleRefresh = async () => {
     setLoading(true);
-    const ws = await AuthService.fetchWorkspaceFromServer(
+    const ws = await WorkspaceService.fetchWorkspaceFromServer(
       AuthService.getCachedUser()?.current_org_id
     );
     setWorkspace(ws);
-    isActivationMode = (ws?.onboarding_step || 0) < 5;
+    setIsActivationMode((ws?.onboarding_step || 0) < 5); // ✅ update state
+
     const hasDashboard = isActivationMode ? false : await fetchDashboard();
 
     if (isActivationMode && !hasDashboard && queueSizeRef.current === 0) {
       // Only call update if dashboard not ready and queue size is 0
-      await AuthService.updateDashboard(orgId!);
+      await DashboardService.updateDashboard(orgId!);
       setUpdating(true);
     } else {
       setUpdating(false);
@@ -243,11 +203,14 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
     if (!orgId) return;
 
     setLoading(true);
-    const ws = await AuthService.fetchWorkspaceFromServer(
+    const ws = await WorkspaceService.fetchWorkspaceFromServer(
       AuthService.getCachedUser()?.current_org_id
     );
     setWorkspace(ws);
+    setIsActivationMode((ws?.onboarding_step || 0) < 5); // ✅ update state
 
+
+    console.log("isActivationMode", isActivationMode);
     const hasDashboard = isActivationMode ? false : await fetchDashboard();
     if (!isActivationMode && !hasDashboard) setUpdating(true);
 
@@ -321,7 +284,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
   );
 
 
-  const CardSkeleton = ({ label }: { label?: string }) => (
+  const CardSkeleton: React.FC<{ label?: string }> = ({ label }) => (
     <div className="p-6 border-2 border-slate-200 bg-slate-50 rounded animate-pulse flex items-center justify-center h-28">
       <span className="text-slate-400 font-medium">{label || "Generating insight..."}</span>
     </div>
@@ -456,7 +419,9 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       </div >
     );
   }
-
+  {
+    console.log("isActivationModebefore skeletion", isActivationMode);
+  }
   if (!data && !isActivationMode) {
     return (
       <div>
