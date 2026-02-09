@@ -265,12 +265,12 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
             if (!workspace) return;
             await WorkspaceService.updateWorkspace(workspace.id, {
                 ...formData,
-                onboarding_step: Math.max(workspace.onboarding_step, 4)
+                onboarding_step: Math.max(workspace.onboarding_step, 3)
             });
 
 
             if (workspace.onboarding_step < 5) {
-                onNavigate(ScreenId.FINANCIALS_ONBOARDING);
+                onNavigate(ScreenId.FOUNDERS_LIST);
             }
         } catch (err: any) {
             setError(err?.message || "Something went wrong.");
@@ -291,11 +291,11 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
             if (!workspace) return;
             await WorkspaceService.updateWorkspace(workspace.id, {
                 ...formData,
-                onboarding_step: Math.max(workspace.onboarding_step, 4)
+                onboarding_step: Math.max(workspace.onboarding_step, 3)
             });
 
             if (workspace.onboarding_step < 5) {
-                onNavigate(ScreenId.FINANCIALS_ONBOARDING);
+                onNavigate(ScreenId.FOUNDERS_LIST);
             }
         } catch (err: any) {
             setError(err?.message || "Something went wrong.");

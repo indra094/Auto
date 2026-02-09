@@ -94,7 +94,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
       if (ws && !isOnboardingComplete) {
         await WorkspaceService.setOnboarding(ws.id, Math.max(ws?.onboarding_step || 0, 2));
-        onNavigate(ScreenId.FOUNDERS_LIST);
+        onNavigate(ScreenId.COMPANY_INFORMATION);
       }
     } catch (err: any) {
       setError(err?.message || "Something went wrong");

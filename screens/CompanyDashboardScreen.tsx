@@ -238,18 +238,18 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       why: 'This is information about your role.',
     },
     {
-      id: ScreenId.FOUNDERS_LIST,
-      label: 'Founding Team',
-      completed: (workspace?.onboarding_step || 0) >= 3,
-      current: (workspace?.onboarding_step || 0) === 2,
-      why: 'This is information about your founding team.',
-    },
-    {
       id: ScreenId.COMPANY_INFORMATION,
       label: 'Company Information',
+      completed: (workspace?.onboarding_step || 0) >= 3,
+      current: (workspace?.onboarding_step || 0) === 2,
+      why: 'This is information about your business idea and strategy.',
+    },
+    {
+      id: ScreenId.FOUNDERS_LIST,
+      label: 'Founding Team',
       completed: (workspace?.onboarding_step || 0) >= 4,
       current: (workspace?.onboarding_step || 0) === 3,
-      why: 'This is information about your business idea and strategy.',
+      why: 'This is information about your founding team.',
     },
     {
       id: ScreenId.FINANCIALS_ONBOARDING,

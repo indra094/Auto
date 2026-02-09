@@ -75,7 +75,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     setOnboardingStep(step);
     console.log("[FoundersListScreen] ws onboarding step", step);
 
-    await WorkspaceService.setOnboarding(orgId, Math.max(step, 3));
+    await WorkspaceService.setOnboarding(orgId, Math.max(step, 4));
   };
 
 
@@ -355,7 +355,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
       {onboarding_step != 0 && onboarding_step < 5 && (
         <div className="flex justify-end pt-6">
           <Button
-            onClick={() => onNavigate(ScreenId.COMPANY_INFORMATION)}
+            onClick={() => onNavigate(ScreenId.FINANCIALS_ONBOARDING)}
             className="flex items-center gap-2"
           >
             Continue

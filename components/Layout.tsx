@@ -23,8 +23,8 @@ const beforeOnboardingNav: NavGroup[] = [
     label: "Get Started",
     screens: [
       { id: ScreenId.ACCOUNT_CREATION, label: "Your Info" },
-      { id: ScreenId.FOUNDERS_LIST, label: "Founding Team" },
       { id: ScreenId.COMPANY_INFORMATION, label: "Company Information" },
+      { id: ScreenId.FOUNDERS_LIST, label: "Founding Team" },
       { id: ScreenId.FINANCIALS_ONBOARDING, label: "Financials" }
     ]
   }/*,
@@ -213,8 +213,8 @@ export const Layout: React.FC = () => {
       const onboarding_steps = [
         { id: ScreenId.COMPANY_DASHBOARD, minStep: 0 },
         { id: ScreenId.ACCOUNT_CREATION, minStep: 1 },
-        { id: ScreenId.FOUNDERS_LIST, minStep: 2 },
-        { id: ScreenId.COMPANY_INFORMATION, minStep: 3 },
+        { id: ScreenId.COMPANY_INFORMATION, minStep: 2 },
+        { id: ScreenId.FOUNDERS_LIST, minStep: 3 },
         { id: ScreenId.FINANCIALS_ONBOARDING, minStep: 4 },
       ];
 
