@@ -9,8 +9,10 @@ import {
     MapPin,
     Briefcase,
     Users,
-    RefreshCw
+    RefreshCw,
+    Info // Import Info icon
 } from 'lucide-react';
+import { Tooltip } from '../components/Tooltip';
 import { AuthService } from '../services/AuthService';
 import { WorkspaceService } from '../services/WorkspaceService';
 import { ScreenId } from '../types';
@@ -399,14 +401,15 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
 
                     {/* Refresh button on its own line */}
                     <div style={{ marginTop: '16px' }}>
-                        <button
-                            onClick={handleRefresh}
-                            title="Refresh"
-                            className="p-2 rounded-full hover:bg-slate-100 transition"
-                            disabled={isLoading} // optional
-                        >
-                            <RefreshCw className={`w-6 h-6 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
-                        </button>
+                        <Tooltip content="Refresh workspace data" position="bottom">
+                            <button
+                                onClick={handleRefresh}
+                                className="p-2 rounded-full hover:bg-slate-100 transition"
+                                disabled={isLoading} // optional
+                            >
+                                <RefreshCw className={`w-6 h-6 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
+                            </button>
+                        </Tooltip>
                     </div>
                 </header>
 
@@ -416,7 +419,12 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                     <h2><Building size={20} style={{ display: 'inline', marginRight: 8, verticalAlign: 'text-bottom' }} /> Identity</h2>
 
                     <div className="input-group">
-                        <label className="label">Company Name <span className="required">*</span></label>
+                        <div className="flex items-center gap-2 mb-2">
+                            <label className="label mb-0">Company Name <span className="required">*</span></label>
+                            <Tooltip content="The legal or trading name of your startup.">
+                                <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
+                        </div>
                         <div className="input-wrapper">
                             <Building className="input-icon" size={18} />
                             <input
@@ -432,7 +440,12 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                     </div>
 
                     <div className="input-group">
-                        <label className="label">Company Type <span className="required">*</span></label>
+                        <div className="flex items-center gap-2 mb-2">
+                            <label className="label mb-0">Company Type <span className="required">*</span></label>
+                            <Tooltip content="Select the business model that best fits your startup.">
+                                <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
+                        </div>
                         <div className="grid-options">
                             {['SaaS', 'Marketplace', 'HardTech', 'FinTech', 'Consumer', 'Other'].map(t => (
                                 <button
@@ -458,7 +471,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                                     placeholder="Enter your company type"
                                     value={customType}
                                     onChange={e => setCustomType(e.target.value)}
-                                    onBlur={() => handleChange('type', e.target.value)}
+                                    onBlur={(e) => handleChange('type', e.target.value)}
                                 />
                                 {isError('type') && <div className="error-msg">Please enter a type</div>}
                             </div>
@@ -474,7 +487,12 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                     <h2><Target size={20} style={{ display: 'inline', marginRight: 8, verticalAlign: 'text-bottom' }} /> Strategy Basics</h2>
 
                     <div className="input-group">
-                        <label className="label">Problem Statement <span className="required">*</span></label>
+                        <div className="flex items-center gap-2 mb-2">
+                            <label className="label mb-0">Problem Statement <span className="required">*</span></label>
+                            <Tooltip content="Describe the specific pain point your target customers face.">
+                                <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
+                        </div>
                         <textarea
                             rows={3}
                             className={isError('problem') ? 'error' : ''}
@@ -487,7 +505,12 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
                     </div>
 
                     <div className="input-group">
-                        <label className="label">Proposed Solution <span className="required">*</span></label>
+                        <div className="flex items-center gap-2 mb-2">
+                            <label className="label mb-0">Proposed Solution <span className="required">*</span></label>
+                            <Tooltip content="Explain how your product or service solves the problem.">
+                                <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
+                        </div>
                         <textarea
                             rows={3}
                             className={isError('solution') ? 'error' : ''}

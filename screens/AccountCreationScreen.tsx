@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ScreenId } from '../types';
-import { Button } from '../components/UI';
-import { UserIcon, Mail, Loader2, ArrowRight, Calendar, RefreshCcw } from 'lucide-react';
+import { Button, Card, Badge } from '../components/UI';
+import { UserIcon, Mail, Loader2, ArrowRight, Calendar, RefreshCcw, Info } from 'lucide-react';
+import { Tooltip } from '../components/Tooltip';
 import { AuthService } from '../services/AuthService';
 import { WorkspaceService } from '../services/WorkspaceService';
 import { TeamService } from '../services/TeamService';
@@ -124,18 +125,25 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
       <header className="text-center mb-10">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Your Info</h1>
         <p className="text-slate-500">Let's get to know you first.</p>
-        <button
-          onClick={handleRefresh}
-          disabled={isLoading}
-          className="p-2 rounded-full hover:bg-slate-100 transition"
-        >
-          <RefreshCcw className={`w-6 h-6 ${isLoading ? 'animate-spin' : ''}`} />
-        </button>
+        <Tooltip content="Refresh account data" position="bottom" className="inline-block">
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="p-2 rounded-full hover:bg-slate-100 transition"
+          >
+            <RefreshCcw className={`w-6 h-6 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+        </Tooltip>
       </header>
 
       <div className="space-y-6">
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-0">Full Name</label>
+            <Tooltip content="Your legal full name as it should appear in documents.">
+              <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+            </Tooltip>
+          </div>
           <div className="relative">
             <UserIcon className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
             <input
@@ -149,7 +157,12 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-0">Email Address</label>
+            <Tooltip content="The email address you use for work-related communication.">
+              <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+            </Tooltip>
+          </div>
           <div className="relative">
             <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
             <input
@@ -164,9 +177,14 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
 
         {/* NEW: Industry Experience */}
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
-            Industry Experience (years) <span className="text-slate-400 font-normal">(optional)</span>
-          </label>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-0">
+              Industry Experience (years) <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <Tooltip content="Number of years you have worked in this specific industry.">
+              <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+            </Tooltip>
+          </div>
           <div className="relative">
             <Calendar className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
             <input

@@ -10,7 +10,7 @@ import {
 import { AuthService } from '../services/AuthService';
 import { AnalysisService } from '../services/AnalysisService';
 import { format } from 'date-fns';
-
+import { Tooltip } from '../components/Tooltip';
 import { Info } from "lucide-react";
 
 
@@ -207,31 +207,7 @@ const InvestorReadinessSkeleton = () => {
     );
 };
 
-interface InfoTooltipProps {
-    content: string;
-}
 
-export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content }) => {
-    const [open, setOpen] = useState(false);
-
-    return (
-        <div className="relative inline-flex">
-            <button
-                type="button"
-                onClick={() => setOpen(!open)}
-                className="ml-1 text-slate-400 hover:text-slate-600 focus:outline-none"
-            >
-                <Info className="w-4 h-4" />
-            </button>
-
-            {open && (
-                <div className="absolute z-50 top-6 left-1/2 -translate-x-1/2 w-64 rounded-lg border border-slate-200 bg-white shadow-xl p-3 text-xs text-slate-600">
-                    {content}
-                </div>
-            )}
-        </div>
-    );
-};
 
 
 export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = ({ onNavigate }) => {
@@ -254,17 +230,26 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
 
             const response = await AnalysisService.getInvestorReadiness(orgId);
 
-            if (response && response.investor_readiness) {
-                const readiness = response.investor_readiness;
+            if (response) {
+                if (response.investor_readiness) {
+                    const readiness = response.investor_readiness;
 
-                // Format last_updated
-                readiness.last_updated = new Date(readiness.last_updated).toLocaleString();
-
-                setData(readiness);
-                setQueueSize(response.size ?? 0);
-                setUpdating(false);
-
-                return true;
+                    // Format last_updated
+                    readiness.last_updated = new Date(readiness.last_updated).toLocaleString();
+                    setData(readiness);
+                    setQueueSize(response.size ?? 0);
+                    setUpdating(false);
+                    return true;
+                } else {
+                    if (response.size > 0) {
+                        setQueueSize(response.size);
+                    }
+                    else {
+                        await AnalysisService.createOrUpdateInvestorReadiness(orgId);
+                    }
+                    setUpdating(true);
+                    return false;
+                }
             } else {
                 setUpdating(true);
                 return false;
@@ -294,14 +279,15 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
         return (
             <div className="flex flex-col items-center gap-4">
                 {/* Refresh button above skeleton */}
-                <button
-                    onClick={handleRefresh}
-                    title="Refresh"
-                    className="p-2 rounded-full hover:bg-slate-100 transition"
-                    disabled={loading}
-                >
-                    <RefreshCw className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`} />
-                </button>
+                <Tooltip content="Refresh analysis" position="bottom" className="mt-4">
+                    <button
+                        onClick={handleRefresh}
+                        className="p-2 rounded-full hover:bg-slate-100 transition"
+                        disabled={loading}
+                    >
+                        <RefreshCw className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`} />
+                    </button>
+                </Tooltip>
 
                 <InvestorReadinessSkeleton />
             </div>
@@ -358,16 +344,17 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
 
                     {/* Refresh button below subtitle */}
                     <div className="mt-4 flex justify-start md:justify-start">
-                        <button
-                            onClick={handleRefresh}
-                            title="Refresh"
-                            className="p-2 rounded-full hover:bg-slate-100 transition"
-                            disabled={loading} // optional
-                        >
-                            <RefreshCw
-                                className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`}
-                            />
-                        </button>
+                        <Tooltip content="Refresh analysis" position="bottom">
+                            <button
+                                onClick={handleRefresh}
+                                className="p-2 rounded-full hover:bg-slate-100 transition"
+                                disabled={loading} // optional
+                            >
+                                <RefreshCw
+                                    className={`w-6 h-6 text-slate-500 ${loading ? "animate-spin" : ""}`}
+                                />
+                            </button>
+                        </Tooltip>
                     </div>
                 </div>
             </div>
@@ -382,7 +369,12 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden relative">
                         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-500 via-amber-400 to-emerald-500"></div>
                         <div className="p-6 md:p-8 text-center relative z-10">
-                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Readiness Score</h3>
+                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-center gap-2">
+                                Readiness Score
+                                <Tooltip content="Score based on team, market, product, and traction data.">
+                                    <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                                </Tooltip>
+                            </h3>
                             <div className="flex items-center justify-center mb-2">
                                 <span className={`text-6xl font-black tracking-tighter ${isReady ? 'text-emerald-500' : 'text-slate-900'}`}>
                                     {Math.min(Math.max(parseInt(readinessScore, 10) || 0, 0), 100)}
@@ -444,7 +436,12 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                             <div className="flex justify-between items-start mb-4">
-                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Likely Investor Type</h3>
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    Likely Investor Type
+                                    <Tooltip content="The investor profile that best matches your startup.">
+                                        <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                                    </Tooltip>
+                                </h3>
                                 <Target className="w-5 h-5 text-indigo-500" />
                             </div>
 

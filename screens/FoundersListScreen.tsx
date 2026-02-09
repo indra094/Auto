@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge } from '../components/UI';
-import { User, Plus, ShieldAlert, RefreshCw, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Plus, ShieldAlert, RefreshCw, ArrowRight, Loader2, Info } from 'lucide-react';
+import { Tooltip } from '../components/Tooltip';
 import { AuthService } from '../services/AuthService';
 import { TeamService } from '../services/TeamService';
 import { WorkspaceService } from '../services/WorkspaceService';
@@ -154,13 +155,14 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         </div>
       </header>
       {/* Refresh */}
-      <button
-        onClick={handleRefresh}
-        title="Refresh"
-        className="p-2 mt-1 rounded-full hover:bg-slate-100 transition"
-      >
-        <RefreshCw className="w-6 h-6 text-slate-500" />
-      </button>
+      <Tooltip content="Refresh founders list" position="bottom" className="inline-block">
+        <button
+          onClick={handleRefresh}
+          className="p-2 mt-1 rounded-full hover:bg-slate-100 transition"
+        >
+          <RefreshCw className="w-6 h-6 text-slate-500" />
+        </button>
+      </Tooltip>
 
 
       {/* NEW: Users list */}
@@ -201,16 +203,17 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
                             <span className="text-slate-400 font-normal">· {u.role}</span>
 
-                            <Badge
-                              color={u.permission_level === "ADMIN" ? "purple" : "slate"}
-                              title={
-                                u.permission_level === "ADMIN"
-                                  ? "ADMIN: Can update equity, remove founders, and edit permissions."
-                                  : "MEMBER: Can only view details."
-                              }
-                            >
-                              {u.permission_level}
-                            </Badge>
+                            <Tooltip content={
+                              u.permission_level === "ADMIN"
+                                ? "ADMIN: Can update equity, remove founders, and edit permissions."
+                                : "MEMBER: Can only view details."
+                            }>
+                              <Badge
+                                color={u.permission_level === "ADMIN" ? "purple" : "slate"}
+                              >
+                                {u.permission_level}
+                              </Badge>
+                            </Tooltip>
                           </div>
 
                           <div className="text-xs text-slate-500">
@@ -310,13 +313,14 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                           )}
 
                           {isAdmin && !isSelf && (
-                            <button
-                              title="Remove user from organization (Admin only)"
-                              onClick={() => handleRemoveUser(u.email, u.id)}
-                              className="text-red-500 hover:underline font-medium"
-                            >
-                              Remove
-                            </button>
+                            <Tooltip content="Remove user from organization (Admin only)">
+                              <button
+                                onClick={() => handleRemoveUser(u.email, u.id)}
+                                className="text-red-500 hover:underline font-medium"
+                              >
+                                Remove
+                              </button>
+                            </Tooltip>
                           )}
                         </div>
 

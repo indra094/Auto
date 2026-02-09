@@ -54,10 +54,21 @@ export const FoundersAlignmentScreen: React.FC = ({
 
       const data = await AnalysisService.getFounderAlignment(orgId);
 
-      if (data && data.alignment) {
-        setAlignment(data.alignment);
-        setQueueSize(data.size ?? 0);
-        setUpdating(false);
+      if (data) {
+        if (data.alignment) {
+          setAlignment(data.alignment);
+          setQueueSize(data.size ?? 0);
+          setUpdating(false);
+        } else {
+          if (data.size) {
+            setQueueSize(data.size);
+          }
+          else {
+            await AnalysisService.createOrUpdateFounderAlignment(orgId);
+          }
+          setUpdating(true);
+          setAlignment(null);
+        }
       } else {
         setAlignment(null);
         setUpdating(true);

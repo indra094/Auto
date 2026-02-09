@@ -9,6 +9,7 @@ import { ScreenContent } from '../screens/ScreenContent';
 import { AuthService } from '../services/AuthService';
 import { WorkspaceService } from '../services/WorkspaceService';
 import { ProgressBar } from './UI';
+import { Tooltip } from './Tooltip';
 import type { User, Workspace } from '../types';
 
 // BEFORE ONBOARDING - Minimal, completion-focused navigation
@@ -348,18 +349,19 @@ export const Layout: React.FC = () => {
 
                   return (
                     <li key={screen.id} className="relative group/tooltip">
-                      <button
-                        onClick={() => handleNavClick(screen.id, status)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md transition-all ${containerClass}`}
-                        title={status === 'locked' ? "Complete onboarding to unlock." : ""}
-                      >
-                        <Icon className={`w-3.5 h-3.5 ${statusColor}`} />
-                        <span className="truncate">{screen.label}</span>
+                      <Tooltip content={status === 'locked' ? "Complete onboarding to unlock." : ""} position="right">
+                        <button
+                          onClick={() => handleNavClick(screen.id, status)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md transition-all ${containerClass}`}
+                        >
+                          <Icon className={`w-3.5 h-3.5 ${statusColor}`} />
+                          <span className="truncate">{screen.label}</span>
 
-                        {/* Status Indicators */}
-                        {status === 'partial' && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500"></span>}
-                        {status === 'locked' && <Lock className="ml-auto w-3 h-3 opacity-50" />}
-                      </button>
+                          {/* Status Indicators */}
+                          {status === 'partial' && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500"></span>}
+                          {status === 'locked' && <Lock className="ml-auto w-3 h-3 opacity-50" />}
+                        </button>
+                      </Tooltip>
                     </li>
                   );
                 })}

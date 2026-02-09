@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ScreenId } from '../types';
 import { Button, Card, Badge, ProgressBar } from '../components/UI';
 import { getOnboardingProgress } from '../utils/onboarding';
+import { Tooltip } from '../components/Tooltip';
 import {
   Heart,
   CheckCircle,
@@ -25,31 +26,7 @@ interface ScreenProps {
 
 
 
-interface InfoTooltipProps {
-  content: string;
-}
 
-export const InfoTooltip: React.FC<InfoTooltipProps> = ({ content }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="relative inline-flex">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="ml-1 text-slate-400 hover:text-slate-600 focus:outline-none"
-      >
-        <Info className="w-4 h-4" />
-      </button>
-
-      {open && (
-        <div className="absolute z-50 top-6 left-1/2 -translate-x-1/2 w-64 rounded-lg border border-slate-200 bg-white shadow-xl p-3 text-xs text-slate-600">
-          {content}
-        </div>
-      )}
-    </div>
-  );
-};
 
 const CompanyDashboardSkeleton = () => {
   return (
@@ -171,6 +148,13 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
         setUpdating(false);
         return true;
       }
+      else {
+        if (data.size == 0) {
+
+        }
+        setUpdating(true);
+        return false;
+      }
     }
 
     return false;
@@ -273,13 +257,15 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
         </p>
       )}
-      <button
-        onClick={handleRefresh}
-        disabled={loading}
-        className="p-2 mt-4 rounded-full hover:bg-slate-100 transition"
-      >
-        <RefreshCcw className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
-      </button>
+      <Tooltip content="Refresh dashboard data" position="bottom" className="mt-4">
+        <button
+          onClick={handleRefresh}
+          disabled={loading}
+          className="p-2 rounded-full hover:bg-slate-100 transition"
+        >
+          <RefreshCcw className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
+        </button>
+      </Tooltip>
     </header>
   );
 
@@ -479,6 +465,9 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       <section className="mb-10">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <Heart className="w-4 h-4 text-pink-500" /> Executive Summary
+          <Tooltip content="High-level overview of your startup's status and health.">
+            <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+          </Tooltip>
         </h3>
 
         {workspace?.name && data.thesis ? (
@@ -494,6 +483,9 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       <section className="mb-10">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-red-500" /> Killer Insight
+          <Tooltip content="The most critical finding from the AI analysis that needs your attention.">
+            <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+          </Tooltip>
         </h3>
 
         {data.killer_insight ? (
@@ -517,6 +509,9 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       <section className="mb-10">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <Zap className="w-4 h-4 text-yellow-500" /> What Needs Attention Now
+          <Tooltip content="Priority actions recommended to resolve immediate risks.">
+            <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+          </Tooltip>
         </h3>
 
         {data?.top_actions?.length > 0 ? (
@@ -545,9 +540,12 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       <section>
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <DollarSign className="w-4 h-4 text-emerald-500" /> Capital & Runway
+          <Tooltip content="Estimated financial runway and burn rate analysis.">
+            <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+          </Tooltip>
         </h3>
 
-        {data.runway_months && data.burn_rate && data.capital_recommendation ? (
+        {data.runway_months != undefined && data.burn_rate != undefined && data.capital_recommendation != undefined ? (
           <Card className="p-6 border-2 border-slate-200">
             <div className="grid md:grid-cols-3 gap-6">
               <div>
@@ -574,6 +572,9 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
       <section className="space-y-6 mt-10 mb-10">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <Target className="w-4 h-4" /> Readiness Tracker
+          <Tooltip content="Track your progress towards becoming investor-ready.">
+            <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-pointer" />
+          </Tooltip>
         </h3>
 
         {onboarding_steps.length > 0 ? (

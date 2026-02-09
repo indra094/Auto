@@ -7,45 +7,7 @@ import { Info } from "lucide-react";
 import { AuthService } from '../services/AuthService';
 import { AnalysisService } from '../services/AnalysisService';
 
-interface TooltipProps {
-    content: string;
-}
-
-export const Tooltip: React.FC<TooltipProps> = ({ content }) => {
-    const [open, setOpen] = useState(false);
-
-    const ref = useRef<HTMLDivElement>(null);
-
-    // close when clicking outside
-    useEffect(() => {
-        const onClick = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
-                setOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", onClick);
-        return () => document.removeEventListener("mousedown", onClick);
-    }, []);
-
-
-
-    return (
-        <div className="relative inline-flex items-center" ref={ref}>
-            <Info
-                className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer"
-                onClick={() => setOpen((prev) => !prev)}
-            />
-
-            {open && (
-                <div className="absolute left-1/2 top-full mt-2 w-64 -translate-x-1/2
-                        rounded-lg bg-slate-900 text-white text-xs
-                        px-3 py-2 z-50 shadow-xl">
-                    {content}
-                </div>
-            )}
-        </div>
-    );
-};
+import { Tooltip } from '../components/Tooltip';
 interface ScreenProps {
     onNavigate: (id: ScreenId) => void;
     active: boolean;
@@ -218,11 +180,22 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
         try {
             const data = await AnalysisService.fetchIdeaAnalysisFromServer(orgId);
 
-            if (data && data.analysis) {
-                setAnalysis(data.analysis);
-                setQueueSize(data.size);   // queue size from response
-                setUpdating(false);
-                return true;
+            if (data) {
+                if (data.analysis) {
+                    setAnalysis(data.analysis);
+                    setQueueSize(data.size);   // queue size from response
+                    setUpdating(false);
+                    return true;
+                } else {
+                    if (data.size) {
+                        setQueueSize(data.size);
+                    }
+                    else {
+                        await AnalysisService.createOrUpdateAnalysis(orgId);
+                    }
+                    setUpdating(true);
+                    return false;
+                }
             } else {
                 setUpdating(true);
                 return false;
@@ -293,14 +266,18 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                             <Target className="w-5 h-5 text-indigo-500" />
                             Market Size & Clarity
-                            {/* <Tooltip content="Evaluates how large and accessible the market is, and whether demand is clearly defined and growing." />*/}
+                            <Tooltip content="Evaluates how large and accessible the market is, and whether demand is clearly defined and growing.">
+                                <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
                         </h3>
                         <div className="space-y-6 relative z-10">
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
                                     <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
                                         Total Addressable Market Reach
-                                        {/* <Tooltip content="Estimated total revenue opportunity this product can realistically access across all target customers." />*/}
+                                        <Tooltip content="Estimated total revenue opportunity this product can realistically access across all target customers.">
+                                            <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                                        </Tooltip>
                                     </span>
                                     <span className="text-sm font-black text-slate-900">
                                         {showOrFallback(analysis?.market?.tam_value ? `$${analysis.market.tam_value}B` : null)}
@@ -316,7 +293,9 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                                 <div className="flex justify-between items-center">
                                     <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
                                         Index Growth Project
-                                        {/* <Tooltip content="Projected annual market growth rate based on industry trends, funding velocity, and adoption signals." />*/}
+                                        <Tooltip content="Projected annual market growth rate based on industry trends, funding velocity, and adoption signals.">
+                                            <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                                        </Tooltip>
                                     </span>
                                     <span className="text-sm font-black text-emerald-500">
                                         {showOrFallback(analysis?.market?.growth_rate_percent ? `+${analysis.market.growth_rate_percent}%` : null)}
@@ -339,7 +318,9 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                             <TrendingUp className="w-5 h-5 text-emerald-500" />
                             Strengths
-                            {/* <Tooltip content="Core competitive advantages that improve defensibility, scalability, or execution speed." />*/}
+                            <Tooltip content="Core competitive advantages that improve defensibility, scalability, or execution speed.">
+                                <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
                         </h3>
                         <ul className="space-y-3">
                             {analysis?.strengths?.map((s, i) => (
@@ -363,7 +344,9 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                             <AlertCircle className="w-5 h-5 text-amber-500" />
                             Weaknesses
-                            {/* <Tooltip content="Risks or constraints that may slow adoption, execution, or fundraising if not mitigated." />*/}
+                            <Tooltip content="Risks or constraints that may slow adoption, execution, or fundraising if not mitigated.">
+                                <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
                         </h3>
 
                         <ul className="space-y-3">
@@ -381,7 +364,9 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
                         <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                             <Lightbulb className="w-5 h-5 text-indigo-500" />
                             Investor Appeal
-                            {/* <Tooltip content="Overall attractiveness of the idea from a venture investor perspective, combining market size, differentiation, and timing." />*/}
+                            <Tooltip content="Overall attractiveness of the idea from a venture investor perspective, combining market size, differentiation, and timing.">
+                                <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
                         </h3>
                         <div className="space-y-4">
                             <div className="p-4 bg-indigo-50 rounded-xl">
@@ -456,7 +441,9 @@ export const AIIdeaValidationScreen: React.FC<ScreenProps> = ({ onNavigate, acti
 
                         <h3 className="text-xl font-bold mb-6 relative z-10 flex items-center gap-2">
                             Roadmap Estimate
-                            {/*  <Tooltip content="High-level execution plan estimating capital, time, and sequencing to reach initial traction." />*/}
+                            <Tooltip content="High-level execution plan estimating capital, time, and sequencing to reach initial traction.">
+                                <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-pointer" />
+                            </Tooltip>
                         </h3>
 
                         <div className="space-y-6 relative z-10">
