@@ -94,6 +94,7 @@ export const AccountCreationScreen: React.FC<ScreenProps> = ({ onNavigate }) => 
       }
 
       if (ws && !isOnboardingComplete) {
+        console.log("account creation: onboarding step", ws.onboarding_step);
         await WorkspaceService.setOnboarding(ws.id, Math.max(ws?.onboarding_step || 0, 2));
         onNavigate(ScreenId.COMPANY_INFORMATION);
       }

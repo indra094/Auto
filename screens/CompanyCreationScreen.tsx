@@ -368,6 +368,7 @@ export const CompanyCreationScreen: React.FC<ScreenProps> = ({ onNavigate, activ
         }));
 
         // Update onboarding step
+        console.log("company creation: onboarding step", ws.onboarding_step);
         setOnboardingStep(ws?.onboarding_step || 0);
     };
 

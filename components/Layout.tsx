@@ -165,6 +165,7 @@ export const Layout: React.FC = () => {
 
       // Update onboarding progress
       if (w) {
+        console.log("refresh layout: onboarding step", w.onboarding_step);
         const progressMap = [0, 20, 40, 60, 80, 100];
         setOnboardingProgress(progressMap[Math.min(w.onboarding_step, 5)]);
       }
@@ -175,12 +176,11 @@ export const Layout: React.FC = () => {
 
     // Subscription to workspace changes
     const unsubscribe = WorkspaceService.onWorkspaceChange((w) => {
-      console.log("[Layout] Workspace updated:", w);
-      setWorkspace(w);
-
-      if (w) {
+      refreshData();
+      if (workspace) {
+        console.log("onworkspacechange layout: onboarding step", workspace.onboarding_step);
         const progressMap = [0, 20, 40, 60, 80, 100];
-        setOnboardingProgress(progressMap[Math.min(w.onboarding_step, 5)]);
+        setOnboardingProgress(progressMap[Math.min(workspace.onboarding_step, 5)]);
       }
     });
 

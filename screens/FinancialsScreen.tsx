@@ -333,8 +333,10 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
             await FinancialService.updateFinancials(data.org_id, dataToSave);
 
             if (!workspace || (workspace?.onboarding_step && workspace.onboarding_step <= 5)) {
+                console.log("in workspace financials: onboarding step", workspace.onboarding_step);
                 await WorkspaceService.setOnboarding(data.org_id, Math.max(workspace?.onboarding_step ?? 0, 5));
             }
+            console.log("after financials: onboarding step", workspace.onboarding_step);
 
             if (workspace?.onboarding_step < 5) {
                 onNavigate(ScreenId.COMPANY_DASHBOARD);
