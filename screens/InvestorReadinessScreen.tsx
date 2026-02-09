@@ -384,7 +384,9 @@ export const InvestorReadinessScreen: React.FC<InvestorReadinessScreenProps> = (
                         <div className="p-6 md:p-8 text-center relative z-10">
                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Readiness Score</h3>
                             <div className="flex items-center justify-center mb-2">
-                                <span className={`text-6xl font-black tracking-tighter ${isReady ? 'text-emerald-500' : 'text-slate-900'}`}>{readinessScore}</span>
+                                <span className={`text-6xl font-black tracking-tighter ${isReady ? 'text-emerald-500' : 'text-slate-900'}`}>
+                                    {Math.min(Math.max(parseInt(readinessScore, 10) || 0, 0), 100)}
+                                </span>
                             </div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100 text-red-700 text-xs font-bold uppercase mb-6">
                                 <AlertTriangle className="w-3 h-3" />

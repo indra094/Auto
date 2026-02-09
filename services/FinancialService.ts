@@ -7,6 +7,7 @@ export const FinancialService = {
     },
 
     updateFinancials: async (orgId: string, data: Financials): Promise<Financials> => {
+        console.log("DATA", data);
         return await api.put(`/api/v1/${orgId}/financials`, data);
     },
 };

@@ -121,6 +121,7 @@ export interface Financials {
   customers_in_pipeline?: number;
   data_confidence?: string;
   last_updated?: string;
+  expense_pattern?: number; // Add this!
 }
 
 

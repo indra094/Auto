@@ -224,7 +224,8 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         pricing_model: undefined, // Subscription, Usage, One-time, Enterprise
         price_per_customer: undefined,
         customers_in_pipeline: undefined,
-        data_confidence: 'Rough'
+        data_confidence: 'Rough',
+        expense_pattern: 50, // default value
     });
 
 
@@ -322,7 +323,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
         try {
             // Make a copy and fill 0 for empty numeric fields
             const dataToSave = { ...data };
-            ['monthly_revenue', 'monthly_burn', 'cash_in_bank', 'price_per_customer', 'customers_in_pipeline'].forEach(field => {
+            ['monthly_revenue', 'monthly_burn', 'expense_pattern', 'cash_in_bank', 'price_per_customer', 'customers_in_pipeline'].forEach(field => {
                 if (dataToSave[field as keyof Financials] === undefined || dataToSave[field as keyof Financials] === '') {
                     dataToSave[field as keyof Financials] = 0;
                 }
@@ -426,7 +427,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     </div>
 
                     <div className="input-group">
-                        <label className="label">Monthly Revenue <span className="required">*</span></label>
+                        <label className="label">Current Monthly Revenue <span className="required">*</span></label>
                         <div style={{ position: 'relative' }}>
                             <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 14, color: '#94a3b8' }} />
                             <input
@@ -469,7 +470,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     <div className="section-title">Expenses</div>
 
                     <div className="input-group">
-                        <label className="label">Monthly Expenses <span className="required">*</span></label>
+                        <label className="label">Average Monthly Expenses <span className="required">*</span></label>
                         <div style={{ position: 'relative' }}>
                             <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 14, color: '#94a3b8' }} />
                             <input
@@ -485,7 +486,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     </div>
 
                     <div className="input-group">
-                        <label className="label">Expense Pattern</label>
+                        <label className="label">Expense Behavior</label>
                         <div className="slider-container">
                             <div className="slider-labels">
                                 <span>Mostly the same</span>
@@ -495,9 +496,8 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                                 type="range"
                                 min="0"
                                 max="100"
-                                defaultValue="50"
-                                // Just a visual slider for now, mapping generic "Mix" or maybe we store percentage later
-                                onChange={() => { }}
+                                value={data.expense_pattern}
+                                onChange={e => handleChange('expense_pattern', parseInt(e.target.value, 10))}
                             />
                         </div>
                     </div>
@@ -539,7 +539,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     <div className="section-title">Pricing (Optional)</div>
 
                     <div className="input-group">
-                        <label className="label">Revenue per customer</label>
+                        <label className="label">Monthly revenue per customer</label>
                         <div style={{ position: 'relative' }}>
                             <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 14, color: '#94a3b8' }} />
                             <input
@@ -555,7 +555,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     </div>
 
                     <div className="input-group">
-                        <label className="label">Customers / Month</label>
+                        <label className="label">Customers in Pipeline / Month</label>
                         <input
                             type="text"
                             inputMode="numeric"
@@ -567,7 +567,7 @@ export const FinancialsScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                     </div>
 
                     <div className="input-group">
-                        <label className="label">Model</label>
+                        <label className="label">Pricing Model</label>
                         <div className="pills">
                             {['Subscription', 'Usage', 'One-time', 'Enterprise'].map(v => (
                                 <div
