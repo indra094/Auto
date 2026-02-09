@@ -73,5 +73,17 @@ export const api = {
       console.error(`[API] PATCH ${endpoint} Exception:`, err);
       throw err;
     }
+  },
+  delete: async (endpoint: string) => {
+    try {
+      const res = await fetch(`${API_URL}${endpoint}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
+      return await res.json();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   }
 };

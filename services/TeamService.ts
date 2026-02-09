@@ -81,4 +81,13 @@ export const TeamService = {
             status: "Active",
         });
     },
+    deleteUserFromOrgByEmail: async (orgId: string, email: string): Promise<{ status: string; message: string }> => {
+        try {
+            const response = await api.delete(`/api/v1/org/${orgId}/user-by-email/${email}`);
+            return response;
+        } catch (err: any) {
+            console.error("Failed to delete user:", err);
+            throw err;
+        }
+    },
 };

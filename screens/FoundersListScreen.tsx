@@ -97,7 +97,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
 
 
-  const handleRemoveUser = async (userId: string) => {
+  const handleRemoveUser = async (userEmail: string, userId: string) => {
     if (!currentUser) return;
 
     const confirmed = window.confirm(
@@ -106,7 +106,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
     if (!confirmed) return;
 
     try {
-      // await AuthService.removeUserFromOrg(userId, currentUser.current_org_id);
+      await TeamService.deleteUserFromOrgByEmail(currentUser.current_org_id, userEmail);
       setUsers((prev) => prev.filter((u) => u.id !== userId));
     } catch (err) {
       console.error(err);
@@ -312,7 +312,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
                           {isAdmin && !isSelf && (
                             <button
                               title="Remove user from organization (Admin only)"
-                              onClick={() => handleRemoveUser(u.id)}
+                              onClick={() => handleRemoveUser(u.email, u.id)}
                               className="text-red-500 hover:underline font-medium"
                             >
                               Remove
