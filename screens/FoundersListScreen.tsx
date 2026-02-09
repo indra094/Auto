@@ -165,7 +165,7 @@ export const FoundersListScreen: React.FC<ScreenProps> = ({ onNavigate }) => {
 
       {/* NEW: Users list */}
       <Card className="p-6 bg-white border-slate-100 shadow-sm">
-        <h3 className="text-lg font-bold mb-4">Users in this Organization</h3>
+        <h3 className="text-lg font-bold mb-4">Executives in this Organization</h3>
 
         {/* READ-ONLY EXPLANATION */}
         <p className="text-xs text-slate-400 mb-4">

@@ -187,7 +187,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
 
     const hasDashboard = isActivationMode ? false : await fetchDashboard();
 
-    if (isActivationMode && !hasDashboard && queueSizeRef.current === 0) {
+    if (!isActivationMode && !hasDashboard && queueSizeRef.current === 0) {
       // Only call update if dashboard not ready and queue size is 0
       await DashboardService.updateDashboard(orgId!);
       setUpdating(true);
@@ -567,7 +567,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
             </div>
           </Card>
         ) : (
-          <CardSkeleton label="Loading capital insight upon onboarding completion..." />
+          <CardSkeleton label="Loading capital insight upon insight generation..." />
         )}
       </section>
 
@@ -604,7 +604,7 @@ export const CompanyDashboardScreen: React.FC<ScreenProps> = ({ onNavigate }) =>
             ))}
           </div>
         ) : (
-          <CardSkeleton label="Loading readiness tracker upon onboarding completion..." />
+          <CardSkeleton label="Loading readiness tracker upon insight generation..." />
         )}
       </section>
 
